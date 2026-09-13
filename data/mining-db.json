@@ -3,21 +3,21 @@
   "maxSupply": 10000,
   "records": [
     {
-      "id": "solv_1789317318198_h378i",
-      "wallet": "0xdbc228279f2ef4d1e15d2e77b5c4be468cfd57c2",
+      "id": "solv_1789318302631_hperp",
+      "wallet": "0xdb2d47e68f92fe5021b1a1994a612c4cefc9c80c",
       "tokenId": 7850,
-      "nonce": "974",
-      "solvedHash": "0x00060d82cf19ef7e137154077baa91abfda54c7108efd5b0d2101c9a080b97a5",
+      "nonce": "7889",
+      "solvedHash": "0x0004383152b8578f4d2e5642490c4e265dc4d263b9a0a90ede92be71967bb649",
       "difficulty": 4,
       "gpuRenderer": "NVIDIA RTX 4090 WebGPU",
       "timeToSolve": 0,
       "status": "MINTED",
-      "solvedAt": 1789317318198,
+      "solvedAt": 1789318302631,
       "txHash": "0x9999888877776666555544443333222211110000aabbccddeeff001122334455",
       "epochId": 1,
       "feeUsd": 5,
       "feeEth": 0.002,
-      "mintedAt": 1789317318206
+      "mintedAt": 1789318302638
     },
     {
       "id": "mint_genesis_3",
@@ -28,7 +28,7 @@
       "epochId": 1,
       "feeUsd": 5,
       "txHash": "0x03a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000003",
-      "mintedAt": 1789316117566
+      "mintedAt": 1789317101409
     },
     {
       "id": "mint_genesis_2",
@@ -39,7 +39,7 @@
       "epochId": 1,
       "feeUsd": 5,
       "txHash": "0x02a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000002",
-      "mintedAt": 1789314917566
+      "mintedAt": 1789315901409
     },
     {
       "id": "mint_genesis_1",
@@ -50,24 +50,79 @@
       "epochId": 1,
       "feeUsd": 5,
       "txHash": "0x01a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000001",
-      "mintedAt": 1789313717566
+      "mintedAt": 1789314701409
     }
   ],
   "workerEntitlements": {
-    "0xdbc228279f2ef4d1e15d2e77b5c4be468cfd57c2": {
+    "0xdb2d47e68f92fe5021b1a1994a612c4cefc9c80c": {
       "3": true
     }
   },
   "usedProofs": {
-    "0x00060d82cf19ef7e137154077baa91abfda54c7108efd5b0d2101c9a080b97a5": true
+    "0x0004383152b8578f4d2e5642490c4e265dc4d263b9a0a90ede92be71967bb649": true
   },
-  "activeMiners": {},
+  "activeMiners": {
+    "0xd8287aef4d931d4cf3bfb36d99d577f6b4c36178": {
+      "wallet": "0xd8287aef4d931d4cf3bfb36d99d577f6b4c36178",
+      "gpuName": "WebGPU Compute Core",
+      "hashrate": 12.5,
+      "noncesScanned": 0,
+      "isMining": true,
+      "lastSeen": 1789318248008,
+      "status": "HASHING_UNSOLVED"
+    },
+    "0xdbd33a264f12a2686ae21902d82d5b20a837d750": {
+      "wallet": "0xdbd33a264f12a2686ae21902d82d5b20a837d750",
+      "gpuName": "WebGPU Compute Core",
+      "hashrate": 12.5,
+      "noncesScanned": 0,
+      "isMining": true,
+      "lastSeen": 1789318249042,
+      "status": "HASHING_UNSOLVED"
+    },
+    "0x1111222233334444555566667777888899990000": {
+      "wallet": "0x1111222233334444555566667777888899990000",
+      "gpuName": "WebGPU Compute Core",
+      "hashrate": 12.5,
+      "noncesScanned": 0,
+      "isMining": true,
+      "lastSeen": 1789318304219,
+      "status": "HASHING_UNSOLVED"
+    },
+    "0xbd320f04e429c139c570fa9b4ffdc92164e9b395": {
+      "wallet": "0xbd320f04e429c139c570fa9b4ffdc92164e9b395",
+      "gpuName": "WebGPU Compute Core",
+      "hashrate": 12.5,
+      "noncesScanned": 0,
+      "isMining": true,
+      "lastSeen": 1789318300863,
+      "status": "HASHING_UNSOLVED"
+    },
+    "0xb8e3dfdd19b6bf35b9fd87f8373f7f82c53bc93c": {
+      "wallet": "0xb8e3dfdd19b6bf35b9fd87f8373f7f82c53bc93c",
+      "gpuName": "NVIDIA GeForce RTX 4090 WebGPU",
+      "hashrate": 18.5,
+      "noncesScanned": 500000,
+      "isMining": true,
+      "lastSeen": 1789318301406,
+      "status": "HASHING_UNSOLVED"
+    },
+    "0xdb2d47e68f92fe5021b1a1994a612c4cefc9c80c": {
+      "wallet": "0xdb2d47e68f92fe5021b1a1994a612c4cefc9c80c",
+      "gpuName": "WebGPU Compute Core",
+      "hashrate": 12.5,
+      "noncesScanned": 0,
+      "isMining": true,
+      "lastSeen": 1789318301818,
+      "status": "HASHING_UNSOLVED"
+    }
+  },
   "epochOverrides": {
     "1": {
       "mintFeeUsd": 5,
       "mintFeeEth": 0.002,
       "mintFeeApe": 5,
-      "updatedAt": 1789317320085
+      "updatedAt": 1789318304249
     }
   },
   "treasury": {

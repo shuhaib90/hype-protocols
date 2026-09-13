@@ -505,6 +505,56 @@ export const App: React.FC = () => {
     };
   }, [supply.totalMined, gpuInfo?.name]);
 
+  // Periodic active miner heartbeat & network telemetry sync while mining
+  useEffect(() => {
+    if (!isMining) return;
+
+    const syncTelemetry = () => {
+      if (!address) return;
+      fetch('/api/mining/heartbeat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          wallet: address,
+          gpuName: gpuInfo?.name || 'WebGPU Compute Core',
+          hashrate: totalHashrate,
+          noncesScanned,
+          isMining: true,
+        }),
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.success && data.telemetry) {
+            setSupply((prev) => ({
+              ...prev,
+              activeMinersCount: data.telemetry.activeMinersCount,
+              unsolvedCount: data.telemetry.unsolvedCount,
+              pendingBlock: data.telemetry.pendingBlock,
+              networkStats: data.telemetry,
+            }));
+          }
+        })
+        .catch(() => {});
+    };
+
+    syncTelemetry();
+    const timer = setInterval(syncTelemetry, 6000);
+
+    return () => {
+      clearInterval(timer);
+      if (address) {
+        fetch('/api/mining/heartbeat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            wallet: address,
+            isMining: false,
+          }),
+        }).catch(() => {});
+      }
+    };
+  }, [isMining, address, gpuInfo?.name, totalHashrate, noncesScanned]);
+
   const handleStartMining = async () => {
     if (!isConnected || !address) return;
     if (supply.totalMined >= supply.maxSupply) {
@@ -524,7 +574,11 @@ export const App: React.FC = () => {
       const sessionRes = await fetch('/api/mining/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ wallet: address })
+        body: JSON.stringify({
+          wallet: address,
+          gpuName: gpuInfo?.name || 'WebGPU Compute Core',
+          hashrate: totalHashrate,
+        })
       });
       const sessionData = await sessionRes.json();
       if (!sessionRes.ok || !sessionData.success) {
@@ -533,6 +587,17 @@ export const App: React.FC = () => {
           setMiningStatus('QUOTA FULL');
           return;
         }
+      }
+
+      if (sessionData.session?.networkTelemetry) {
+        const net = sessionData.session.networkTelemetry;
+        setSupply((prev) => ({
+          ...prev,
+          activeMinersCount: net.activeMinersCount,
+          unsolvedCount: net.unsolvedCount,
+          pendingBlock: net.pendingBlock,
+          networkStats: net,
+        }));
       }
 
       const challenge = onChainChallenge || sessionData.session?.challenge || '0xb46af2c33fa24c1c27670e585a72800097d9a812bd959955973687b70334a26a';
@@ -568,6 +633,16 @@ export const App: React.FC = () => {
     soundEffects.stopGpuRunningSound();
     setTotalHashrate(0);
     setWorkerHashrates({});
+    if (address) {
+      fetch('/api/mining/heartbeat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          wallet: address,
+          isMining: false,
+        }),
+      }).catch(() => {});
+    }
   };
 
   const handleActivateWorker = async (workerId: number, costHype: number) => {
@@ -745,6 +820,9 @@ export const App: React.FC = () => {
                 maxMints={5}
                 isCapped={walletQuotaCapped}
                 currentEpoch={supply.currentEpoch}
+                activeMinersCount={supply.activeMinersCount}
+                unsolvedCount={supply.unsolvedCount}
+                networkStats={supply.networkStats}
                 onStart={handleStartMining}
                 onStop={handleStopMining}
               />

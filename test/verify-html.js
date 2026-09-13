@@ -75,6 +75,17 @@ const webGPUEngineTs = fs.readFileSync(path.join(srcDir, 'mining/WebGPUEngine.ts
 assert(soundEffectsTs.includes('startGpuRunningSound') && soundEffectsTs.includes('stopGpuRunningSound'), 'Continuous GPU running sound synthesizer implemented in soundEffects.ts');
 assert(webGPUEngineTs.includes('startGpuRunningSound') && webGPUEngineTs.includes('stopGpuRunningSound'), 'GPU running sound triggered on mining start and stopped on termination');
 
+// 10. Live Mining Active Cockpit: Active Users, Unsolved Race, GPU Name, Time & Deltas
+assert(miningDashboardTsx.includes('ACTIVE USERS RUNNING'), 'Active users running displayed in MiningDashboard');
+assert(miningDashboardTsx.includes('RUNNING & NOT SOLVED'), 'Running not solved count displayed in MiningDashboard');
+assert(miningDashboardTsx.includes('UNSOLVED TARGET: HASHAPE #'), 'Unsolved pending block target displayed in MiningDashboard');
+assert(miningDashboardTsx.includes('GPU HARDWARE'), 'GPU hardware name displayed in MiningDashboard');
+assert(miningDashboardTsx.includes('EST. TIME TO SOLVE'), 'Estimated time to solve displayed in MiningDashboard');
+assert(miningDashboardTsx.includes('SESSION TIME'), 'Session time counter displayed in MiningDashboard');
+assert(miningDashboardTsx.includes('COMPUTE HASHRATE'), 'Compute hashrate delta displayed in MiningDashboard');
+assert(miningDashboardTsx.includes('NONCES TESTED'), 'Nonces tested delta displayed in MiningDashboard');
+assert(appTsx.includes('syncTelemetry') && appTsx.includes('/api/mining/heartbeat'), 'Periodic miner telemetry heartbeat implemented in App.tsx');
+
 console.log('\n====================================================');
 console.log(`🎉 ALL ${passed}/${total} FRONTEND INTEGRITY TESTS PASSED!`);
 console.log('====================================================');

@@ -104,6 +104,34 @@ export interface EpochInfo {
   } | null;
 }
 
+export interface NetworkNodeInfo {
+  wallet: string;
+  gpuName?: string;
+  hashrate?: number;
+  noncesScanned?: number;
+  lastSeen?: number;
+  status?: string;
+  isLocal?: boolean;
+}
+
+export interface NetworkMiningStats {
+  activeMinersCount: number;
+  unsolvedCount: number;
+  pendingBlock: {
+    tokenId: number;
+    status: string;
+    epochId?: number;
+    epochName?: string;
+    difficulty?: string;
+    target?: string;
+    competingMiners?: number;
+    proofsDiscovered?: number;
+  };
+  networkHashrateMH?: number;
+  activeNodes?: NetworkNodeInfo[];
+  timestamp?: number;
+}
+
 export interface SupplyInfo {
   totalMined: number;
   maxSupply: number;
@@ -115,6 +143,19 @@ export interface SupplyInfo {
   escalatingTiers?: WalletDifficultyTier[];
   currentEpoch?: EpochInfo;
   epochs?: EpochInfo[];
+  activeMinersCount?: number;
+  unsolvedCount?: number;
+  pendingBlock?: {
+    tokenId: number;
+    status: string;
+    epochId?: number;
+    epochName?: string;
+    difficulty?: string;
+    target?: string;
+    competingMiners?: number;
+    proofsDiscovered?: number;
+  };
+  networkStats?: NetworkMiningStats;
 }
 
 export interface MintReceipt {

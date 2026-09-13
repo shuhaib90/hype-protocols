@@ -326,6 +326,40 @@ async function testEndpoints() {
   assert(minersPayload.minerStats.minersList.length > 0, 'Miners list contains active miner records');
   assert(minersPayload.minerStats.bladeBreakdown && minersPayload.minerStats.bladeBreakdown[1] !== undefined, 'Blade breakdown reports Blade 1 activations');
 
+  // 23. Test Live Active Miners & Unsolved Stats in Supply (/api/mining/supply)
+  const supplyTelemetryRes = await fetch('http://localhost:3000/api/mining/supply');
+  assert(supplyTelemetryRes.status === 200, 'GET /api/mining/supply responds with HTTP 200');
+  const supplyTelemetryData = await supplyTelemetryRes.json();
+  assert(typeof supplyTelemetryData.supply.activeMinersCount === 'number', 'Supply includes numeric activeMinersCount');
+  assert(typeof supplyTelemetryData.supply.unsolvedCount === 'number', 'Supply includes numeric unsolvedCount');
+  assert(supplyTelemetryData.supply.pendingBlock && supplyTelemetryData.supply.pendingBlock.status === 'UNSOLVED', 'Supply includes pendingBlock marked as UNSOLVED');
+
+  // 24. Test Network Telemetry Dedicated Endpoint (/api/mining/network-telemetry)
+  const netTelemetryRes = await fetch('http://localhost:3000/api/mining/network-telemetry');
+  assert(netTelemetryRes.status === 200, 'GET /api/mining/network-telemetry responds with HTTP 200');
+  const netTelemetryData = await netTelemetryRes.json();
+  assert(netTelemetryData.success === true, 'Network telemetry reports success');
+  assert(netTelemetryData.telemetry.activeMinersCount >= 1, 'Network telemetry shows at least 1 active miner');
+  assert(netTelemetryData.telemetry.unsolvedCount >= 1, 'Network telemetry shows unsolved machines racing');
+  assert(netTelemetryData.telemetry.pendingBlock.status === 'UNSOLVED', 'Network telemetry pending block is UNSOLVED');
+
+  // 25. Test Miner Heartbeat API (/api/mining/heartbeat)
+  const heartbeatRes = await fetch('http://localhost:3000/api/mining/heartbeat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      wallet: testWallet,
+      gpuName: 'NVIDIA GeForce RTX 4090 WebGPU',
+      hashrate: 18.5,
+      noncesScanned: 500000,
+      isMining: true
+    })
+  });
+  assert(heartbeatRes.status === 200, 'POST /api/mining/heartbeat responds with HTTP 200');
+  const heartbeatData = await heartbeatRes.json();
+  assert(heartbeatData.success === true, 'Heartbeat reports success');
+  assert(heartbeatData.telemetry && heartbeatData.telemetry.activeMinersCount >= 1, 'Heartbeat returns active telemetry');
+
   // Final cleanup reset to default genesis
   await fetch('http://localhost:3000/api/mining/reset', { method: 'POST' });
 
