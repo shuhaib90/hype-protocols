@@ -419,6 +419,11 @@ export const AdminModal: React.FC<AdminModalProps> = ({
             </div>
 
             <div className="mb-3 p-2 bg-[#fdfbf7] border border-[#24140a] flex items-center justify-between text-[10px] font-mono flex-wrap gap-1">
+              <span className="text-[#6b5443] uppercase font-bold">Deployed NFT Contract (Chain 4663):</span>
+              <code className="text-[#19638b] font-bold select-all">0x7D959C29aa1098d93b307Ca40bEEEc0bF7bbfF85</code>
+            </div>
+
+            <div className="mb-3 p-2 bg-[#fdfbf7] border border-[#24140a] flex items-center justify-between text-[10px] font-mono flex-wrap gap-1">
               <span className="text-[#6b5443] uppercase font-bold">Rig Activation Token Contract:</span>
               <code className="text-[#d83a2a] font-bold select-all">0x30E55c3cfB2BBe5d0B07051e0B15c8a532c45ecc</code>
             </div>

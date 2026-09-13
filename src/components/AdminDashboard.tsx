@@ -386,6 +386,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   Accumulated from all PoW manual mint fees across Epochs 1 through 10. Automatically routed to the creator admin wallet on Robinhood EVM L2.
                 </p>
 
+                <div className="p-2 bg-[#fdfbf7] border border-[#24140a] text-[10px] font-mono">
+                  <span className="text-[#6b5443] block uppercase font-dot font-bold">DEPLOYED NFT CONTRACT (CHAIN 4663):</span>
+                  <code className="text-[#19638b] font-bold select-all">
+                    0x7D959C29aa1098d93b307Ca40bEEEc0bF7bbfF85
+                  </code>
+                </div>
+
                 <div className="grid grid-cols-3 gap-2 pt-2">
                   <div className="bg-[#fdfbf7] p-2.5 border-2 border-[#24140a]">
                     <span className="text-[9px] font-dot text-[#6b5443] block uppercase font-bold">TOTAL COLLECTED</span>

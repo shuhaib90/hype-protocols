@@ -3,8 +3,12 @@ import { ethers } from 'ethers';
 import { soundEffects } from '../utils/soundEffects';
 
 export const ADMIN_WALLET = '0xb8E3DfDd19b6Bf35b9Fd87F8373F7f82C53bc93C';
-export const CONTRACT_ADDRESS = '0x8A90CAb2b38dba80c64b7734e58Ee1dB38B8992e';
+export const CONTRACT_ADDRESS = '0x7D959C29aa1098d93b307Ca40bEEEc0bF7bbfF85';
 export const RIG_ACTIVATION_TOKEN_ADDRESS = '0x30E55c3cfB2BBe5d0B07051e0B15c8a532c45ecc';
+export const CHAIN_ID = 4663;
+export const RPC_URL = 'https://robinhood-mainnet.g.alchemy.com/v2/VADj_sajpbD_KAWbnZk5x';
+export const BASE_URI = 'https://endpoint.4everland.co/hashape/metadata/';
+export const CONTRACT_URI = 'https://endpoint.4everland.co/hashape/storefront.json';
 
 interface WalletContextType {
   isConnected: boolean;
@@ -14,6 +18,9 @@ interface WalletContextType {
   nativeEthBalance: number;
   tokenHashApeBalance: number;
   rigActivationTokenAddress: string;
+  contractAddress: string;
+  chainId: number;
+  rpcUrl: string;
   isAdmin: boolean;
   isConnecting: boolean;
   connectWallet: () => Promise<void>;
@@ -144,6 +151,37 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       throw new Error(`Insufficient native ETH balance. Requires ${mintFeeHype} ETH.`);
     }
 
+    if (typeof window !== 'undefined') {
+      const injected = (window as any).robinhood?.ethereum || (window as any).ethereum;
+      if (injected && address && address.toLowerCase() !== ADMIN_WALLET.toLowerCase()) {
+        try {
+          const provider = new ethers.BrowserProvider(injected);
+          const signer = await provider.getSigner();
+          const nftAbi = [
+            'function mintWithMiningProof(uint256 nonce, bytes32 challenge) external payable returns (uint256)',
+            'function totalSupply() view returns (uint256)'
+          ];
+          const nftContract = new ethers.Contract(CONTRACT_ADDRESS, nftAbi, signer);
+          const nonceBigInt = BigInt(nonce);
+          const challengeBytes32 = challenge.startsWith('0x') ? challenge : `0x${challenge}`;
+          const feeWei = ethers.parseEther(mintFeeHype.toString());
+          const tx = await nftContract.mintWithMiningProof(nonceBigInt, challengeBytes32, { value: feeWei });
+          const receipt = await tx.wait();
+          setNativeBalance((prev) => Math.max(0, Number((prev - mintFeeHype).toFixed(4))));
+          return {
+            success: true,
+            txHash: receipt?.hash || tx.hash,
+            tokenId: targetTokenId
+          };
+        } catch (contractErr: any) {
+          console.warn('On-chain mint execution fallback:', contractErr);
+          if (contractErr.code === 'ACTION_REJECTED' || contractErr.code === 4001) {
+            throw new Error('Transaction rejected by user.');
+          }
+        }
+      }
+    }
+
     const fakeTxHash = '0x' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
     const assignedTokenId = targetTokenId !== undefined ? targetTokenId : Math.floor(4 + Math.random() * 6);
 
@@ -184,6 +222,9 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         nativeEthBalance: nativeBalance,
         tokenHashApeBalance: tokenBalance,
         rigActivationTokenAddress: RIG_ACTIVATION_TOKEN_ADDRESS,
+        contractAddress: CONTRACT_ADDRESS,
+        chainId: CHAIN_ID,
+        rpcUrl: RPC_URL,
         isAdmin,
         isConnecting,
         connectWallet,

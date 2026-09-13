@@ -410,7 +410,7 @@ const server = http.createServer(async (req, res) => {
     res.end(JSON.stringify({
       success: true,
       status: 'HEALTHY',
-      service: 'ApeSyndicate HashApe PoW Mining Engine',
+      service: 'HashApe PoW Mining Engine',
       network: 'Robinhood EVM L2',
       clientIp,
       cloudflare: {
@@ -936,6 +936,12 @@ const server = http.createServer(async (req, res) => {
       workerCosts: { 1: 0, 2: 100, 3: 200, 4: 300, 5: 500 },
       sessionDurationSeconds: 600,
       adminWallet: '0xb8E3DfDd19b6Bf35b9Fd87F8373F7f82C53bc93C',
+      contractAddress: '0x7D959C29aa1098d93b307Ca40bEEEc0bF7bbfF85',
+      chainId: 4663,
+      rpcUrl: 'https://robinhood-mainnet.g.alchemy.com/v2/VADj_sajpbD_KAWbnZk5x',
+      networkName: 'Robinhood Chain Mainnet',
+      baseUri: 'https://endpoint.4everland.co/hashape/metadata/',
+      contractUri: 'https://endpoint.4everland.co/hashape/storefront.json',
       royaltyBasisPoints: 500,
       difficultyTiers: WALLET_DIFFICULTY_TIERS,
       activationTokenContract: '0x30E55c3cfB2BBe5d0B07051e0B15c8a532c45ecc',

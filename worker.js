@@ -7,7 +7,7 @@ import { ethers } from 'ethers';
 
 const ADMIN_WALLET = '0xb8E3DfDd19b6Bf35b9Fd87F8373F7f82C53bc93C';
 const RIG_TOKEN_CONTRACT = '0x30E55c3cfB2BBe5d0B07051e0B15c8a532c45ecc';
-const NFT_CONTRACT = '0x3b1c67B6651E523A3Eb199203c40788641473138';
+const NFT_CONTRACT = '0x7D959C29aa1098d93b307Ca40bEEEc0bF7bbfF85';
 const WALLET_MAX_MINTS = 5;
 
 const WALLET_DIFFICULTY_TIERS = [
@@ -197,14 +197,16 @@ export default {
         success: true,
         config: {
           contractAddress: NFT_CONTRACT,
-          rpcUrl: 'https://rpc.robinhood.com',
-          chainId: 1337,
-          networkName: 'Robinhood EVM L2',
+          rpcUrl: 'https://robinhood-mainnet.g.alchemy.com/v2/VADj_sajpbD_KAWbnZk5x',
+          chainId: 4663,
+          networkName: 'Robinhood Chain Mainnet',
           tokenName: 'HashApe',
           tokenSymbol: 'HASHAPE',
           tokenAddress: RIG_TOKEN_CONTRACT,
           adminWallet: ADMIN_WALLET,
           creatorAdminWallet: ADMIN_WALLET,
+          baseUri: 'https://endpoint.4everland.co/hashape/metadata/',
+          contractUri: 'https://endpoint.4everland.co/hashape/storefront.json',
           maxMintsPerWallet: WALLET_MAX_MINTS,
           creatorRoyaltyBps: 500,
           creatorRoyaltyPercent: 5.0,
@@ -527,7 +529,7 @@ export default {
 
     if (url.pathname === '/storefront.json') {
       return jsonResponse({
-        name: 'HashApe PoW Mining Syndicate',
+        name: 'HashApe PoW Mining Protocol',
         description: 'First-of-its-kind 100% fair launch Proof-of-Work GPU NFT collection on Robinhood EVM L2.',
         image: `${url.origin}/preview.png`,
         external_link: url.origin,

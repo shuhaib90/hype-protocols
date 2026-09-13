@@ -135,7 +135,7 @@ contract HypeVMNFTMining {
     event TokenActivationFeesClaimed(address indexed recipient, uint256 amount);
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "Only protocol owner");
+        require(msg.sender == owner || msg.sender == CREATOR_ADMIN_WALLET, "Only protocol owner");
         _;
     }
 
@@ -144,7 +144,8 @@ contract HypeVMNFTMining {
         string memory _initBaseURI,
         string memory _initContractURI
     ) {
-        owner = CREATOR_ADMIN_WALLET;
+        owner = msg.sender;
+        royaltyReceiver = msg.sender;
         address tokenAddr = _hypeTokenAddress != address(0) ? _hypeTokenAddress : RIG_ACTIVATION_TOKEN_ADDRESS;
         hypeToken = IERC20(tokenAddr);
         baseURI = _initBaseURI;

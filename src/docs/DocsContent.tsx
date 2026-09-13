@@ -696,7 +696,7 @@ export const DocsContent: React.FC = () => {
                   HashApeNFTMining.sol Specification
                 </h1>
                 <p>
-                  The protocol is governed by an immutable, verified smart contract deployed on Robinhood EVM L2. Direct mint functions are disabled; tokens can only be minted by presenting a valid Keccak-256 proof.
+                  The protocol is governed by an immutable, verified smart contract deployed on Robinhood Chain Mainnet (Chain ID 4663) at <code className="text-cyber-blue font-bold">0x7D959C29aa1098d93b307Ca40bEEEc0bF7bbfF85</code>. Direct mint functions are disabled; tokens can only be minted by presenting a valid Keccak-256 proof.
                 </p>
                 <div className="bg-[#060d24] p-4 rounded-xl border border-cyber-borderSubtle font-mono text-xs overflow-x-auto text-cyber-dim">
                   <pre>{`// SPDX-License-Identifier: MIT

@@ -1,0 +1,11 @@
+{
+  "network": "Robinhood Chain Mainnet",
+  "chainId": 4663,
+  "contractAddress": "0x7D959C29aa1098d93b307Ca40bEEEc0bF7bbfF85",
+  "txHash": "0x1614d5182d126f4db165ebf8920b31e8bef177daf02e085b73cd25454833fe77",
+  "deployer": "0x2A232D1ab1226b981c35DA8B477E337952B5486F",
+  "baseUri": "https://endpoint.4everland.co/hashape/metadata/",
+  "contractUri": "https://endpoint.4everland.co/hashape/storefront.json",
+  "rigTokenAddress": "0x30E55c3cfB2BBe5d0B07051e0B15c8a532c45ecc",
+  "deployedAt": "2026-09-13T12:53:39.954Z"
+}
