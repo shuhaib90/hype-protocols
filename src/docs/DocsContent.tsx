@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   BookOpen,
   Cpu,
@@ -20,6 +20,10 @@ import { EXPLORER_URL, OPENSEA_COLLECTION_URL, CONTRACT_ADDRESS } from '../web3/
 export const DocsContent: React.FC = () => {
   const [activeSection, setActiveSection] = useState('overview');
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
+
   const navItems = [
     { id: 'overview', title: '01. Overview', icon: BookOpen },
     { id: 'how-it-works', title: '02. How Mining Works', icon: Zap },
@@ -37,7 +41,7 @@ export const DocsContent: React.FC = () => {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 font-dot">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-16 font-dot">
       {/* Top Protocol Dispatch Ribbon */}
       <div className="flex items-center justify-between flex-wrap gap-2 text-[11px] font-dot text-[#24140a] mb-6 p-3 bg-[#eee2ca] border-2 border-[#24140a] shadow-[2px_2px_0px_#24140a]">
         <div className="flex items-center space-x-3">
@@ -69,10 +73,10 @@ export const DocsContent: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         {/* Sidebar Navigation */}
-        <div className="lg:col-span-4 xl:col-span-3">
-          <div className="lg:sticky lg:top-24 paper-chassis p-4 bg-[#eee2ca] shadow-[4px_4px_0px_#24140a]">
+        <div className="lg:col-span-4 xl:col-span-3 flex flex-col">
+          <div className="lg:sticky lg:top-20 paper-chassis p-4 bg-[#eee2ca] shadow-[4px_4px_0px_#24140a] max-h-[calc(100vh-6rem)] overflow-y-auto">
             <div className="text-[10px] font-dot font-bold text-[#d83a2a] uppercase tracking-wider mb-3 px-1 flex items-center justify-between">
               <span>[ TABLE OF CONTENTS ]</span>
               <span className="text-[#24140a]">13 TOPICS</span>
@@ -101,16 +105,15 @@ export const DocsContent: React.FC = () => {
         </div>
 
         {/* Documentation Content */}
-        <div className="lg:col-span-8 xl:col-span-9">
-          <article className="paper-chassis p-6 sm:p-8 text-[#24140a] font-dot text-xs sm:text-sm leading-relaxed space-y-6 bg-[#fdfbf7] shadow-[4px_4px_0px_#24140a]">
-            {/* 01. Overview */}
+        <div className="lg:col-span-8 xl:col-span-9 flex flex-col">
+          <article className="paper-chassis p-6 sm:p-8 text-[#24140a] font-dot text-xs sm:text-sm leading-relaxed space-y-6 bg-[#fdfbf7] shadow-[4px_4px_0px_#24140a] min-h-[640px] flex-grow">            {/* 01. Overview */}
             {activeSection === 'overview' && (
               <section className="space-y-4">
                 <div className="flex items-center space-x-2 text-xs text-[#d83a2a] uppercase font-bold">
                   <BookOpen className="w-4 h-4" />
                   <span>Topic 01 // Overview</span>
                 </div>
-                <h1 className="font-jersey font-bold text-3xl sm:text-4xl text-[#24140a] tracking-tight uppercase">
+                <h1 className="font-jersey text-3xl sm:text-4xl text-[#24140a] tracking-wide uppercase">
                   HashApe Proof-of-Work NFT Mining Protocol
                 </h1>
                 <p className="text-[#5c4636] font-medium leading-relaxed">
@@ -121,7 +124,7 @@ export const DocsContent: React.FC = () => {
                 <div className="p-4 bg-[#eee2ca] border-2 border-[#24140a] shadow-[2px_2px_0px_#24140a] text-xs font-bold text-[#24140a]">
                   Maximum Hard Cap: <strong className="text-[#d83a2a]">10,000 NFTs</strong>. Once all 10,000 tokens are minted, primary mining is permanently terminated on-chain.
                 </div>
-                <h2 className="font-jersey font-bold text-xl sm:text-2xl text-[#24140a] uppercase tracking-wide pt-4">
+                <h2 className="font-jersey text-xl sm:text-2xl text-[#24140a] uppercase tracking-wider font-normal pt-4">
                   Core Principles
                 </h2>
                 <ul className="list-disc pl-5 space-y-2 text-[#5c4636]">
@@ -140,7 +143,7 @@ export const DocsContent: React.FC = () => {
                   <Zap className="w-4 h-4" />
                   <span>Topic 02 // Architecture</span>
                 </div>
-                <h1 className="font-jersey font-bold text-3xl sm:text-4xl text-[#24140a] tracking-tight uppercase">
+                <h1 className="font-jersey text-3xl sm:text-4xl text-[#24140a] tracking-wide uppercase">
                   How Mining Works: End-to-End Workflow
                 </h1>
                 <p className="text-[#5c4636] font-medium leading-relaxed">
@@ -191,20 +194,20 @@ export const DocsContent: React.FC = () => {
                   <Users className="w-4 h-4" />
                   <span>Topic 03 // Workers</span>
                 </div>
-                <h1 className="font-jersey font-bold text-3xl sm:text-4xl text-[#24140a] tracking-tight uppercase">
+                <h1 className="font-jersey text-3xl sm:text-4xl text-[#24140a] tracking-wide uppercase">
                   The Five-Worker System & Nonce Partitioning
                 </h1>
                 <p className="text-[#5c4636] font-medium leading-relaxed">
                   Each user can operate up to <strong className="text-[#24140a]">5 simultaneous mining workers</strong>. To ensure optimal hardware efficiency, workers never search overlapping nonce spaces.
                 </p>
 
-                <h2 className="font-jersey font-bold text-xl sm:text-2xl text-[#24140a] uppercase tracking-wide pt-2">
+                <h2 className="font-jersey text-xl sm:text-2xl text-[#24140a] uppercase tracking-wider font-normal pt-2">
                   Disjoint Nonce Partitions
                 </h2>
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse border-2 border-[#24140a] text-xs font-dot shadow-[2px_2px_0px_#24140a] bg-[#fdfbf7]">
                     <thead>
-                      <tr className="bg-[#eee2ca] text-[#24140a] border-b-2 border-[#24140a] font-bold font-jersey uppercase text-sm">
+                      <tr className="bg-[#eee2ca] text-[#24140a] border-b-2 border-[#24140a] font-jersey uppercase text-sm tracking-wider font-normal">
                         <th className="p-3 border border-[#24140a]/40 text-left">Worker</th>
                         <th className="p-3 border border-[#24140a]/40 text-left">Status</th>
                         <th className="p-3 border border-[#24140a]/40 text-left">Assigned Nonce Range</th>
@@ -259,7 +262,7 @@ export const DocsContent: React.FC = () => {
                   <Coins className="w-4 h-4" />
                   <span>Topic 04 // Token Economics</span>
                 </div>
-                <h1 className="font-jersey font-bold text-3xl sm:text-4xl text-[#24140a] tracking-tight uppercase">
+                <h1 className="font-jersey text-3xl sm:text-4xl text-[#24140a] tracking-wide uppercase">
                   HashApe ($HASHAPE) Worker Activation
                 </h1>
                 <p className="text-[#5c4636] font-medium leading-relaxed">
@@ -307,7 +310,7 @@ export const DocsContent: React.FC = () => {
                   <Activity className="w-4 h-4" />
                   <span>Topic 05 // Pacing</span>
                 </div>
-                <h1 className="font-jersey font-bold text-3xl sm:text-4xl text-[#24140a] tracking-tight uppercase">
+                <h1 className="font-jersey text-3xl sm:text-4xl text-[#24140a] tracking-wide uppercase">
                   Dynamic Difficulty Scaling by Remaining Supply
                 </h1>
                 <p className="text-[#5c4636] font-medium leading-relaxed">
@@ -317,7 +320,7 @@ export const DocsContent: React.FC = () => {
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse border-2 border-[#24140a] text-xs font-dot shadow-[2px_2px_0px_#24140a] bg-[#fdfbf7]">
                     <thead>
-                      <tr className="bg-[#eee2ca] text-[#24140a] border-b-2 border-[#24140a] font-bold font-jersey uppercase text-sm">
+                      <tr className="bg-[#eee2ca] text-[#24140a] border-b-2 border-[#24140a] font-jersey uppercase text-sm tracking-wider font-normal">
                         <th className="p-3 border border-[#24140a]/40 text-left">Remaining Supply</th>
                         <th className="p-3 border border-[#24140a]/40 text-left">Difficulty Band</th>
                         <th className="p-3 border border-[#24140a]/40 text-left">Target Hex Bound</th>
@@ -365,7 +368,7 @@ export const DocsContent: React.FC = () => {
                   </table>
                 </div>
 
-                <h2 className="font-jersey font-bold text-xl sm:text-2xl text-[#24140a] uppercase tracking-wide pt-6">
+                <h2 className="font-jersey text-xl sm:text-2xl text-[#24140a] uppercase tracking-wider font-normal pt-6">
                   Per-Wallet Quota (5 NFTs Max) & Sequential Escalation Ladder
                 </h2>
                 <p className="text-[#5c4636] font-medium leading-relaxed">
@@ -376,7 +379,7 @@ export const DocsContent: React.FC = () => {
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse border-2 border-[#24140a] text-xs font-dot shadow-[2px_2px_0px_#24140a] bg-[#fdfbf7]">
                     <thead>
-                      <tr className="bg-[#eee2ca] text-[#24140a] border-b-2 border-[#24140a] font-bold font-jersey uppercase text-sm">
+                      <tr className="bg-[#eee2ca] text-[#24140a] border-b-2 border-[#24140a] font-jersey uppercase text-sm tracking-wider font-normal">
                         <th className="p-3 border border-[#24140a]/40 text-left">Wallet Mint #</th>
                         <th className="p-3 border border-[#24140a]/40 text-left">Difficulty Tier</th>
                         <th className="p-3 border border-[#24140a]/40 text-left">Target Hex Bound</th>
@@ -428,7 +431,7 @@ export const DocsContent: React.FC = () => {
                   <strong className="text-[#d83a2a]">Quota Enforcement:</strong> After minting 5 NFTs, smart contract and backend validation strictly locks further mining session creation and mint transactions for that wallet address.
                 </div>
 
-                <h2 className="font-jersey font-bold text-xl sm:text-2xl text-[#24140a] uppercase tracking-wide pt-6">
+                <h2 className="font-jersey text-xl sm:text-2xl text-[#24140a] uppercase tracking-wider font-normal pt-6">
                   Authoritative 10-Epoch Progressive Difficulty & Escalating Mint Fee Schedule
                 </h2>
                 <p className="text-[#5c4636] font-medium leading-relaxed">
@@ -439,7 +442,7 @@ export const DocsContent: React.FC = () => {
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse border-2 border-[#24140a] text-xs font-dot shadow-[2px_2px_0px_#24140a] bg-[#fdfbf7]">
                     <thead>
-                      <tr className="bg-[#eee2ca] text-[#24140a] border-b-2 border-[#24140a] font-bold font-jersey uppercase text-sm">
+                      <tr className="bg-[#eee2ca] text-[#24140a] border-b-2 border-[#24140a] font-jersey uppercase text-sm tracking-wider font-normal">
                         <th className="p-3 border border-[#24140a]/40 text-left">Epoch #</th>
                         <th className="p-3 border border-[#24140a]/40 text-left">Token Range</th>
                         <th className="p-3 border border-[#24140a]/40 text-left">Epoch Supply</th>
@@ -531,7 +534,7 @@ export const DocsContent: React.FC = () => {
                   <ShieldCheck className="w-4 h-4" />
                   <span>Topic 06 // Cryptography</span>
                 </div>
-                <h1 className="font-jersey font-bold text-3xl sm:text-4xl text-[#24140a] tracking-tight uppercase">
+                <h1 className="font-jersey text-3xl sm:text-4xl text-[#24140a] tracking-wide uppercase">
                   Cryptographic Proof Verification
                 </h1>
                 <p className="text-[#5c4636] font-medium leading-relaxed">
@@ -543,7 +546,7 @@ export const DocsContent: React.FC = () => {
                     <code>require(uint256(digest) &lt; targetDifficulty, "Invalid Proof");</code>
                   </div>
                 </div>
-                <h2 className="font-jersey font-bold text-xl sm:text-2xl text-[#24140a] uppercase tracking-wide pt-2">
+                <h2 className="font-jersey text-xl sm:text-2xl text-[#24140a] uppercase tracking-wider font-normal pt-2">
                   Anti-Cheat Enforcement
                 </h2>
                 <ul className="list-disc pl-5 space-y-2 text-[#5c4636]">
@@ -561,7 +564,7 @@ export const DocsContent: React.FC = () => {
                   <Sparkles className="w-4 h-4" />
                   <span>Topic 07 // Minting</span>
                 </div>
-                <h1 className="font-jersey font-bold text-3xl sm:text-4xl text-[#24140a] tracking-tight uppercase">
+                <h1 className="font-jersey text-3xl sm:text-4xl text-[#24140a] tracking-wide uppercase">
                   NFT Minting Settlement Flow
                 </h1>
                 <p className="text-[#5c4636] font-medium leading-relaxed">
@@ -584,7 +587,7 @@ export const DocsContent: React.FC = () => {
                   <ShoppingBag className="w-4 h-4" />
                   <span>Topic 08 // NFT Metadata</span>
                 </div>
-                <h1 className="font-jersey font-bold text-3xl sm:text-4xl text-[#24140a] tracking-tight uppercase">
+                <h1 className="font-jersey text-3xl sm:text-4xl text-[#24140a] tracking-wide uppercase">
                   NFT Metadata & Self-Hosted Storage Architecture
                 </h1>
                 <p className="text-[#5c4636] font-medium leading-relaxed">
@@ -593,7 +596,7 @@ export const DocsContent: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="p-4 bg-[#eee2ca] border-2 border-[#24140a] shadow-[2px_2px_0px_#24140a] text-xs space-y-2">
-                    <span className="text-[#24140a] font-bold block uppercase font-jersey text-base">Metadata Schema</span>
+                    <span className="text-[#24140a] font-jersey text-base uppercase tracking-wider font-normal">Metadata Schema</span>
                     <ul className="list-disc pl-4 space-y-1 text-[#5c4636]">
                       <li><code className="font-mono text-[#24140a]">name</code>: "Lomarka the Voyager" (Unique per Ape)</li>
                       <li><code className="font-mono text-[#24140a]">description</code>: "hashape #00001: Lomarka the Voyager. A detailed pixel-art ape..."</li>
@@ -603,7 +606,7 @@ export const DocsContent: React.FC = () => {
                   </div>
 
                   <div className="p-4 bg-[#eee2ca] border-2 border-[#24140a] shadow-[2px_2px_0px_#24140a] text-xs space-y-2">
-                    <span className="text-[#24140a] font-bold block uppercase font-jersey text-base">Self-Hosted Endpoints</span>
+                    <span className="text-[#24140a] font-jersey text-base uppercase tracking-wider font-normal">Self-Hosted Endpoints</span>
                     <ul className="list-disc pl-4 space-y-1 text-[#5c4636]">
                       <li>Metadata: <code className="font-mono text-[#24140a]">/metadata/:id.json</code></li>
                       <li>Images: <code className="font-mono text-[#24140a]">/images/:id.png</code></li>
@@ -613,7 +616,7 @@ export const DocsContent: React.FC = () => {
                   </div>
                 </div>
 
-                <h2 className="font-jersey font-bold text-xl sm:text-2xl text-[#24140a] uppercase tracking-wide pt-2">
+                <h2 className="font-jersey text-xl sm:text-2xl text-[#24140a] uppercase tracking-wider font-normal pt-2">
                   Secondary Market Indexing & ERC-2981 Royalties
                 </h2>
                 <p className="text-[#5c4636] font-medium leading-relaxed">
@@ -635,7 +638,7 @@ export const DocsContent: React.FC = () => {
                   <Layers className="w-4 h-4" />
                   <span>Topic 09 // Supply</span>
                 </div>
-                <h1 className="font-jersey font-bold text-3xl sm:text-4xl text-[#24140a] tracking-tight uppercase">
+                <h1 className="font-jersey text-3xl sm:text-4xl text-[#24140a] tracking-wide uppercase">
                   10,000 Maximum Supply & Final Race Conditions
                 </h1>
                 <p className="text-[#5c4636] font-medium leading-relaxed">
@@ -644,7 +647,7 @@ export const DocsContent: React.FC = () => {
                 </p>
 
                 <div className="p-4 bg-[#eee2ca] border-2 border-[#24140a] shadow-[2px_2px_0px_#24140a] text-xs space-y-3">
-                  <h3 className="text-[#24140a] font-bold text-sm font-jersey uppercase">The Final NFT Race Condition</h3>
+                  <h3 className="text-[#24140a] text-sm font-jersey uppercase tracking-wider font-normal">The Final NFT Race Condition</h3>
                   <p className="text-[#5c4636] leading-relaxed">
                     When total mined reaches 9,999, hundreds of miners around the world may find a valid cryptographic proof for Token #10,000 at nearly the exact same second.
                     The frontend is never the authoritative arbiter of who wins the final token.
@@ -668,7 +671,7 @@ export const DocsContent: React.FC = () => {
                   <Lock className="w-4 h-4" />
                   <span>Topic 10 // Security</span>
                 </div>
-                <h1 className="font-jersey font-bold text-3xl sm:text-4xl text-[#24140a] tracking-tight uppercase">
+                <h1 className="font-jersey text-3xl sm:text-4xl text-[#24140a] tracking-wide uppercase">
                   Security Architecture & Threat Mitigation: Anti-Race Condition & Mempool Security
                 </h1>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
@@ -699,7 +702,7 @@ export const DocsContent: React.FC = () => {
                   <Cpu className="w-4 h-4" />
                   <span>Topic 11 // WebGPU</span>
                 </div>
-                <h1 className="font-jersey font-bold text-3xl sm:text-4xl text-[#24140a] tracking-tight uppercase">
+                <h1 className="font-jersey text-3xl sm:text-4xl text-[#24140a] tracking-wide uppercase">
                   WebGPU Architecture & Compute Pipeline
                 </h1>
                 <p className="text-[#5c4636] font-medium leading-relaxed">
@@ -708,7 +711,7 @@ export const DocsContent: React.FC = () => {
                 </p>
 
                 <div className="p-4 bg-[#eee2ca] border-2 border-[#24140a] shadow-[2px_2px_0px_#24140a] text-xs space-y-2">
-                  <h4 className="text-[#24140a] font-bold text-sm font-jersey uppercase">Partitioned Search Spaces Across 5 Workers</h4>
+                  <h4 className="text-[#24140a] text-sm font-jersey uppercase tracking-wider font-normal">Partitioned Search Spaces Across 5 Workers</h4>
                   <p className="text-[#5c4636] leading-relaxed">
                     When multiple workers are active, the compute pipeline segments the uint256 search space into disjoint ranges (Range A through Range E).
                     This ensures 0% redundant hashing across concurrent worker threads, achieving near-linear scaling of effective hashrate.
@@ -719,7 +722,7 @@ export const DocsContent: React.FC = () => {
                 </div>
 
                 <div className="p-4 bg-[#eee2ca] border-2 border-[#24140a] shadow-[2px_2px_0px_#24140a] text-xs space-y-2">
-                  <h4 className="text-[#24140a] font-bold text-sm font-jersey uppercase">HashCats Inspiration & Technical Comparison</h4>
+                  <h4 className="text-[#24140a] text-sm font-jersey uppercase tracking-wider font-normal">HashCats Inspiration & Technical Comparison</h4>
                   <p className="text-[#5c4636] leading-relaxed">
                     Inspired by the cryptographic proof-of-work mechanics pioneered by HashCats, HashApe adopts GPU-driven proof generation while tailoring execution for Robinhood EVM L2's ultra-fast consensus, native ETH mint fees, and up to 5 concurrent WebGPU compute workers with disjoint nonce partitions.
                   </p>
@@ -734,7 +737,7 @@ export const DocsContent: React.FC = () => {
                   <FileCode2 className="w-4 h-4" />
                   <span>Topic 12 // Smart Contract</span>
                 </div>
-                <h1 className="font-jersey font-bold text-3xl sm:text-4xl text-[#24140a] tracking-tight uppercase">
+                <h1 className="font-jersey text-3xl sm:text-4xl text-[#24140a] tracking-wide uppercase">
                   HashApeNFTMining.sol Specification
                 </h1>
                 <p className="text-[#5c4636] font-medium leading-relaxed">
@@ -771,28 +774,28 @@ contract HashApeNFTMining {
                   <HelpCircle className="w-4 h-4" />
                   <span>Topic 13 // FAQ</span>
                 </div>
-                <h1 className="font-jersey font-bold text-3xl sm:text-4xl text-[#24140a] tracking-tight uppercase">
+                <h1 className="font-jersey text-3xl sm:text-4xl text-[#24140a] tracking-wide uppercase">
                   Frequently Asked Questions
                 </h1>
                 <div className="space-y-4 text-xs">
                   <div className="p-4 bg-[#eee2ca] border-2 border-[#24140a] shadow-[2px_2px_0px_#24140a]">
-                    <h3 className="text-[#24140a] font-bold font-jersey text-base mb-1 uppercase">Does mining cost gas or native tokens?</h3>
+                    <h3 className="text-[#24140a] font-jersey text-base mb-1 uppercase tracking-wider font-normal">Does mining cost gas or native tokens?</h3>
                     <p className="text-[#5c4636] leading-relaxed">No. The mining computation occurs 100% off-chain inside your browser GPU. You only pay network gas and the native ETH mint fee ($5 ETH / 0.0020 ETH, escalating by epoch) when submitting the on-chain mint transaction after finding a valid proof.</p>
                   </div>
                   <div className="p-4 bg-[#eee2ca] border-2 border-[#24140a] shadow-[2px_2px_0px_#24140a]">
-                    <h3 className="text-[#24140a] font-bold font-jersey text-base mb-1 uppercase">What currency is used for gas and mint fees?</h3>
+                    <h3 className="text-[#24140a] font-jersey text-base mb-1 uppercase tracking-wider font-normal">What currency is used for gas and mint fees?</h3>
                     <p className="text-[#5c4636] leading-relaxed">Mint fees and network gas are settled strictly in native ETH on Robinhood EVM L2. Worker rig activations (Workers 2–5) utilize HashApe ($HASHAPE) tokens at contract 0x30E55c3cfB2BBe5d0B07051e0B15c8a532c45ecc.</p>
                   </div>
                   <div className="p-4 bg-[#eee2ca] border-2 border-[#24140a] shadow-[2px_2px_0px_#24140a]">
-                    <h3 className="text-[#24140a] font-bold font-jersey text-base mb-1 uppercase">Can I mine on multiple workers?</h3>
+                    <h3 className="text-[#24140a] font-jersey text-base mb-1 uppercase tracking-wider font-normal">Can I mine on multiple workers?</h3>
                     <p className="text-[#5c4636] leading-relaxed">Yes! Miner 01 is 100% free for all connected wallets. Additional workers (Miner 02 to Miner 05) can be activated using HashApe ($HASHAPE) tokens to divide the cryptographic search space and increase your total hashrate.</p>
                   </div>
                   <div className="p-4 bg-[#eee2ca] border-2 border-[#24140a] shadow-[2px_2px_0px_#24140a]">
-                    <h3 className="text-[#24140a] font-bold font-jersey text-base mb-1 uppercase">What happens if two miners solve the final NFT simultaneously?</h3>
+                    <h3 className="text-[#24140a] font-jersey text-base mb-1 uppercase tracking-wider font-normal">What happens if two miners solve the final NFT simultaneously?</h3>
                     <p className="text-[#5c4636] leading-relaxed">The smart contract verifies the first transaction mined into a block to claim Token #10,000. All subsequent transactions revert safely with "NFT ALREADY CLAIMED", preventing over-minting.</p>
                   </div>
                   <div className="p-4 bg-[#eee2ca] border-2 border-[#24140a] shadow-[2px_2px_0px_#24140a]">
-                    <h3 className="text-[#24140a] font-bold font-jersey text-base mb-1 uppercase">How does OpenSea index the collection?</h3>
+                    <h3 className="text-[#24140a] font-jersey text-base mb-1 uppercase tracking-wider font-normal">How does OpenSea index the collection?</h3>
                     <p className="text-[#5c4636] leading-relaxed">OpenSea and secondary marketplaces query tokenURI directly from our contract, fetching self-hosted JSON metadata and PNG images from our durable storage, with an enforced 5% ERC-2981 royalty directed to 0xb8E3DfDd19b6Bf35b9Fd87F8373F7f82C53bc93C.</p>
                   </div>
                 </div>

@@ -26,6 +26,10 @@ export const Navigation: React.FC<NavigationProps> = ({
   const handleTabClick = (tab: 'mining' | 'docs' | 'admin') => {
     soundEffects.playClickSound();
     setActiveTab(tab);
+    if (window.location.hash) {
+      history.replaceState(null, '', window.location.pathname);
+    }
+    window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const handleSoundToggle = () => {
@@ -77,26 +81,38 @@ export const Navigation: React.FC<NavigationProps> = ({
             >
               [ FORGE RIG ]
             </button>
-            <a
-              href="#collection-section"
+            <button
               onClick={() => {
                 soundEffects.playClickSound();
-                if (activeTab !== 'mining') setActiveTab('mining');
+                if (activeTab !== 'mining') {
+                  setActiveTab('mining');
+                  setTimeout(() => {
+                    document.getElementById('collection-section')?.scrollIntoView({ behavior: 'smooth' });
+                  }, 50);
+                } else {
+                  document.getElementById('collection-section')?.scrollIntoView({ behavior: 'smooth' });
+                }
               }}
-              className="px-3 py-1 bg-[#eee2ca] text-[#24140a] hover:bg-[#e4d3b4] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a] uppercase tracking-wider transition-all"
+              className="px-3 py-1 bg-[#eee2ca] text-[#24140a] hover:bg-[#e4d3b4] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a] uppercase tracking-wider transition-all cursor-pointer"
             >
               [ DOSSIER ]
-            </a>
-            <a
-              href="#epochs-section"
+            </button>
+            <button
               onClick={() => {
                 soundEffects.playClickSound();
-                if (activeTab !== 'mining') setActiveTab('mining');
+                if (activeTab !== 'mining') {
+                  setActiveTab('mining');
+                  setTimeout(() => {
+                    document.getElementById('epochs-section')?.scrollIntoView({ behavior: 'smooth' });
+                  }, 50);
+                } else {
+                  document.getElementById('epochs-section')?.scrollIntoView({ behavior: 'smooth' });
+                }
               }}
-              className="px-3 py-1 bg-[#eee2ca] text-[#24140a] hover:bg-[#e4d3b4] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a] uppercase tracking-wider transition-all"
+              className="px-3 py-1 bg-[#eee2ca] text-[#24140a] hover:bg-[#e4d3b4] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a] uppercase tracking-wider transition-all cursor-pointer"
             >
               [ 10 STAGES ]
-            </a>
+            </button>
             <button
               onClick={() => handleTabClick('docs')}
               className={`px-3 py-1 uppercase tracking-wider transition-all border-2 border-[#24140a] ${
