@@ -866,6 +866,17 @@ export const App: React.FC = () => {
             <span className="text-[#24140a] bg-[#f5ebd7] px-2 py-0.5 border border-[#24140a]">Robinhood EVM L2 (Native ETH)</span>
             <span className="text-[#24140a]">▪</span>
             <span className="text-[#9c6208] bg-[#f5ebd7] px-2 py-0.5 border border-[#24140a]">5.0% CREATOR ROYALTY</span>
+            <span className="text-[#24140a]">▪</span>
+            <button
+              onClick={() => {
+                soundEffects.playClickSound();
+                setActiveTab('admin');
+                window.scrollTo({ top: 0, behavior: 'instant' });
+              }}
+              className="text-[#d83a2a] hover:text-[#24140a] hover:underline cursor-pointer bg-[#fdfbf7] px-2 py-0.5 border border-[#24140a] font-bold"
+            >
+              ADMIN PORTAL
+            </button>
           </div>
         </div>
       </footer>

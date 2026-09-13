@@ -3,21 +3,21 @@
   "maxSupply": 10000,
   "records": [
     {
-      "id": "solv_1789318302631_hperp",
-      "wallet": "0xdb2d47e68f92fe5021b1a1994a612c4cefc9c80c",
+      "id": "solv_1789319120501_4hcj5",
+      "wallet": "0xdb9299b3c3298e68c5bb53a9114ab8f0978e3304",
       "tokenId": 7850,
-      "nonce": "7889",
-      "solvedHash": "0x0004383152b8578f4d2e5642490c4e265dc4d263b9a0a90ede92be71967bb649",
+      "nonce": "2554",
+      "solvedHash": "0x000f8a4aa2b3dbabc8af87d0340b2ba80b7f7cd3b6b2e961931fd8bb8fcc8d13",
       "difficulty": 4,
       "gpuRenderer": "NVIDIA RTX 4090 WebGPU",
       "timeToSolve": 0,
       "status": "MINTED",
-      "solvedAt": 1789318302631,
+      "solvedAt": 1789319120501,
       "txHash": "0x9999888877776666555544443333222211110000aabbccddeeff001122334455",
       "epochId": 1,
       "feeUsd": 5,
       "feeEth": 0.002,
-      "mintedAt": 1789318302638
+      "mintedAt": 1789319120508
     },
     {
       "id": "mint_genesis_3",
@@ -28,7 +28,7 @@
       "epochId": 1,
       "feeUsd": 5,
       "txHash": "0x03a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000003",
-      "mintedAt": 1789317101409
+      "mintedAt": 1789317919770
     },
     {
       "id": "mint_genesis_2",
@@ -39,7 +39,7 @@
       "epochId": 1,
       "feeUsd": 5,
       "txHash": "0x02a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000002",
-      "mintedAt": 1789315901409
+      "mintedAt": 1789316719770
     },
     {
       "id": "mint_genesis_1",
@@ -50,16 +50,16 @@
       "epochId": 1,
       "feeUsd": 5,
       "txHash": "0x01a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000001",
-      "mintedAt": 1789314701409
+      "mintedAt": 1789315519770
     }
   ],
   "workerEntitlements": {
-    "0xdb2d47e68f92fe5021b1a1994a612c4cefc9c80c": {
+    "0xdb9299b3c3298e68c5bb53a9114ab8f0978e3304": {
       "3": true
     }
   },
   "usedProofs": {
-    "0x0004383152b8578f4d2e5642490c4e265dc4d263b9a0a90ede92be71967bb649": true
+    "0x000f8a4aa2b3dbabc8af87d0340b2ba80b7f7cd3b6b2e961931fd8bb8fcc8d13": true
   },
   "activeMiners": {
     "0xd8287aef4d931d4cf3bfb36d99d577f6b4c36178": {
@@ -86,7 +86,7 @@
       "hashrate": 12.5,
       "noncesScanned": 0,
       "isMining": true,
-      "lastSeen": 1789318304219,
+      "lastSeen": 1789319122321,
       "status": "HASHING_UNSOLVED"
     },
     "0xbd320f04e429c139c570fa9b4ffdc92164e9b395": {
@@ -104,7 +104,7 @@
       "hashrate": 18.5,
       "noncesScanned": 500000,
       "isMining": true,
-      "lastSeen": 1789318301406,
+      "lastSeen": 1789319119743,
       "status": "HASHING_UNSOLVED"
     },
     "0xdb2d47e68f92fe5021b1a1994a612c4cefc9c80c": {
@@ -115,6 +115,24 @@
       "isMining": true,
       "lastSeen": 1789318301818,
       "status": "HASHING_UNSOLVED"
+    },
+    "0xddfb6a07b43e107d0e76ccb2ea881f5c1ce82c0f": {
+      "wallet": "0xddfb6a07b43e107d0e76ccb2ea881f5c1ce82c0f",
+      "gpuName": "WebGPU Compute Core",
+      "hashrate": 12.5,
+      "noncesScanned": 0,
+      "isMining": true,
+      "lastSeen": 1789319118824,
+      "status": "HASHING_UNSOLVED"
+    },
+    "0xdb9299b3c3298e68c5bb53a9114ab8f0978e3304": {
+      "wallet": "0xdb9299b3c3298e68c5bb53a9114ab8f0978e3304",
+      "gpuName": "WebGPU Compute Core",
+      "hashrate": 12.5,
+      "noncesScanned": 0,
+      "isMining": true,
+      "lastSeen": 1789319120152,
+      "status": "HASHING_UNSOLVED"
     }
   },
   "epochOverrides": {
@@ -122,7 +140,7 @@
       "mintFeeUsd": 5,
       "mintFeeEth": 0.002,
       "mintFeeApe": 5,
-      "updatedAt": 1789318304249
+      "updatedAt": 1789319122347
     }
   },
   "treasury": {
