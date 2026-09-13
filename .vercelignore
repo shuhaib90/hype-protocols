@@ -1,0 +1,8 @@
+collection/
+contracts/
+test/
+scripts/
+cloudflare/
+.agents/
+*.log
+node_modules/
