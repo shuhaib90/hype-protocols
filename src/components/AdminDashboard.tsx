@@ -119,10 +119,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const displayedEpochs = (config.epochs && config.epochs.length > 0) ? config.epochs : DEFAULT_10_EPOCHS;
 
-  const [epochFees, setEpochFees] = useState<{ [id: number]: number }>(() => {
-    const map: { [id: number]: number } = {};
+  const [epochFees, setEpochFees] = useState<{ [id: number]: number | string }>(() => {
+    const map: { [id: number]: number | string } = {};
     displayedEpochs.forEach(e => {
-      map[e.id] = e.mintFeeUsd;
+      map[e.id] = e.mintFeeUsd !== undefined ? e.mintFeeUsd : 5;
     });
     return map;
   });
@@ -179,6 +179,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       if (config.workerCosts[5]) setWorker5Cost(config.workerCosts[5]);
     }
   }, [config.workerCosts]);
+
+  useEffect(() => {
+    if (config.epochs && config.epochs.length > 0) {
+      setEpochFees(prev => {
+        const next = { ...prev };
+        config.epochs?.forEach(e => {
+          if (e.mintFeeUsd !== undefined) {
+            next[e.id] = e.mintFeeUsd;
+          }
+        });
+        return next;
+      });
+    }
+  }, [config.epochs]);
 
   // Fetch Live On-Chain Treasury & Contract State
   const fetchTreasury = useCallback(async () => {
@@ -245,8 +259,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         for (const ep of displayedEpochs) {
           try {
             const onChainEp = await nftContract.getEpoch(ep.startToken);
-            if (onChainEp && onChainEp.feeUsd) {
-              loadedEpochMap[ep.id] = Number(onChainEp.feeUsd);
+            if (onChainEp && onChainEp.mintFeeWei !== undefined) {
+              const feeWei = BigInt(onChainEp.mintFeeWei);
+              if (feeWei === 1n) {
+                loadedEpochMap[ep.id] = 0;
+              } else if (feeWei > 1n) {
+                const ethNum = parseFloat(ethers.formatEther(feeWei));
+                const calcUsd = Number((ethNum * 2500).toFixed(2));
+                const onChainUsd = Number(onChainEp.feeUsd || 0);
+                loadedEpochMap[ep.id] = onChainUsd > 0 && Math.abs(onChainUsd - calcUsd) < 0.05 ? onChainUsd : calcUsd;
+              }
             }
           } catch (_) {}
         }
@@ -424,11 +446,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
     try {
       const epochIds = displayedEpochs.map(e => e.id);
-      const newFeesUsd = displayedEpochs.map(e => Math.round(Number(epochFees[e.id] || e.mintFeeUsd || 5)));
+      const newFeesUsd = displayedEpochs.map(e => {
+        const raw = epochFees[e.id] !== undefined ? epochFees[e.id] : (e.mintFeeUsd ?? 5);
+        const usd = Math.max(0, parseFloat(String(raw)) || 0);
+        return Math.max(0, Math.round(usd));
+      });
+
       const newFeesWei = displayedEpochs.map(e => {
-        const usd = Number(epochFees[e.id] || e.mintFeeUsd || 5);
-        const ethVal = (usd / 2500).toFixed(6);
-        return ethers.parseEther(ethVal);
+        const raw = epochFees[e.id] !== undefined ? epochFees[e.id] : (e.mintFeeUsd ?? 5);
+        const usd = Math.max(0, parseFloat(String(raw)) || 0);
+        if (usd <= 0) return 1n; // 1 wei for free mint so contract require(newFeesWei > 0) succeeds
+        const ethVal = (usd / 2500).toFixed(8);
+        const parsed = ethers.parseEther(ethVal);
+        return parsed > 0n ? parsed : 1n;
       });
 
       const txHash = await setEpochMintFeesBatchOnChain(epochIds, newFeesWei, newFeesUsd);
@@ -437,12 +467,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       setEpochSuccessMsg(`All 10 epochs confirmed on-chain! Tx: ${txHash.slice(0, 14)}...`);
 
       // Synchronize backend state with verified on-chain update
-      const updates = displayedEpochs.map(e => ({
-        ...e,
-        mintFeeUsd: Number(epochFees[e.id] || e.mintFeeUsd || 5),
-        mintFeeEth: Number((((epochFees[e.id] || e.mintFeeUsd || 5)) / 2500).toFixed(4)),
-        mintFeeApe: Number(epochFees[e.id] || e.mintFeeUsd || 5),
-      }));
+      const updates = displayedEpochs.map(e => {
+        const raw = epochFees[e.id] !== undefined ? epochFees[e.id] : (e.mintFeeUsd ?? 5);
+        const usd = Math.max(0, parseFloat(String(raw)) || 0);
+        const ethValNum = usd <= 0 ? 0 : Number((usd / 2500).toFixed(6));
+        return {
+          ...e,
+          mintFeeUsd: usd,
+          mintFeeEth: ethValNum,
+          mintFeeApe: usd,
+        };
+      });
 
       await fetch('/api/admin/epoch-fees-batch', {
         method: 'POST',
@@ -476,11 +511,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setEpochErrorMsg(null);
 
     try {
-      const usdVal = Math.round(epochFees[epochId] || 5);
-      const ethVal = (usdVal / 2500).toFixed(6);
-      const feeWei = ethers.parseEther(ethVal);
+      const e = displayedEpochs.find(ep => ep.id === epochId);
+      const rawUsd = epochFees[epochId] !== undefined ? epochFees[epochId] : (e?.mintFeeUsd ?? 5);
+      const usdVal = Math.max(0, parseFloat(String(rawUsd)) || 0);
 
-      const txHash = await setEpochMintFeeOnChain(epochId, feeWei, usdVal);
+      let feeWei: bigint;
+      let ethValNum: number;
+      if (usdVal <= 0) {
+        feeWei = 1n; // 1 wei allows contract require(newFeeWei > 0) to succeed
+        ethValNum = 0.0000;
+      } else {
+        const ethStr = (usdVal / 2500).toFixed(8);
+        const parsed = ethers.parseEther(ethStr);
+        feeWei = parsed > 0n ? parsed : 1n;
+        ethValNum = Number((usdVal / 2500).toFixed(6));
+      }
+
+      const usdUint = Math.max(0, Math.round(usdVal));
+
+      const txHash = await setEpochMintFeeOnChain(epochId, feeWei, usdUint);
       setLastTxHash(txHash);
       soundEffects.playProofFoundSound();
       setEpochSuccessMsg(`Epoch #${epochId} updated on-chain to $${usdVal} ETH! Tx: ${txHash.slice(0, 14)}...`);
@@ -492,17 +541,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           wallet: address || adminAddress,
           epochId,
           mintFeeUsd: usdVal,
-          mintFeeEth: Number(ethVal),
+          mintFeeEth: ethValNum,
+          mintFeeApe: usdVal,
           txHash,
         }),
       }).catch(() => {});
 
-      const updatedEpochs = displayedEpochs.map(e => e.id === epochId ? {
-        ...e,
+      const updatedEpochs = displayedEpochs.map(ep => ep.id === epochId ? {
+        ...ep,
         mintFeeUsd: usdVal,
-        mintFeeEth: Number(ethVal),
+        mintFeeEth: ethValNum,
         mintFeeApe: usdVal,
-      } : e);
+      } : ep);
 
       onUpdateConfig({
         ...config,
@@ -1367,8 +1417,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 {displayedEpochs.map((epoch) => {
                   const isCurrent = totalMined >= epoch.startToken - 1 && totalMined < epoch.endToken;
                   const isPast = totalMined >= epoch.endToken;
-                  const usdVal = Number(epochFees[epoch.id] !== undefined ? epochFees[epoch.id] : (epoch.mintFeeUsd || 5));
-                  const ethVal = (usdVal / 2500).toFixed(4);
+                  const rawUsd = epochFees[epoch.id] !== undefined ? epochFees[epoch.id] : (epoch.mintFeeUsd !== undefined ? epoch.mintFeeUsd : 5);
+                  const usdVal = Math.max(0, parseFloat(String(rawUsd)) || 0);
+                  const ethValDisplay = usdVal <= 0 
+                    ? '0.0000 ETH (FREE)' 
+                    : `${usdVal < 1 ? (usdVal / 2500).toFixed(5) : (usdVal / 2500).toFixed(4)} ETH`;
                   const isSavingThis = savingSingleEpochId === epoch.id;
 
                   return (
@@ -1398,20 +1451,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           <span className="text-[#24140a] font-bold">$</span>
                           <input
                             type="number"
-                            min="1"
+                            step="any"
+                            min="0"
                             max="500"
                             disabled={!isAdmin || isSavingAllEpochs}
-                            value={usdVal}
+                            value={rawUsd}
                             onChange={(e) => {
-                              const val = Math.max(1, parseFloat(e.target.value) || 1);
+                              const val = e.target.value;
                               setEpochFees(prev => ({ ...prev, [epoch.id]: val }));
                             }}
-                            className="w-16 p-1 bg-[#eee2ca] border-2 border-[#24140a] font-mono text-xs font-bold text-[#24140a] focus:bg-[#fdfbf7]"
+                            className="w-20 p-1 bg-[#eee2ca] border-2 border-[#24140a] font-mono text-xs font-bold text-[#24140a] focus:bg-[#fdfbf7]"
                           />
                         </div>
                       </td>
                       <td className="p-2.5 font-mono text-[#d83a2a] font-bold text-[11px]">
-                        {ethVal} ETH
+                        {ethValDisplay}
                       </td>
                       <td className="p-2.5">
                         {isCurrent ? (

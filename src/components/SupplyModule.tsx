@@ -198,8 +198,10 @@ export const SupplyModule: React.FC<SupplyModuleProps> = ({ supply }) => {
               {defaultEpochs.map((ep) => {
                 const isActive = ep.id === activeEpoch.id;
                 const isPast = ep.id < activeEpoch.id;
-                const effectiveUsd = isActive ? activeEpoch.mintFeeUsd : (ep.mintFeeUsd || 5);
-                const effectiveEth = isActive ? activeEpoch.mintFeeEth : (ep.mintFeeEth || Number((effectiveUsd / 2500).toFixed(4)));
+                const effectiveUsd = isActive ? (activeEpoch.mintFeeUsd ?? 5) : (ep.mintFeeUsd ?? 5);
+                const effectiveEth = isActive 
+                  ? (activeEpoch.mintFeeEth ?? (effectiveUsd <= 0 ? 0 : Number((effectiveUsd / 2500).toFixed(4)))) 
+                  : (ep.mintFeeEth ?? (effectiveUsd <= 0 ? 0 : Number((effectiveUsd / 2500).toFixed(4))));
 
                 return (
                   <div
@@ -233,7 +235,9 @@ export const SupplyModule: React.FC<SupplyModuleProps> = ({ supply }) => {
                     <div className="font-bold text-xs mb-0.5">
                       {isActive ? (
                         <span className="text-[#d83a2a]">
-                          {currencyMode === 'USD' ? `$${effectiveUsd} USD` : `${effectiveEth} ETH`}
+                          {effectiveUsd <= 0
+                            ? (currencyMode === 'USD' ? '$0 USD (FREE)' : '0.0000 ETH (FREE)')
+                            : (currencyMode === 'USD' ? `$${effectiveUsd} USD` : `${effectiveEth} ETH`)}
                         </span>
                       ) : isPast ? (
                         <span className="text-[#6b5443]/60 text-[10px] font-mono">CONCLUDED</span>

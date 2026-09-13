@@ -106,8 +106,10 @@ export const MiningDashboard: React.FC<MiningDashboardProps> = ({
 
   const targetBits = getTargetBits();
   const nextTokenId = (currentEpoch?.nextToken) || 4;
-  const currentFeeUsd = currentEpoch?.mintFeeUsd || 5;
-  const ethEquiv = (currentFeeUsd / 2500).toFixed(4);
+  const currentFeeUsd = currentEpoch?.mintFeeUsd ?? 5;
+  const ethEquiv = currentFeeUsd <= 0 
+    ? '0.0000' 
+    : (currentFeeUsd < 1 ? (currentFeeUsd / 2500).toFixed(5) : (currentFeeUsd / 2500).toFixed(4));
 
   // Compute probability, odds, and estimated time to solve
   const expectedHashes = 2 ** targetBits;
@@ -513,7 +515,11 @@ export const MiningDashboard: React.FC<MiningDashboardProps> = ({
                 <div>
                   <span className="text-[#6b5443] block text-[10px] font-bold">NEXT HASHAPE MINT FEE</span>
                   <span className="text-[#d83a2a] font-bold text-sm sm:text-base">
-                    ${currentFeeUsd} ETH <span className="text-xs text-[#6b5443]">({ethEquiv} ETH)</span>
+                    {currentFeeUsd <= 0 ? (
+                      <span>$0 ETH <span className="text-xs text-[#6b5443]">(0.0000 ETH / FREE)</span></span>
+                    ) : (
+                      <span>${currentFeeUsd} ETH <span className="text-xs text-[#6b5443]">({ethEquiv} ETH)</span></span>
+                    )}
                   </span>
                 </div>
                 <div className="h-8 w-[2px] bg-[#24140a]" />

@@ -457,6 +457,7 @@ export const App: React.FC = () => {
               tokenId: supply.totalMined + 1,
               nonce: String(proof.nonce),
               solvedHash: proof.hash,
+              challenge: proof.challenge,
               difficulty: 4,
               gpuRenderer: gpuInfo?.name || 'WebGPU Compute Core',
               timeToSolve: proof.timeElapsedSeconds || 0,
@@ -483,6 +484,7 @@ export const App: React.FC = () => {
             tokenId: supply.totalMined + 1,
             nonce: proof.nonce,
             solvedHash: proof.hash,
+            challenge: proof.challenge,
             difficulty: 4,
             gpuRenderer: gpuInfo?.name || 'WebGPU Compute Core',
             timeToSolve: proof.timeElapsedSeconds || 0,
@@ -567,49 +569,74 @@ export const App: React.FC = () => {
     }
 
     try {
-      const provider = new ethers.JsonRpcProvider(RPC_URL);
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, ['function currentChallenge() view returns (bytes32)'], provider);
-      const onChainChallenge = await contract.currentChallenge();
+      let activeChallenge = '0xff57ddb3f5e14ac967d4378c56c43491cb2d1639b53d4a9aae417da4be94c685';
+      let targetHex = walletTargetHex;
 
-      const sessionRes = await fetch('/api/mining/session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          wallet: address,
-          gpuName: gpuInfo?.name || 'WebGPU Compute Core',
-          hashrate: totalHashrate,
-        })
-      });
-      const sessionData = await sessionRes.json();
-      if (!sessionRes.ok || !sessionData.success) {
-        if (sessionData.isCapped) {
-          setWalletQuotaCapped(true);
-          setMiningStatus('QUOTA FULL');
-          return;
+      // 1. Fetch authoritative mining session from backend
+      try {
+        const sessionRes = await fetch('/api/mining/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            wallet: address,
+            gpuName: gpuInfo?.name || 'WebGPU Compute Core',
+            hashrate: totalHashrate,
+          })
+        });
+        const sessionData = await sessionRes.json();
+        if (!sessionRes.ok || !sessionData.success) {
+          if (sessionData.isCapped) {
+            setWalletQuotaCapped(true);
+            setMiningStatus('QUOTA FULL');
+            return;
+          }
         }
+
+        if (sessionData.session?.challenge) {
+          activeChallenge = sessionData.session.challenge;
+        }
+        if (sessionData.session?.targetDifficulty) {
+          targetHex = sessionData.session.targetDifficulty;
+        }
+        if (sessionData.session?.difficultyBand) {
+          setWalletDifficultyLabel(sessionData.session.difficultyBand);
+        }
+
+        if (sessionData.session?.networkTelemetry) {
+          const net = sessionData.session.networkTelemetry;
+          setSupply((prev) => ({
+            ...prev,
+            activeMinersCount: net.activeMinersCount,
+            unsolvedCount: net.unsolvedCount,
+            pendingBlock: net.pendingBlock,
+            networkStats: net,
+          }));
+        }
+      } catch (sessErr) {
+        console.warn('Session API query warning:', sessErr);
       }
 
-      if (sessionData.session?.networkTelemetry) {
-        const net = sessionData.session.networkTelemetry;
-        setSupply((prev) => ({
-          ...prev,
-          activeMinersCount: net.activeMinersCount,
-          unsolvedCount: net.unsolvedCount,
-          pendingBlock: net.pendingBlock,
-          networkStats: net,
-        }));
-      }
-
-      const challenge = onChainChallenge || sessionData.session?.challenge || '0xb46af2c33fa24c1c27670e585a72800097d9a812bd959955973687b70334a26a';
-      const targetHex = sessionData.session?.targetDifficulty || walletTargetHex;
-      if (sessionData.session?.difficultyBand) {
-        setWalletDifficultyLabel(sessionData.session.difficultyBand);
+      // 2. Cross-verify with on-chain contract to guarantee 100% synchronization
+      try {
+        let provider: any = null;
+        if (typeof window !== 'undefined' && (window as any).ethereum) {
+          provider = new ethers.BrowserProvider((window as any).ethereum);
+        } else {
+          provider = new ethers.JsonRpcProvider(RPC_URL);
+        }
+        const contract = new ethers.Contract(CONTRACT_ADDRESS, ['function currentChallenge() view returns (bytes32)'], provider);
+        const onChainChallenge = await contract.currentChallenge();
+        if (onChainChallenge && onChainChallenge.startsWith('0x') && onChainChallenge.length === 66) {
+          activeChallenge = onChainChallenge;
+        }
+      } catch (rpcErr) {
+        console.warn('On-chain challenge query warning:', rpcErr);
       }
 
       setIsMining(true);
       setMiningStatus('MINING');
       miningEngineRef.current?.start(
-        challenge,
+        activeChallenge,
         address,
         targetHex,
         workers
@@ -618,7 +645,7 @@ export const App: React.FC = () => {
       setIsMining(true);
       setMiningStatus('MINING');
       miningEngineRef.current?.start(
-        '0xb46af2c33fa24c1c27670e585a72800097d9a812bd959955973687b70334a26a',
+        '0xff57ddb3f5e14ac967d4378c56c43491cb2d1639b53d4a9aae417da4be94c685',
         address,
         walletTargetHex,
         workers
@@ -743,14 +770,34 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleMintRecord = (rec: SolvedRecord) => {
+  const handleMintRecord = async (rec: SolvedRecord) => {
     if (rec.status === 'MINTED') return;
+
+    let ch = rec.challenge;
+    if (!ch || !ch.startsWith('0x') || ch.length !== 66 || ch === '0xb46af2c33fa24c1c27670e585a72800097d9a812bd959955973687b70334a26a') {
+      try {
+        let provider: any = null;
+        if (typeof window !== 'undefined' && (window as any).ethereum) {
+          provider = new ethers.BrowserProvider((window as any).ethereum);
+        } else {
+          provider = new ethers.JsonRpcProvider(RPC_URL);
+        }
+        const contract = new ethers.Contract(CONTRACT_ADDRESS, ['function currentChallenge() view returns (bytes32)'], provider);
+        const onChain = await contract.currentChallenge();
+        if (onChain && onChain.startsWith('0x') && onChain.length === 66) {
+          ch = onChain;
+        }
+      } catch (_) {
+        ch = '0xff57ddb3f5e14ac967d4378c56c43491cb2d1639b53d4a9aae417da4be94c685';
+      }
+    }
+
     setLatestProof({
       proofId: rec.id || 'proof_' + Date.now(),
       sessionId: 'sess_manual',
       nonce: rec.nonce,
       hash: rec.solvedHash,
-      challenge: '0xb46af2c33fa24c1c27670e585a72800097d9a812bd959955973687b70334a26a',
+      challenge: ch || '0xff57ddb3f5e14ac967d4378c56c43491cb2d1639b53d4a9aae417da4be94c685',
       wallet: rec.wallet,
       difficulty: String(rec.difficulty || 4),
       timeElapsedSeconds: rec.timeToSolve || 12,
@@ -794,7 +841,7 @@ export const App: React.FC = () => {
               onStartMining={handleStartMining}
               isMining={isMining}
               totalMined={supply.totalMined}
-              currentEpochFeeUsd={supply.currentEpoch?.mintFeeUsd || 5}
+              currentEpochFeeUsd={supply.currentEpoch?.mintFeeUsd ?? 5}
               currentEpochId={supply.currentEpoch?.id || 1}
             />
 
@@ -842,6 +889,7 @@ export const App: React.FC = () => {
               <MiningLedger
                 onMintRecord={handleMintRecord}
                 refreshTrigger={ledgerRefresh}
+                totalMined={supply.totalMined}
               />
             </div>
           </div>

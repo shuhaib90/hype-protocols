@@ -137,21 +137,42 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
               <div className="text-right">
                 <span className="text-[10px] text-[#6b5443] uppercase block font-bold">MINT FEE</span>
                 <span className="text-sm font-jersey font-bold text-[#d83a2a]">
-                  {currentEpoch && typeof currentEpoch.mintFeeEth === 'number' 
-                    ? `$${currentEpoch.mintFeeUsd ?? 5} ETH (${currentEpoch.mintFeeEth.toFixed(4)} ETH)` 
-                    : `$${currentEpoch?.mintFeeUsd ?? 5} ETH (${((currentEpoch?.mintFeeUsd ?? 5) / 2500).toFixed(4)} ETH)`}
+                  {(() => {
+                    const feeUsd = currentEpoch?.mintFeeUsd ?? 5;
+                    if (feeUsd <= 0) return '$0 ETH (0.0000 ETH / FREE)';
+                    const ethStr = typeof currentEpoch?.mintFeeEth === 'number' && currentEpoch.mintFeeEth > 0
+                      ? currentEpoch.mintFeeEth.toFixed(4)
+                      : (feeUsd < 1 ? (feeUsd / 2500).toFixed(5) : (feeUsd / 2500).toFixed(4));
+                    return `$${feeUsd} ETH (${ethStr} ETH)`;
+                  })()}
                 </span>
               </div>
             </div>
             <p className="text-xs text-[#6b5443] leading-relaxed font-medium">
-              Your valid proof unlocks exactly 1 HashApe NFT mint entitlement in <strong className="text-[#24140a] font-bold">{currentEpoch?.name || 'Active Epoch'}</strong> (Token #{expectedToken}). Mint fee is strictly <strong className="text-[#d83a2a] font-bold">${currentEpoch?.mintFeeUsd || 5} ETH</strong> on Robinhood Chain Mainnet.
+              Your valid proof unlocks exactly 1 HashApe NFT mint entitlement in <strong className="text-[#24140a] font-bold">{currentEpoch?.name || 'Active Epoch'}</strong> (Token #{expectedToken}). Mint fee is strictly <strong className="text-[#d83a2a] font-bold">{(currentEpoch?.mintFeeUsd ?? 5) <= 0 ? '$0 ETH (FREE)' : `$${currentEpoch?.mintFeeUsd ?? 5} ETH`}</strong> on Robinhood Chain Mainnet.
             </p>
           </div>
 
           {errorMessage && (
-            <div className="p-3 bg-[#eee2ca] border-2 border-[#d83a2a] text-xs text-[#d83a2a] flex items-center gap-2 font-bold shadow-[2px_2px_0px_#24140a]">
-              <AlertCircle className="w-4 h-4 flex-shrink-0 text-[#d83a2a]" />
-              <span>{errorMessage}</span>
+            <div className="p-3.5 bg-[#eee2ca] border-2 border-[#d83a2a] text-xs shadow-[2px_2px_0px_#24140a] space-y-2">
+              <div className="flex items-center gap-2 font-bold text-[#d83a2a]">
+                <AlertCircle className="w-4 h-4 flex-shrink-0 text-[#d83a2a]" />
+                <span>MINING ROUND NOTICE</span>
+              </div>
+              <p className="text-[11px] text-[#6b5443] font-medium leading-relaxed">
+                {errorMessage}
+              </p>
+              {(errorMessage.includes('expired') || errorMessage.includes('rotated') || errorMessage.includes('challenge')) && (
+                <button
+                  onClick={() => {
+                    soundEffects.playClickSound();
+                    onClose();
+                  }}
+                  className="paper-btn-red px-3 py-1.5 text-[11px] font-bold w-full uppercase"
+                >
+                  DISMISS &amp; MINE ACTIVE BLOCK #{expectedToken}
+                </button>
+              )}
             </div>
           )}
         </div>

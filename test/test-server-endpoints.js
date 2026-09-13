@@ -232,6 +232,62 @@ async function testEndpoints() {
   assert(batchData.epochs.find(e => e.id === 1).mintFeeUsd === 5, 'Epoch 1 fee successfully restored to $5');
   assert(batchData.epochs.find(e => e.id === 3).mintFeeUsd === 12, 'Epoch 3 fee successfully customized to $12');
 
+  // 16.1 Test Admin setting mint fee to 0 (Free Mint)
+  const zeroFeeRes = await fetch('http://localhost:3000/api/admin/epoch-fee', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ wallet: testWallet, epochId: 1, mintFeeUsd: 0 })
+  });
+  assert(zeroFeeRes.status === 200, 'Admin successfully sets Epoch 1 mint fee to $0 (free mint)');
+  const zeroFeeData = await zeroFeeRes.json();
+  assert(zeroFeeData.success === true, 'Setting mint fee to 0 reports success');
+  assert(zeroFeeData.epoch.mintFeeUsd === 0, 'Epoch 1 mint fee USD is strictly 0');
+  assert(zeroFeeData.epoch.mintFeeEth === 0, 'Epoch 1 mint fee ETH is strictly 0');
+
+  const zeroSupplyCheck = await (await fetch('http://localhost:3000/api/mining/supply')).json();
+  assert(zeroSupplyCheck.supply.epochs.find(e => e.id === 1).mintFeeUsd === 0, 'Supply preserves 0 USD without resetting to 5');
+  if (zeroSupplyCheck.supply.currentEpoch.id === 1) {
+    assert(zeroSupplyCheck.supply.currentEpoch.mintFeeUsd === 0, 'Current active epoch reflects 0 USD mint fee');
+  }
+
+  // 16.2 Test Admin setting mint fee to decimal values (0.1, 0.05)
+  const decimalFeeRes = await fetch('http://localhost:3000/api/admin/epoch-fee', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ wallet: testWallet, epochId: 2, mintFeeUsd: 0.1 })
+  });
+  assert(decimalFeeRes.status === 200, 'Admin successfully sets Epoch 2 mint fee to $0.1');
+  const decimalFeeData = await decimalFeeRes.json();
+  assert(decimalFeeData.epoch.mintFeeUsd === 0.1, 'Epoch 2 mint fee USD is strictly 0.1');
+  assert(decimalFeeData.epoch.mintFeeEth === 0.00004, 'Epoch 2 mint fee ETH is calculated as 0.00004 ETH ($0.10 / $2500)');
+
+  // 16.3 Test Admin batch updating with 0 and decimal values
+  const decimalBatchRes = await fetch('http://localhost:3000/api/admin/epoch-fees-batch', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      wallet: testWallet,
+      epochs: [
+        { id: 1, mintFeeUsd: 0 },
+        { id: 2, mintFeeUsd: 0.1 },
+        { id: 3, mintFeeUsd: 0.05 },
+      ]
+    })
+  });
+  assert(decimalBatchRes.status === 200, 'Admin batch updates 0 and decimal epoch fees successfully');
+  const decimalBatchData = await decimalBatchRes.json();
+  assert(decimalBatchData.epochs.find(e => e.id === 1).mintFeeUsd === 0, 'Batch preserves 0 USD for Epoch 1');
+  assert(decimalBatchData.epochs.find(e => e.id === 2).mintFeeUsd === 0.1, 'Batch preserves 0.1 USD for Epoch 2');
+  assert(decimalBatchData.epochs.find(e => e.id === 3).mintFeeUsd === 0.05, 'Batch preserves 0.05 USD for Epoch 3');
+
+  // 16.4 Test negative mint fee rejection
+  const negativeFeeRes = await fetch('http://localhost:3000/api/admin/epoch-fee', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ wallet: testWallet, epochId: 1, mintFeeUsd: -5 })
+  });
+  assert(negativeFeeRes.status === 400, 'Negative mint fee rejected with HTTP 400');
+
   // 17. Test Admin Treasury API (GET /api/admin/treasury)
   const treasuryRes = await fetch('http://localhost:3000/api/admin/treasury');
   assert(treasuryRes.status === 200, 'GET /api/admin/treasury responds with HTTP 200');

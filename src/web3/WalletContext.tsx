@@ -29,6 +29,7 @@ const NFT_MINING_ABI = [
   'function setWorkerActivationCost(uint8 workerIndex, uint256 _cost) external',
   'function claimNativeMintFees() public',
   'function claimTokenActivationFees() public',
+  'function getDifficultyTargetForWallet(address) view returns (uint256)',
   'event ProofVerifiedAndMinted(address indexed miner, uint256 indexed tokenId, uint256 nonce, bytes32 proofHash, uint256 difficulty, uint256 feePaid, uint256 epochId)',
   'event WorkerActivated(address indexed miner, uint8 indexed workerIndex, uint256 costPaid)',
   'event EpochMintFeeUpdated(uint256 indexed epochId, uint256 oldFeeWei, uint256 newFeeWei, uint256 newFeeUsd)',
@@ -317,7 +318,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const { provider, contract } = await getSignerAndContract();
 
     const nonceBigInt = BigInt(nonce);
-    const challengeBytes32 = challenge.startsWith('0x') ? challenge : `0x${challenge}`;
+    let challengeBytes32 = challenge.startsWith('0x') ? challenge : `0x${challenge}`;
 
     const totalMinedBigInt = await contract.totalMined();
     const nextTokenId = Number(totalMinedBigInt) + 1;
@@ -328,7 +329,59 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       throw new Error(`Insufficient native ETH balance. Requires ${ethers.formatEther(requiredFeeWei)} ETH.`);
     }
 
-    const tx = await contract.mintWithMiningProof(nonceBigInt, challengeBytes32, { value: requiredFeeWei });
+    // Pre-flight challenge & target verification against live on-chain contract state
+    try {
+      const activeChallenge: string = await contract.currentChallenge();
+      if (activeChallenge && challengeBytes32.toLowerCase() !== activeChallenge.toLowerCase()) {
+        // Test whether this nonce already satisfies the new active challenge for this wallet
+        const safeMiner = address.toLowerCase();
+        const packed = ethers.solidityPacked(
+          ['bytes32', 'address', 'uint256'],
+          [activeChallenge, safeMiner, nonceBigInt]
+        );
+        const hashHex = ethers.keccak256(packed);
+        const hashBigInt = BigInt(hashHex);
+
+        let effectiveTarget = 0x0003ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffn;
+        try {
+          const [walletTarget, epoch] = await Promise.all([
+            contract.getDifficultyTargetForWallet(address),
+            contract.getEpoch(nextTokenId)
+          ]);
+          const epochTarget = BigInt(epoch.target);
+          effectiveTarget = BigInt(walletTarget) < epochTarget ? BigInt(walletTarget) : epochTarget;
+        } catch (_) {}
+
+        if (hashBigInt < effectiveTarget) {
+          // The nonce satisfies the active challenge! Auto-promote challenge so mint succeeds
+          challengeBytes32 = activeChallenge;
+        } else {
+          throw new Error(`Mining round expired: This proof was discovered for an older block/challenge that has already rotated on Robinhood Chain. Block #${nextTokenId} is currently waiting to be solved. Please run the forge rig to mine the active block.`);
+        }
+      }
+    } catch (preflightErr: any) {
+      if (preflightErr.message && preflightErr.message.includes('Mining round expired')) {
+        throw preflightErr;
+      }
+      console.warn('Preflight challenge check warning:', preflightErr);
+    }
+
+    let tx: any;
+    try {
+      tx = await contract.mintWithMiningProof(nonceBigInt, challengeBytes32, { value: requiredFeeWei });
+    } catch (err: any) {
+      const msg = err?.reason || err?.message || '';
+      if (msg.includes('Expired or invalid mining challenge')) {
+        throw new Error(`Mining round expired: A competing miner already minted Block #${nextTokenId - 1} and the on-chain challenge has rotated. Please mine a fresh proof for active Block #${nextTokenId}.`);
+      }
+      if (msg.includes('Hash does not meet difficulty target')) {
+        throw new Error(`Invalid proof: Discovered hash does not meet difficulty target for Block #${nextTokenId}. Please run the forge rig to find a valid solution.`);
+      }
+      if (msg.includes('Wallet mint limit reached')) {
+        throw new Error('Maximum wallet quota reached: Each wallet is permitted up to 5 HashApe NFT mints.');
+      }
+      throw err;
+    }
     const receipt = await tx.wait();
 
     let mintedTokenId = targetTokenId || nextTokenId;

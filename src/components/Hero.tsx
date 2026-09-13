@@ -34,7 +34,9 @@ export const Hero: React.FC<HeroProps> = ({
     connectWallet();
   };
 
-  const ethEquiv = (currentEpochFeeUsd / 2500).toFixed(4);
+  const ethEquiv = currentEpochFeeUsd <= 0
+    ? '0.0000'
+    : (currentEpochFeeUsd < 1 ? (currentEpochFeeUsd / 2500).toFixed(5) : (currentEpochFeeUsd / 2500).toFixed(4));
 
   return (
     <section className="relative overflow-hidden py-10 md:py-16 border-b-4 border-[#24140a] paper-dot-bg">
@@ -103,7 +105,11 @@ export const Hero: React.FC<HeroProps> = ({
               <div className="p-3 bg-[#fdfbf7] border-2 border-[#24140a] shadow-[2px_2px_0px_#24140a]">
                 <span className="text-[10px] font-dot text-[#6b5443] block uppercase font-bold">MINT PRICE</span>
                 <span className="text-sm sm:text-base font-jersey font-bold text-[#24140a]">
-                  {ethEquiv} ETH <span className="text-xs font-dot text-[#6b5443]">(${currentEpochFeeUsd} USD)</span>
+                  {currentEpochFeeUsd <= 0 ? (
+                    <span>FREE <span className="text-xs font-dot text-[#6b5443]">(0.0000 ETH)</span></span>
+                  ) : (
+                    <span>{ethEquiv} ETH <span className="text-xs font-dot text-[#6b5443]">(${currentEpochFeeUsd} USD)</span></span>
+                  )}
                 </span>
               </div>
               <div className="p-3 bg-[#fdfbf7] border-2 border-[#24140a] shadow-[2px_2px_0px_#24140a]">
@@ -157,7 +163,9 @@ export const Hero: React.FC<HeroProps> = ({
                 <div className="grid grid-cols-2 gap-2 text-xs font-dot">
                   <div className="bg-[#eee2ca] p-2.5 border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
                     <span className="text-[#6b5443] block text-[10px] font-bold">ENTRY PRICE</span>
-                    <span className="text-[#d83a2a] font-bold">${currentEpochFeeUsd} ETH ({ethEquiv} ETH)</span>
+                    <span className="text-[#d83a2a] font-bold">
+                      {currentEpochFeeUsd <= 0 ? '$0 ETH (FREE)' : `$${currentEpochFeeUsd} ETH (${ethEquiv} ETH)`}
+                    </span>
                   </div>
                   <div className="bg-[#eee2ca] p-2.5 border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
                     <span className="text-[#6b5443] block text-[10px] font-bold">DIFFICULTY</span>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ethers } from 'ethers';
 import { ProtocolConfig } from '../types';
 import { useWallet } from '../web3/WalletContext';
 import { Shield, Check, X, Loader2, Play, Pause, Save, Sparkles } from 'lucide-react';
@@ -29,7 +30,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   totalMined = 7842,
   maxSupply = 10000,
 }) => {
-  const { address } = useWallet();
+  const { address, isAdmin, setEpochMintFeeOnChain, setEpochMintFeesBatchOnChain } = useWallet();
   const [mintFee, setMintFee] = useState(config.mintFeeHype || 0.05);
   const [worker2Cost, setWorker2Cost] = useState(config.workerCosts[2] || 100);
   const [worker3Cost, setWorker3Cost] = useState(config.workerCosts[3] || 200);
@@ -41,27 +42,25 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [difficultyTier] = useState('VERY HARD');
 
   const DEFAULT_10_EPOCHS = [
-    { id: 1, name: 'EPOCH 1 (GENESIS)', startToken: 1, endToken: 10, count: 10, mintFeeUsd: 5, mintFeeEth: 0.0020, mintFeeApe: 5, difficulty: 'HARD' },
-    { id: 2, name: 'EPOCH 2 (ASCENSION)', startToken: 11, endToken: 30, count: 20, mintFeeUsd: 7, mintFeeEth: 0.0028, mintFeeApe: 7, difficulty: 'HARDER' },
-    { id: 3, name: 'EPOCH 3 (EXPANSION)', startToken: 31, endToken: 70, count: 40, mintFeeUsd: 10, mintFeeEth: 0.0040, mintFeeApe: 10, difficulty: 'VERY HARD' },
-    { id: 4, name: 'EPOCH 4 (SURGE)', startToken: 71, endToken: 150, count: 80, mintFeeUsd: 14, mintFeeEth: 0.0056, mintFeeApe: 14, difficulty: 'VERY HARD+' },
-    { id: 5, name: 'EPOCH 5 (NEXUS)', startToken: 151, endToken: 300, count: 150, mintFeeUsd: 18, mintFeeEth: 0.0072, mintFeeApe: 18, difficulty: 'EXTREME' },
-    { id: 6, name: 'EPOCH 6 (APEX)', startToken: 301, endToken: 600, count: 300, mintFeeUsd: 22, mintFeeEth: 0.0088, mintFeeApe: 22, difficulty: 'EXTREME+' },
-    { id: 7, name: 'EPOCH 7 (SOVEREIGN)', startToken: 601, endToken: 1200, count: 600, mintFeeUsd: 26, mintFeeEth: 0.0104, mintFeeApe: 26, difficulty: 'LEGENDARY' },
-    { id: 8, name: 'EPOCH 8 (TITAN)', startToken: 1201, endToken: 2500, count: 1300, mintFeeUsd: 30, mintFeeEth: 0.0120, mintFeeApe: 30, difficulty: 'LEGENDARY+' },
-    { id: 9, name: 'EPOCH 9 (MYTHIC)', startToken: 2501, endToken: 5000, count: 2500, mintFeeUsd: 35, mintFeeEth: 0.0140, mintFeeApe: 35, difficulty: 'MYTHIC' },
-    { id: 10, name: 'EPOCH 10 (OMEGA)', startToken: 5001, endToken: 10000, count: 5000, mintFeeUsd: 40, mintFeeEth: 0.0160, mintFeeApe: 40, difficulty: 'OMEGA' },
+    { id: 1, name: 'EPOCH 1 (GENESIS)', startToken: 1, endToken: 10, count: 10, mintFeeUsd: 1, mintFeeEth: 0.0004, mintFeeApe: 1, difficulty: 'HARD' },
+    { id: 2, name: 'EPOCH 2 (ASCENSION)', startToken: 11, endToken: 30, count: 20, mintFeeUsd: 6, mintFeeEth: 0.0024, mintFeeApe: 6, difficulty: 'HARDER' },
+    { id: 3, name: 'EPOCH 3 (EXPANSION)', startToken: 31, endToken: 70, count: 40, mintFeeUsd: 20, mintFeeEth: 0.0080, mintFeeApe: 20, difficulty: 'VERY HARD' },
+    { id: 4, name: 'EPOCH 4 (SURGE)', startToken: 71, endToken: 150, count: 80, mintFeeUsd: 40, mintFeeEth: 0.0160, mintFeeApe: 40, difficulty: 'VERY HARD+' },
+    { id: 5, name: 'EPOCH 5 (NEXUS)', startToken: 151, endToken: 300, count: 150, mintFeeUsd: 60, mintFeeEth: 0.0240, mintFeeApe: 60, difficulty: 'EXTREME' },
+    { id: 6, name: 'EPOCH 6 (APEX)', startToken: 301, endToken: 600, count: 300, mintFeeUsd: 88, mintFeeEth: 0.0352, mintFeeApe: 88, difficulty: 'EXTREME+' },
+    { id: 7, name: 'EPOCH 7 (SOVEREIGN)', startToken: 601, endToken: 1200, count: 600, mintFeeUsd: 120, mintFeeEth: 0.0480, mintFeeApe: 120, difficulty: 'LEGENDARY' },
+    { id: 8, name: 'EPOCH 8 (TITAN)', startToken: 1201, endToken: 2500, count: 1300, mintFeeUsd: 160, mintFeeEth: 0.0640, mintFeeApe: 160, difficulty: 'LEGENDARY+' },
+    { id: 9, name: 'EPOCH 9 (MYTHIC)', startToken: 2501, endToken: 5000, count: 2500, mintFeeUsd: 180, mintFeeEth: 0.0720, mintFeeApe: 180, difficulty: 'MYTHIC' },
+    { id: 10, name: 'EPOCH 10 (OMEGA)', startToken: 5001, endToken: 10000, count: 5000, mintFeeUsd: 220, mintFeeEth: 0.0880, mintFeeApe: 220, difficulty: 'OMEGA' },
   ];
 
   const displayedEpochs = (config.epochs && config.epochs.length > 0) ? config.epochs : DEFAULT_10_EPOCHS;
 
   // 10-Epoch mint prices state dictionary
-  const [epochFees, setEpochFees] = useState<{ [id: number]: number }>(() => {
-    const map: { [id: number]: number } = {
-      1: 5, 2: 7, 3: 10, 4: 14, 5: 18, 6: 22, 7: 26, 8: 30, 9: 35, 10: 40
-    };
+  const [epochFees, setEpochFees] = useState<{ [id: number]: number | string }>(() => {
+    const map: { [id: number]: number | string } = {};
     displayedEpochs.forEach(e => {
-      map[e.id] = e.mintFeeUsd;
+      map[e.id] = e.mintFeeUsd !== undefined ? e.mintFeeUsd : 5;
     });
     return map;
   });
@@ -70,11 +69,13 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [epochSuccessMsg, setEpochSuccessMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    if (config.epochs) {
+    if (config.epochs && config.epochs.length > 0) {
       setEpochFees(prev => {
         const next = { ...prev };
         config.epochs?.forEach(e => {
-          next[e.id] = e.mintFeeUsd;
+          if (e.mintFeeUsd !== undefined) {
+            next[e.id] = e.mintFeeUsd;
+          }
         });
         return next;
       });
@@ -137,16 +138,34 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   };
 
   const handleSaveSingleEpoch = (epochId: number) => {
-    const usd = epochFees[epochId];
-    const prevUsd = config.epochs?.find(e => e.id === epochId)?.mintFeeUsd || 5;
+    const raw = epochFees[epochId];
+    const usd = Math.max(0, parseFloat(String(raw)) || 0);
+    const prevUsd = config.epochs?.find(e => e.id === epochId)?.mintFeeUsd ?? 5;
+    const ethDisplay = usd <= 0 ? '0.0000 ETH (FREE)' : `${usd < 1 ? (usd / 2500).toFixed(5) : (usd / 2500).toFixed(4)} ETH`;
     triggerConfirmation({
       title: `Update Epoch #${epochId} Mint Fee`,
       field: `Epoch #${epochId} Fee`,
       oldValue: `$${prevUsd} ETH`,
-      newValue: `$${usd} ETH (${(usd / 2500).toFixed(4)} ETH)`,
+      newValue: `$${usd} ETH (${ethDisplay})`,
       applyFn: async () => {
         setSavingEpochId(epochId);
         try {
+          let txHash: string | undefined;
+          if (isAdmin && setEpochMintFeeOnChain) {
+            try {
+              let feeWei = 1n;
+              if (usd > 0) {
+                const ethStr = (usd / 2500).toFixed(8);
+                const parsed = ethers.parseEther(ethStr);
+                feeWei = parsed > 0n ? parsed : 1n;
+              }
+              const usdUint = Math.max(0, Math.round(usd));
+              txHash = await setEpochMintFeeOnChain(epochId, feeWei, usdUint);
+            } catch (onChainErr) {
+              console.warn('On-chain fee update skipped/failed in modal:', onChainErr);
+            }
+          }
+
           const res = await fetch('/api/admin/epoch-fee', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -154,8 +173,9 @@ export const AdminModal: React.FC<AdminModalProps> = ({
               wallet: address || '0xb8E3DfDd19b6Bf35b9Fd87F8373F7f82C53bc93C',
               epochId,
               mintFeeUsd: usd,
-              mintFeeEth: Number((usd / 2500).toFixed(4)),
+              mintFeeEth: usd <= 0 ? 0 : Number((usd / 2500).toFixed(6)),
               mintFeeApe: usd,
+              txHash,
             }),
           });
           const data = await res.json();
@@ -188,18 +208,41 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       applyFn: async () => {
         setIsSavingAll(true);
         try {
-          const updates = Object.entries(epochFees).map(([id, usd]) => ({
-            id: Number(id),
-            mintFeeUsd: Number(usd),
-            mintFeeEth: Number((Number(usd) / 2500).toFixed(4)),
-            mintFeeApe: Number(usd),
-          }));
+          const updates = displayedEpochs.map(e => {
+            const raw = epochFees[e.id] !== undefined ? epochFees[e.id] : (e.mintFeeUsd ?? 5);
+            const usd = Math.max(0, parseFloat(String(raw)) || 0);
+            return {
+              id: e.id,
+              mintFeeUsd: usd,
+              mintFeeEth: usd <= 0 ? 0 : Number((usd / 2500).toFixed(6)),
+              mintFeeApe: usd,
+            };
+          });
+
+          let txHash: string | undefined;
+          if (isAdmin && setEpochMintFeesBatchOnChain) {
+            try {
+              const epochIds = updates.map(u => u.id);
+              const newFeesWei = updates.map(u => {
+                if (u.mintFeeUsd <= 0) return 1n;
+                const ethStr = (u.mintFeeUsd / 2500).toFixed(8);
+                const parsed = ethers.parseEther(ethStr);
+                return parsed > 0n ? parsed : 1n;
+              });
+              const newFeesUsd = updates.map(u => Math.max(0, Math.round(u.mintFeeUsd)));
+              txHash = await setEpochMintFeesBatchOnChain(epochIds, newFeesWei, newFeesUsd);
+            } catch (onChainErr) {
+              console.warn('Batch on-chain fee update skipped/failed in modal:', onChainErr);
+            }
+          }
+
           const res = await fetch('/api/admin/epoch-fees-batch', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               wallet: address || '0xb8E3DfDd19b6Bf35b9Fd87F8373F7f82C53bc93C',
               epochs: updates,
+              txHash,
             }),
           });
           const data = await res.json();
@@ -341,8 +384,9 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
             <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
               {displayedEpochs.map((ep) => {
-                const currentVal = epochFees[ep.id] !== undefined ? epochFees[ep.id] : ep.mintFeeUsd;
-                const ethVal = (currentVal / 2500).toFixed(4);
+                const currentVal = epochFees[ep.id] !== undefined ? epochFees[ep.id] : (ep.mintFeeUsd ?? 5);
+                const numVal = parseFloat(String(currentVal)) || 0;
+                const ethVal = numVal <= 0 ? '0.0000 ETH (FREE)' : `${numVal < 1 ? (numVal / 2500).toFixed(5) : (numVal / 2500).toFixed(4)} ETH`;
                 const isActive = config.currentEpoch?.id === ep.id;
 
                 return (
@@ -380,11 +424,11 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         <span className="text-[#d48818] font-bold font-display text-xs">$</span>
                         <input
                           type="number"
-                          step="1"
-                          min="1"
+                          step="any"
+                          min="0"
                           value={currentVal}
                           onChange={(e) => {
-                            const val = parseFloat(e.target.value) || 0;
+                            const val = e.target.value;
                             setEpochFees(prev => ({ ...prev, [ep.id]: val }));
                           }}
                           className="w-14 bg-transparent text-right text-[#24140a] font-mono font-bold text-xs outline-none"
@@ -392,7 +436,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         <span className="text-[#6b5443] text-[10px] font-mono">USD</span>
                       </div>
                       <span className="text-[10px] text-[#19638b] font-mono whitespace-nowrap font-bold">
-                        ≈ {ethVal} ETH
+                        ≈ {ethVal}
                       </span>
                       <button
                         onClick={() => handleSaveSingleEpoch(ep.id)}

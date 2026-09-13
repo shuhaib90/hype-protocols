@@ -10,6 +10,7 @@ export interface SolvedRecord {
   tokenId: number;
   nonce: string;
   solvedHash: string;
+  challenge?: string;
   difficulty: number;
   gpuRenderer?: string;
   timeToSolve?: number;
@@ -25,12 +26,24 @@ export interface SolvedRecord {
 interface MiningLedgerProps {
   onMintRecord?: (record: SolvedRecord) => void;
   refreshTrigger?: number;
+  totalMined?: number;
 }
 
-export const MiningLedger: React.FC<MiningLedgerProps> = ({ onMintRecord, refreshTrigger }) => {
+export const MiningLedger: React.FC<MiningLedgerProps> = ({ onMintRecord, refreshTrigger, totalMined }) => {
   const { isConnected, address, connectWallet } = useWallet();
   const [records, setRecords] = useState<SolvedRecord[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const handleDismiss = (idOrNonce: string) => {
+    soundEffects.playClickSound();
+    if (!address) return;
+    const storageKey = `hashape_records_${address.toLowerCase()}`;
+    const updated = records.filter(r => (r.id !== idOrNonce && r.nonce !== idOrNonce));
+    setRecords(updated);
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(updated));
+    } catch (_) {}
+  };
 
   useEffect(() => {
     if (!isConnected || !address) {
@@ -231,12 +244,14 @@ export const MiningLedger: React.FC<MiningLedgerProps> = ({ onMintRecord, refres
             </button>
           </div>
         ) : loading && records.length === 0 ? (
-          <div className="text-center py-8 text-xs font-dot text-[#6b5443] animate-pulse font-bold">
-            Retrieving ledger for {address ? `${address.slice(0, 8)}...${address.slice(-6)}` : ''}
+          <div className="p-8 text-center bg-[#fdfbf7] border-2 border-[#24140a]">
+            <div className="inline-block animate-spin w-5 h-5 border-2 border-[#d83a2a] border-t-transparent rounded-full mb-2"></div>
+            <p className="text-xs text-[#6b5443] font-bold uppercase">
+              SYNCING BLOCKCHAIN LEDGER PROOFS...
+            </p>
           </div>
         ) : records.length === 0 ? (
-          <div className="bg-[#eee2ca] border-2 border-[#24140a] p-8 text-center shadow-[2px_2px_0px_#24140a]">
-            <Sparkles className="w-8 h-8 text-[#d83a2a] mx-auto mb-3 opacity-80" />
+          <div className="p-8 text-center bg-[#fdfbf7] border-2 border-[#24140a] border-dashed">
             <h4 className="font-jersey text-lg text-[#24140a] mb-2">
               NO PROOFS FOUND YET
             </h4>
@@ -248,6 +263,7 @@ export const MiningLedger: React.FC<MiningLedgerProps> = ({ onMintRecord, refres
           <div className="space-y-3">
             {records.map((rec) => {
               const isMinted = rec.status === 'MINTED';
+              const isSuperseded = !isMinted && typeof totalMined === 'number' && rec.tokenId <= totalMined;
               const dateStr = new Date(rec.solvedAt || Date.now()).toLocaleTimeString();
 
               return (
@@ -256,6 +272,8 @@ export const MiningLedger: React.FC<MiningLedgerProps> = ({ onMintRecord, refres
                   className={`p-3.5 border-2 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all ${
                     isMinted
                       ? 'bg-[#fdfbf7] border-[#24140a] shadow-[1px_1px_0px_#24140a]'
+                      : isSuperseded
+                      ? 'bg-[#f5ebd7] border-[#6b5443] opacity-85 shadow-[1px_1px_0px_#24140a]'
                       : 'bg-[#eee2ca] border-[#d83a2a] shadow-[2px_2px_0px_#24140a]'
                   }`}
                 >
@@ -278,6 +296,10 @@ export const MiningLedger: React.FC<MiningLedgerProps> = ({ onMintRecord, refres
                         {isMinted ? (
                           <span className="paper-stamp-gold text-[10px]">
                             MINTED
+                          </span>
+                        ) : isSuperseded ? (
+                          <span className="bg-[#fdfbf7] text-[#d83a2a] border border-[#d83a2a] px-1.5 py-0.5 text-[10px] font-bold">
+                            EXPIRED // ROUND ROTATED
                           </span>
                         ) : (
                           <span className="paper-stamp-green text-[10px]">
@@ -337,6 +359,19 @@ export const MiningLedger: React.FC<MiningLedgerProps> = ({ onMintRecord, refres
                           <span>OPENSEA</span>
                           <ExternalLink className="w-3 h-3" />
                         </a>
+                      </div>
+                    ) : isSuperseded ? (
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleDismiss(rec.id || rec.nonce)}
+                          className="paper-btn-kraft px-3 py-1.5 text-xs font-bold text-[#d83a2a] hover:bg-[#d83a2a] hover:text-white"
+                          title="Dismiss stale proof from local ledger"
+                        >
+                          DISMISS
+                        </button>
+                        <span className="text-[11px] text-[#6b5443] font-bold">
+                          Block #{rec.tokenId} already minted
+                        </span>
                       </div>
                     ) : (
                       <button

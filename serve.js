@@ -151,7 +151,7 @@ async function getAuthoritativeWorkerCosts() {
 getAuthoritativeWorkerCosts().catch(() => {});
 
 let cachedOnChainChallenge = {
-  challenge: '0xb46af2c33fa24c1c27670e585a72800097d9a812bd959955973687b70334a26a',
+  challenge: '0xff57ddb3f5e14ac967d4378c56c43491cb2d1639b53d4a9aae417da4be94c685',
   timestamp: 0
 };
 
@@ -1049,6 +1049,7 @@ async function handleRequest(req, res) {
           tokenId: Number(data.tokenId || db.totalMined + 1),
           nonce: String(data.nonce),
           solvedHash: data.solvedHash || '',
+          challenge: data.challenge || cachedOnChainChallenge.challenge,
           difficulty: Number(data.difficulty || 4),
           gpuRenderer: data.gpuRenderer || 'WebGPU Compute Core',
           timeToSolve: Number(data.timeToSolve || 0),
@@ -1297,14 +1298,14 @@ async function handleRequest(req, res) {
       }
 
       const mintFeeUsd = parseFloat(data.mintFeeUsd);
-      if (isNaN(mintFeeUsd) || mintFeeUsd <= 0) {
+      if (isNaN(mintFeeUsd) || mintFeeUsd < 0) {
         res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: false, error: 'Mint fee must be greater than 0' }));
+        res.end(JSON.stringify({ success: false, error: 'Mint fee must be 0 or greater' }));
         return;
       }
 
-      const mintFeeEth = data.mintFeeEth ? parseFloat(data.mintFeeEth) : Number((mintFeeUsd / 2500).toFixed(4));
-      const mintFeeApe = data.mintFeeApe ? parseFloat(data.mintFeeApe) : mintFeeUsd;
+      const mintFeeEth = data.mintFeeEth !== undefined ? parseFloat(data.mintFeeEth) : (mintFeeUsd <= 0 ? 0 : Number((mintFeeUsd / 2500).toFixed(6)));
+      const mintFeeApe = data.mintFeeApe !== undefined ? parseFloat(data.mintFeeApe) : mintFeeUsd;
 
       if (!db.epochOverrides) db.epochOverrides = {};
       db.epochOverrides[epochId] = {
@@ -1357,9 +1358,9 @@ async function handleRequest(req, res) {
       for (const item of updates) {
         const id = parseInt(item.id, 10);
         const usd = parseFloat(item.mintFeeUsd);
-        if (id >= 1 && id <= 10 && usd > 0) {
-          const eth = item.mintFeeEth ? parseFloat(item.mintFeeEth) : Number((usd / 2500).toFixed(4));
-          const ape = item.mintFeeApe ? parseFloat(item.mintFeeApe) : usd;
+        if (id >= 1 && id <= 10 && !isNaN(usd) && usd >= 0) {
+          const eth = item.mintFeeEth !== undefined ? parseFloat(item.mintFeeEth) : (usd <= 0 ? 0 : Number((usd / 2500).toFixed(6)));
+          const ape = item.mintFeeApe !== undefined ? parseFloat(item.mintFeeApe) : usd;
           db.epochOverrides[id] = {
             mintFeeUsd: usd,
             mintFeeEth: eth,
