@@ -271,6 +271,33 @@ export const App: React.FC = () => {
         setMiningStatus('SUCCESS');
         setLatestProof(proof);
 
+        // Save immediately to client localStorage so data is NEVER lost on page refresh
+        if (proof.wallet) {
+          try {
+            const storageKey = `hashape_records_${proof.wallet.toLowerCase()}`;
+            const local = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            const newRecord = {
+              id: 'solv_' + Date.now(),
+              wallet: proof.wallet.toLowerCase(),
+              tokenId: supply.totalMined + 1,
+              nonce: String(proof.nonce),
+              solvedHash: proof.hash,
+              difficulty: 4,
+              gpuRenderer: gpuInfo?.name || 'WebGPU Compute Core',
+              timeToSolve: proof.timeElapsedSeconds || 0,
+              status: 'SOLVED',
+              solvedAt: Date.now(),
+              txHash: null,
+            };
+            if (!local.some((r: any) => String(r.nonce) === String(proof.nonce))) {
+              local.unshift(newRecord);
+              localStorage.setItem(storageKey, JSON.stringify(local));
+            }
+          } catch (e) {
+            console.warn('LocalStorage save error:', e);
+          }
+        }
+
         // Record proof to backend
         fetch('/api/mining/record', {
           method: 'POST',
@@ -378,16 +405,53 @@ export const App: React.FC = () => {
   };
 
   const handleMintSuccess = async (tokenId: number, txHash: string) => {
+    const solvedProof = latestProof;
     setLatestProof(null);
     setLatestReceipt({
       tokenId,
       txHash,
       owner: address,
       timestamp: Date.now(),
-      proofDigest: latestProof?.hash || '',
+      proofDigest: solvedProof?.hash || '',
     });
 
     await syncOnChainState(address);
+
+    // Immediately mark as MINTED in localStorage so client state is instantly persistent
+    if (address) {
+      try {
+        const storageKey = `hashape_records_${address.toLowerCase()}`;
+        const local = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        let updated = false;
+        for (const item of local) {
+          if (
+            (solvedProof?.nonce && String(item.nonce) === String(solvedProof.nonce)) ||
+            Number(item.tokenId) === Number(tokenId) ||
+            (!updated && item.status === 'SOLVED')
+          ) {
+            item.status = 'MINTED';
+            item.tokenId = tokenId;
+            item.txHash = txHash;
+            item.mintedAt = Date.now();
+            updated = true;
+          }
+        }
+        if (!updated) {
+          local.unshift({
+            id: 'mint_' + Date.now(),
+            wallet: address.toLowerCase(),
+            tokenId,
+            nonce: solvedProof?.nonce || '0',
+            status: 'MINTED',
+            txHash,
+            mintedAt: Date.now(),
+          });
+        }
+        localStorage.setItem(storageKey, JSON.stringify(local));
+      } catch (e) {
+        console.warn('LocalStorage update error:', e);
+      }
+    }
 
     // Record mint on backend
     fetch('/api/mining/record', {
@@ -398,7 +462,7 @@ export const App: React.FC = () => {
         wallet: address,
         tokenId,
         txHash,
-        nonce: latestProof?.nonce,
+        nonce: solvedProof?.nonce,
       }),
     })
       .then((r) => r.json())
@@ -410,6 +474,7 @@ export const App: React.FC = () => {
   };
 
   const handleMintRecord = (rec: SolvedRecord) => {
+    if (rec.status === 'MINTED') return;
     setLatestProof({
       nonce: rec.nonce,
       hash: rec.solvedHash,

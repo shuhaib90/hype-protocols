@@ -43,8 +43,8 @@ export const Navigation: React.FC<NavigationProps> = ({
             onClick={() => handleTabClick('mining')}
           >
             {/* 8-Bit Ape Icon */}
-            <div className="w-10 h-10 bg-[#eee2ca] border-3 border-[#24140a] flex items-center justify-center shadow-[2px_2px_0px_#24140a]">
-              <span className="text-xl leading-none select-none">🦍</span>
+            <div className="w-10 h-10 bg-[#eee2ca] border-3 border-[#24140a] overflow-hidden flex items-center justify-center shadow-[2px_2px_0px_#24140a]">
+              <img src="/logo.png" alt="HashApe Logo" className="w-full h-full object-cover pixelated" />
             </div>
             <div className="flex flex-col">
               <div className="font-jersey text-2xl font-bold tracking-wider text-[#24140a] uppercase flex items-center gap-1.5 leading-none">

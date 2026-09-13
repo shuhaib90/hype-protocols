@@ -42,6 +42,16 @@ export const MiningDashboard: React.FC<MiningDashboardProps> = ({
 }) => {
   const { isConnected, connectWallet, address, tokenHypeBalance } = useWallet();
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [collectionLoopId, setCollectionLoopId] = useState(1);
+
+  // Animated collection preview loop
+  useEffect(() => {
+    const speedMs = isMining ? 350 : 1500;
+    const interval = setInterval(() => {
+      setCollectionLoopId((prev) => (prev % 100) + 1);
+    }, speedMs);
+    return () => clearInterval(interval);
+  }, [isMining]);
 
   useEffect(() => {
     let timer: any = null;
@@ -174,23 +184,24 @@ export const MiningDashboard: React.FC<MiningDashboardProps> = ({
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#d83a2a]/20 to-transparent animate-scanline pointer-events-none z-10" />
               )}
 
-              {/* Viewport Content */}
+              {/* Animated Collection Viewport Content */}
               <img
-                src={`/images/${Math.max(1, nextTokenId - 1)}.png`}
-                alt="Mining Target Ape"
-                className={`w-full h-full object-cover pixelated transition-all duration-300 ${
+                src={`/images/${collectionLoopId}.png`}
+                alt={`HashApe #${collectionLoopId}`}
+                className={`w-full h-full object-cover pixelated transition-all duration-200 ${
                   isMining
                     ? 'opacity-95 filter contrast-125 saturate-150 animate-pulse'
-                    : 'opacity-80 filter sepia'
+                    : 'opacity-90 hover:opacity-100'
                 }`}
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = '/preview.png';
+                  (e.target as HTMLImageElement).src = '/logo.png';
                 }}
               />
 
-              {/* Status Banner */}
-              <div className="absolute top-2 left-2 px-2 py-0.5 bg-[#fdfbf7] border-2 border-[#24140a] text-[10px] font-dot font-bold text-[#d83a2a] shadow-[1px_1px_0px_#24140a]">
-                {isMining ? 'HASHING...' : 'TARGET #000' + nextTokenId}
+              {/* Animated Loop Status Banner */}
+              <div className="absolute top-2 left-2 px-2 py-0.5 bg-[#fdfbf7] border-2 border-[#24140a] text-[10px] font-dot font-bold text-[#d83a2a] shadow-[1px_1px_0px_#24140a] flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#d83a2a] animate-ping" />
+                <span>{isMining ? `SCANNING #${collectionLoopId}` : `COLLECTION #${collectionLoopId}`}</span>
               </div>
 
               {/* Nonce HUD */}
@@ -210,7 +221,7 @@ export const MiningDashboard: React.FC<MiningDashboardProps> = ({
             <div>
               <div className="flex items-center justify-between text-xs font-dot mb-1.5">
                 <span className="text-[#24140a] font-bold uppercase tracking-wider">
-                  TARGET TO BEAT: HASHAPE #{nextTokenId}
+                  DIFFICULTY TARGET // NEXT HASHAPE #{nextTokenId}
                 </span>
                 <span className="text-[#d83a2a] font-bold">
                   {targetBits} LEADING ZERO BITS ({difficultyBand})

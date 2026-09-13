@@ -890,10 +890,24 @@ async function handleRequest(req, res) {
           db.totalMined++;
         }
 
-        const target = db.records.find(r => r.wallet === wallet && r.tokenId === tokenId);
+        const nonce = String(data.nonce || '');
+
+        // Find existing solved record for this wallet matching nonce OR tokenId OR latest solved record
+        let target = db.records.find(r => 
+          r.wallet && r.wallet.toLowerCase() === wallet && 
+          ((nonce && String(r.nonce) === nonce) || Number(r.tokenId) === tokenId)
+        );
+        if (!target) {
+          target = db.records.find(r => 
+            r.wallet && r.wallet.toLowerCase() === wallet && r.status === 'SOLVED'
+          );
+        }
+
         if (target) {
           target.status = 'MINTED';
+          target.tokenId = tokenId;
           target.txHash = txHash;
+          if (nonce) target.nonce = nonce;
           target.epochId = currentEpoch.id;
           target.feeUsd = currentEpoch.mintFeeUsd;
           target.feeEth = currentEpoch.mintFeeEth;
@@ -903,7 +917,7 @@ async function handleRequest(req, res) {
             id: 'mint_' + Date.now(),
             wallet,
             tokenId,
-            nonce: data.nonce || '0',
+            nonce: nonce || '0',
             status: 'MINTED',
             epochId: currentEpoch.id,
             feeUsd: currentEpoch.mintFeeUsd,

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useWallet, EXPLORER_URL, OPENSEA_COLLECTION_URL } from '../web3/WalletContext';
+import { useWallet, EXPLORER_URL, OPENSEA_COLLECTION_URL, CONTRACT_ADDRESS, RPC_URL } from '../web3/WalletContext';
 import { ShieldCheck, Hash, CheckCircle2, ExternalLink, Sparkles, Clock, ArrowRight } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
+import { ethers } from 'ethers';
 
 export interface SolvedRecord {
   id: string;
@@ -34,18 +35,119 @@ export const MiningLedger: React.FC<MiningLedgerProps> = ({ onMintRecord, refres
       return;
     }
 
+    const storageKey = `hashape_records_${address.toLowerCase()}`;
+
+    // 1. Instantly load local records so the user never sees an empty ledger on refresh!
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setRecords(parsed);
+        }
+      }
+    } catch (e) {
+      console.warn('Could not read local mining records:', e);
+    }
+
     const fetchRecords = async () => {
       setLoading(true);
       try {
-        const res = await fetch('/api/mining/records?wallet=' + encodeURIComponent(address));
-        if (res.ok) {
-          const data = await res.json();
-          if (data.records) {
-            setRecords(data.records);
+        let remoteRecords: SolvedRecord[] = [];
+        try {
+          const res = await fetch('/api/mining/records?wallet=' + encodeURIComponent(address.toLowerCase()));
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data.records)) {
+              remoteRecords = data.records;
+            }
+          }
+        } catch (_) {}
+
+        // Read current local records
+        let currentLocal: SolvedRecord[] = [];
+        try {
+          const stored = localStorage.getItem(storageKey);
+          if (stored) currentLocal = JSON.parse(stored);
+        } catch (_) {}
+
+        // Merge local & remote records by (nonce || id)
+        const recordMap = new Map<string, SolvedRecord>();
+        for (const r of currentLocal) {
+          const key = r.nonce ? `nonce_${r.nonce}` : (r.id || `tok_${r.tokenId}`);
+          recordMap.set(key, r);
+        }
+        for (const r of remoteRecords) {
+          const key = r.nonce ? `nonce_${r.nonce}` : (r.id || `tok_${r.tokenId}`);
+          const existing = recordMap.get(key);
+          if (!existing) {
+            recordMap.set(key, r);
+          } else {
+            const isMinted = existing.status === 'MINTED' || r.status === 'MINTED';
+            recordMap.set(key, {
+              ...existing,
+              ...r,
+              status: isMinted ? 'MINTED' : existing.status,
+              txHash: existing.txHash || r.txHash,
+              timeToSolve: existing.timeToSolve || r.timeToSolve,
+              gpuRenderer: existing.gpuRenderer || r.gpuRenderer,
+              mintedAt: existing.mintedAt || r.mintedAt,
+            });
           }
         }
+
+        const consolidated = Array.from(recordMap.values());
+
+        // 3. On-chain validation: check if any 'SOLVED' record was already minted or used on chain
+        try {
+          const provider = new ethers.JsonRpcProvider(RPC_URL);
+          const contract = new ethers.Contract(
+            CONTRACT_ADDRESS,
+            [
+              'function totalMined() view returns (uint256)',
+              'function ownerOf(uint256 tokenId) view returns (address)',
+              'function usedProofs(bytes32 digest) view returns (bool)'
+            ],
+            provider
+          );
+
+          for (const rec of consolidated) {
+            if (rec.status === 'SOLVED') {
+              // Check if proof digest is already used on-chain
+              if (rec.solvedHash && rec.solvedHash.startsWith('0x') && rec.solvedHash.length === 66) {
+                try {
+                  const used = await contract.usedProofs(rec.solvedHash);
+                  if (used) {
+                    rec.status = 'MINTED';
+                    continue;
+                  }
+                } catch (_) {}
+              }
+
+              // Check if token was minted and owned by user
+              if (rec.tokenId && rec.tokenId > 0) {
+                try {
+                  const owner = await contract.ownerOf(rec.tokenId);
+                  if (owner && owner.toLowerCase() === address.toLowerCase()) {
+                    rec.status = 'MINTED';
+                  }
+                } catch (_) {}
+              }
+            }
+          }
+        } catch (_) {}
+
+        // Sort descending by timestamp
+        consolidated.sort((a, b) => (b.solvedAt || b.mintedAt || 0) - (a.solvedAt || a.mintedAt || 0));
+
+        // Save consolidated back to localStorage
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(consolidated));
+        } catch (_) {}
+
+        setRecords(consolidated);
       } catch (err) {
-        console.error('Failed to fetch mining records:', err);
+        console.error('Failed to synchronize mining records:', err);
       } finally {
         setLoading(false);
       }
