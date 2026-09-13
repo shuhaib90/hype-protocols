@@ -2,16 +2,8 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "hashape-mining",
   "compatibility_date": "2026-09-13",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ],
   "assets": {
     "directory": "./dist",
-    "binding": "ASSETS",
     "not_found_handling": "single-page-application"
-  },
-  "vars": {
-    "NODE_ENV": "production",
-    "NETWORK": "Robinhood EVM L2"
   }
 }

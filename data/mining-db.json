@@ -60,4 +60,33 @@
       "id": "mint_genesis_1",
       "wallet": "0x3333111122223333444455556666777788889999",
       "tokenId": 1,
-      "nonce": "1042"
+      "nonce": "1042",
+      "status": "MINTED",
+      "epochId": 1,
+      "feeUsd": 5,
+      "txHash": "0x01a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000001",
+      "mintedAt": 1789281190086
+    }
+  ],
+  "workerEntitlements": {
+    "0xdb195274e29e4f33c2924700e52a91da1f087bfc": {
+      "3": true
+    },
+    "0xb8e3dfdd19b6bf35b9fd87f8373f7f82c53bc93c": {
+      "2": true,
+      "3": true,
+      "4": true,
+      "5": true
+    }
+  },
+  "usedProofs": {
+    "0x000c921c200ba26a147b83409ffd033a2e7bfcb1648c75a6b7094a5065ed6e2f": true
+  },
+  "activeMiners": {},
+  "epochOverrides": {},
+  "treasury": {
+    "claimedMintFeesEth": 0,
+    "claimedRigFeesHashApe": 0,
+    "claims": []
+  }
+}
