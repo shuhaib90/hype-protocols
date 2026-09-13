@@ -1,74 +1,11 @@
 {
-  "totalMined": 4,
+  "totalMined": 0,
   "maxSupply": 10000,
-  "records": [
-    {
-      "id": "solv_1789307033531_st8i8",
-      "wallet": "0xdb19bfb42de028bb5a41faaae82f7e78d8528634",
-      "tokenId": 7850,
-      "nonce": "1296",
-      "solvedHash": "0x00019560670b40e89b1f89fc8a81e6081eb413be88e59f20ad61da43068390ff",
-      "difficulty": 4,
-      "gpuRenderer": "NVIDIA RTX 4090 WebGPU",
-      "status": "MINTED",
-      "solvedAt": 1789307033531,
-      "txHash": "0x9999888877776666555544443333222211110000aabbccddeeff001122334455",
-      "epochId": 1,
-      "feeUsd": 5,
-      "feeEth": 0.002,
-      "mintedAt": 1789307033536
-    },
-    {
-      "id": "mint_genesis_3",
-      "wallet": "0x9999111122223333444455556666777788889999",
-      "tokenId": 3,
-      "nonce": "3126",
-      "status": "MINTED",
-      "epochId": 1,
-      "feeUsd": 5,
-      "txHash": "0x03a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000003",
-      "mintedAt": 1789305832937
-    },
-    {
-      "id": "mint_genesis_2",
-      "wallet": "0x7777111122223333444455556666777788889999",
-      "tokenId": 2,
-      "nonce": "2084",
-      "status": "MINTED",
-      "epochId": 1,
-      "feeUsd": 5,
-      "txHash": "0x02a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000002",
-      "mintedAt": 1789304632937
-    },
-    {
-      "id": "mint_genesis_1",
-      "wallet": "0x3333111122223333444455556666777788889999",
-      "tokenId": 1,
-      "nonce": "1042",
-      "status": "MINTED",
-      "epochId": 1,
-      "feeUsd": 5,
-      "txHash": "0x01a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000001",
-      "mintedAt": 1789303432937
-    }
-  ],
-  "workerEntitlements": {
-    "0xdb19bfb42de028bb5a41faaae82f7e78d8528634": {
-      "3": true
-    }
-  },
-  "usedProofs": {
-    "0x00019560670b40e89b1f89fc8a81e6081eb413be88e59f20ad61da43068390ff": true
-  },
+  "records": [],
+  "workerEntitlements": {},
+  "usedProofs": {},
   "activeMiners": {},
-  "epochOverrides": {
-    "1": {
-      "mintFeeUsd": 5,
-      "mintFeeEth": 0.002,
-      "mintFeeApe": 5,
-      "updatedAt": 1789307035227
-    }
-  },
+  "epochOverrides": {},
   "treasury": {
     "claimedMintFeesEth": 0,
     "claimedRigFeesHashApe": 0,
