@@ -1,11 +1,74 @@
 {
-  "totalMined": 0,
+  "totalMined": 4,
   "maxSupply": 10000,
-  "records": [],
-  "workerEntitlements": {},
-  "usedProofs": {},
+  "records": [
+    {
+      "id": "solv_1789307686174_qmso7",
+      "wallet": "0xdbd62a075cc866e9fa6c177019a225c1d14c263e",
+      "tokenId": 7850,
+      "nonce": "606",
+      "solvedHash": "0x00021bdd872ff89c03b5480248fb042f54b4ea586396ff4e55dbd18ac1bbcd82",
+      "difficulty": 4,
+      "gpuRenderer": "NVIDIA RTX 4090 WebGPU",
+      "status": "MINTED",
+      "solvedAt": 1789307686174,
+      "txHash": "0x9999888877776666555544443333222211110000aabbccddeeff001122334455",
+      "epochId": 1,
+      "feeUsd": 5,
+      "feeEth": 0.002,
+      "mintedAt": 1789307686180
+    },
+    {
+      "id": "mint_genesis_3",
+      "wallet": "0x9999111122223333444455556666777788889999",
+      "tokenId": 3,
+      "nonce": "3126",
+      "status": "MINTED",
+      "epochId": 1,
+      "feeUsd": 5,
+      "txHash": "0x03a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000003",
+      "mintedAt": 1789306485721
+    },
+    {
+      "id": "mint_genesis_2",
+      "wallet": "0x7777111122223333444455556666777788889999",
+      "tokenId": 2,
+      "nonce": "2084",
+      "status": "MINTED",
+      "epochId": 1,
+      "feeUsd": 5,
+      "txHash": "0x02a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000002",
+      "mintedAt": 1789305285721
+    },
+    {
+      "id": "mint_genesis_1",
+      "wallet": "0x3333111122223333444455556666777788889999",
+      "tokenId": 1,
+      "nonce": "1042",
+      "status": "MINTED",
+      "epochId": 1,
+      "feeUsd": 5,
+      "txHash": "0x01a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000001",
+      "mintedAt": 1789304085721
+    }
+  ],
+  "workerEntitlements": {
+    "0xdbd62a075cc866e9fa6c177019a225c1d14c263e": {
+      "3": true
+    }
+  },
+  "usedProofs": {
+    "0x00021bdd872ff89c03b5480248fb042f54b4ea586396ff4e55dbd18ac1bbcd82": true
+  },
   "activeMiners": {},
-  "epochOverrides": {},
+  "epochOverrides": {
+    "1": {
+      "mintFeeUsd": 5,
+      "mintFeeEth": 0.002,
+      "mintFeeApe": 5,
+      "updatedAt": 1789307687789
+    }
+  },
   "treasury": {
     "claimedMintFeesEth": 0,
     "claimedRigFeesHashApe": 0,

@@ -135,26 +135,35 @@ export const App: React.FC = () => {
       const feeEth = Number(parseFloat(ethers.formatEther(onChainEpoch.mintFeeWei)).toFixed(4));
       const feeUsd = Number(onChainEpoch.feeUsd);
 
+      const epochId = Number(onChainEpoch.id);
+      const epochStart = Number(onChainEpoch.startToken);
+      const epochEnd = Number(onChainEpoch.endToken);
+      const epochCount = Math.max(1, epochEnd - epochStart + 1);
+      const minedInEpoch = Math.max(0, onChainMined - (epochStart - 1));
+      const remainingInEpoch = Math.max(0, epochEnd - onChainMined);
+      const percentInEpoch = Number(((minedInEpoch / epochCount) * 100).toFixed(1));
+      const targetHex = '0x' + BigInt(onChainEpoch.target).toString(16).padStart(64, '0');
+
       setSupply((prev) => ({
         ...prev,
         totalMined: onChainMined,
         remaining: Math.max(0, 10000 - onChainMined),
         percentMined: Number(((onChainMined / 10000) * 100).toFixed(2)),
         currentEpoch: {
-          id: Number(onChainEpoch.id),
+          id: epochId,
           name: onChainEpoch.name,
-          startToken: Number(onChainEpoch.startToken),
-          endToken: Number(onChainEpoch.endToken),
-          count: Number(onChainEpoch.endToken - onChainEpoch.startToken + 1),
+          startToken: epochStart,
+          endToken: epochEnd,
+          count: epochCount,
           mintFeeUsd: feeUsd,
           mintFeeEth: feeEth,
           mintFeeApe: feeUsd,
           difficulty: 'HARD',
-          target: '0x' + onChainEpoch.target.toString(16).padStart(64, '0'),
+          target: targetHex,
           nextToken: nextTokenId,
-          minedInEpoch: Math.max(0, onChainMined - (Number(onChainEpoch.startToken) - 1)),
-          remainingInEpoch: Math.max(0, Number(onChainEpoch.endToken) - onChainMined),
-          percentInEpoch: Number(((Math.max(0, onChainMined - (Number(onChainEpoch.startToken) - 1)) / Number(onChainEpoch.endToken - onChainEpoch.startToken + 1)) * 100).toFixed(1)),
+          minedInEpoch,
+          remainingInEpoch,
+          percentInEpoch,
         }
       }));
 
