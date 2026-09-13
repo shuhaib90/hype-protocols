@@ -69,8 +69,12 @@ export interface MiningProof {
   hash: string;
   difficulty: string;
   timeElapsedSeconds: number;
+  elapsedSecs?: number;
   workersUsed: number;
+  workerId?: number;
   averageHashrate: number;
+  hashrate?: number;
+  gpuName?: string;
   timestamp: number;
 }
 

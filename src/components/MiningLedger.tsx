@@ -11,6 +11,7 @@ export interface SolvedRecord {
   solvedHash: string;
   difficulty: number;
   gpuRenderer?: string;
+  timeToSolve?: number;
   status: 'SOLVED' | 'MINTED';
   solvedAt: number;
   mintedAt?: number;
@@ -166,10 +167,13 @@ export const MiningLedger: React.FC<MiningLedgerProps> = ({ onMintRecord, refres
                             {rec.solvedHash || '0x' + '0'.repeat(64)}
                           </code>
                         </div>
-                        <div className="text-[#6b5443] flex items-center gap-2 text-[11px] font-bold">
+                        <div className="text-[#6b5443] flex items-center gap-2 text-[11px] font-bold flex-wrap">
                           <span>NONCE: <strong className="text-[#24140a]">{rec.nonce}</strong></span>
                           {rec.gpuRenderer && (
-                            <span>• CORE: <span className="text-[#2e7d32]">{rec.gpuRenderer}</span></span>
+                            <span>• GPU: <span className="text-[#19638b]">{rec.gpuRenderer}</span></span>
+                          )}
+                          {typeof rec.timeToSolve === 'number' && rec.timeToSolve > 0 && (
+                            <span>• SOLVE TIME: <span className="text-[#2e7d32]">{Math.floor(rec.timeToSolve / 60)}m {rec.timeToSolve % 60}s</span></span>
                           )}
                         </div>
                       </div>

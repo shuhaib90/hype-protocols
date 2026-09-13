@@ -858,6 +858,7 @@ async function handleRequest(req, res) {
           solvedHash: data.solvedHash || '',
           difficulty: Number(data.difficulty || 4),
           gpuRenderer: data.gpuRenderer || 'WebGPU Compute Core',
+          timeToSolve: Number(data.timeToSolve || 0),
           status: 'SOLVED',
           solvedAt: Date.now(),
           txHash: null

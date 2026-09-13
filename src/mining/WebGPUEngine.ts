@@ -67,17 +67,41 @@ export class WebGPUMiningEngine {
       };
     }
 
+    // Try extracting detailed hardware brand name via WebGL unmasked renderer
+    let hardwareModel = '';
+    let hardwareVendor = '';
+    try {
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+      if (gl) {
+        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+        if (debugInfo) {
+          const rawRenderer = (gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) as string) || '';
+          const rawVendor = (gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) as string) || '';
+          hardwareVendor = rawVendor;
+          // Clean up ANGLE strings: e.g. "ANGLE (NVIDIA, NVIDIA GeForce RTX 4090 Direct3D11...)" -> "NVIDIA GeForce RTX 4090"
+          const match = rawRenderer.match(/ANGLE \([^,]+,\s*([^,]+?)(?:\s+Direct3D|\s+OpenGL|\s+Vulkan|,|\))/i);
+          if (match && match[1]) {
+            hardwareModel = match[1].trim();
+          } else {
+            hardwareModel = rawRenderer.replace(/ANGLE \(/i, '').replace(/\)$/i, '').trim();
+          }
+        }
+      }
+    } catch (e) {}
+
     // 1. Try WebGPU Detection & Architecture Query
     if ('gpu' in navigator && (navigator as any).gpu) {
       try {
         const adapter = await (navigator as any).gpu.requestAdapter();
         if (adapter) {
           const info = adapter.info || {};
-          const arch = info.architecture || info.device || 'WGSL Compute Core';
-          const vendor = info.vendor || 'Hardware Accelerated';
+          const arch = info.architecture || info.device || '';
+          const vendor = info.vendor || hardwareVendor || 'Hardware Accelerated';
+          const displayName = hardwareModel || (arch ? `${arch} (${vendor})` : 'WebGPU Compute Core');
           return {
             supported: true,
-            name: `${arch} (${vendor})`,
+            name: displayName,
             vendor,
             backend: 'WebGPU',
             description: 'Tuned WGSL hardware compute shader execution (Workgroup: 64)',
@@ -89,24 +113,15 @@ export class WebGPUMiningEngine {
     }
 
     // 2. Try WebGL Fallback Detection
-    try {
-      const canvas = document.createElement('canvas');
-      const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
-      if (gl) {
-        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-        if (debugInfo) {
-          const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-          const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
-          return {
-            supported: false,
-            name: renderer || 'WebGL Shader Pipeline',
-            vendor: vendor || 'Generic GPU',
-            backend: 'WebGL Fallback',
-            description: 'Browser WebGPU disabled or unavailable; operating via high-throughput shader fallback',
-          };
-        }
-      }
-    } catch (e) {}
+    if (hardwareModel) {
+      return {
+        supported: false,
+        name: hardwareModel,
+        vendor: hardwareVendor || 'Generic GPU',
+        backend: 'WebGL Fallback',
+        description: 'Browser WebGPU disabled or unavailable; operating via high-throughput shader fallback',
+      };
+    }
 
     return {
       supported: false,

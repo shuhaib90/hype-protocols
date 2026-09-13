@@ -9,6 +9,7 @@ interface SuccessModalProps {
   mintFeeHype: number;
   currentEpoch?: EpochInfo;
   targetTokenId?: number;
+  gpuName?: string;
   onClose: () => void;
   onMintSuccess: (tokenId: number, txHash: string) => void;
 }
@@ -18,6 +19,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
   mintFeeHype,
   currentEpoch,
   targetTokenId,
+  gpuName,
   onClose,
   onMintSuccess,
 }) => {
@@ -29,6 +31,10 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
 
   const feeToPay = currentEpoch ? currentEpoch.mintFeeEth : 0.0020;
   const expectedToken = targetTokenId || (currentEpoch ? currentEpoch.startToken + (currentEpoch.minedInEpoch || 0) : 1);
+  const elapsed = (proof as any).timeElapsedSeconds ?? (proof as any).elapsedSecs ?? 0;
+  const workers = (proof as any).workersUsed ?? (proof as any).workerId ?? 1;
+  const hashrate = (proof as any).averageHashrate ?? (proof as any).hashrate ?? 0;
+  const activeGpu = gpuName || (proof as any).gpuName || 'WebGPU Hardware Compute Core';
 
   const handleMint = async () => {
     soundEffects.playClickSound();
@@ -89,23 +95,28 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
               <div className="bg-[#fdfbf7] p-2 border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
-                <span className="text-[#6b5443] text-[10px] uppercase block font-bold">TIME</span>
-                <span className="font-mono font-bold text-[#24140a]">{formatSecs(proof.elapsedSecs)}</span>
+                <span className="text-[#6b5443] text-[10px] uppercase block font-bold">TIME OF SOLVE</span>
+                <span className="font-mono font-bold text-[#24140a]">{formatSecs(elapsed)}</span>
               </div>
               <div className="bg-[#fdfbf7] p-2 border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
                 <span className="text-[#6b5443] text-[10px] uppercase block font-bold">WORKERS</span>
-                <span className="font-mono font-bold text-[#24140a]">{proof.workerId} / 5</span>
+                <span className="font-mono font-bold text-[#24140a]">{workers} / 5</span>
               </div>
               <div className="bg-[#fdfbf7] p-2 border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
                 <span className="text-[#6b5443] text-[10px] uppercase block font-bold">HASHRATE</span>
                 <span className="font-mono font-bold text-[#2e7d32]">
-                  {typeof proof.hashrate === 'number' ? proof.hashrate.toFixed(2) : '0.00'} MH/s
+                  {typeof hashrate === 'number' ? hashrate.toFixed(2) : '0.00'} MH/s
                 </span>
               </div>
               <div className="bg-[#fdfbf7] p-2 border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
                 <span className="text-[#6b5443] text-[10px] uppercase block font-bold">PROOF ID</span>
                 <span className="text-[#24140a] font-bold">{proof.proofId}</span>
               </div>
+            </div>
+
+            <div className="p-2.5 bg-[#fdfbf7] border-2 border-[#24140a] mt-2.5 flex items-center justify-between text-xs">
+              <span className="text-[10px] text-[#6b5443] uppercase font-bold">SOLVED BY GPU:</span>
+              <span className="text-[#19638b] font-bold truncate max-w-[280px]">{activeGpu}</span>
             </div>
 
             <div className="p-2.5 bg-[#fdfbf7] border-2 border-[#24140a] mt-2.5">

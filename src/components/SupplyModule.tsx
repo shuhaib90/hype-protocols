@@ -224,8 +224,16 @@ export const SupplyModule: React.FC<SupplyModuleProps> = ({ supply }) => {
                     <div className="text-[11px] text-[#6b5443] truncate mb-1 font-bold">
                       #{ep.startToken}–#{ep.endToken}
                     </div>
-                    <div className="text-[#d83a2a] font-bold text-xs">
-                      {currencyMode === 'USD' ? `$${ep.mintFeeUsd} ETH` : `${ep.mintFeeEth} ETH`}
+                    <div className="font-bold text-xs mb-0.5">
+                      {isActive ? (
+                        <span className="text-[#d83a2a]">
+                          {currencyMode === 'USD' ? `$${ep.mintFeeUsd} ETH` : `${ep.mintFeeEth} ETH`}
+                        </span>
+                      ) : isPast ? (
+                        <span className="text-[#6b5443]/60 text-[10px] font-mono">CONCLUDED</span>
+                      ) : (
+                        <span className="text-[#6b5443]/50 text-[10px] font-mono uppercase tracking-wider">LOCKED FEE</span>
+                      )}
                     </div>
                     <div className="text-[9px] text-[#6b5443] font-medium">
                       {ep.difficulty}

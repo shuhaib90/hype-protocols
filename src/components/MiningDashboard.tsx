@@ -93,6 +93,42 @@ export const MiningDashboard: React.FC<MiningDashboardProps> = ({
   const currentFeeUsd = currentEpoch?.mintFeeUsd || 5;
   const ethEquiv = (currentFeeUsd / 2500).toFixed(4);
 
+  // Compute probability, odds, and estimated time to solve
+  const expectedHashes = 2 ** targetBits;
+  const effectiveHashrateMH = totalHashrate > 0 ? totalHashrate : activeWorkerCount * 2.5;
+  const effectiveHashrateHps = effectiveHashrateMH * 1_000_000;
+
+  const estSecondsToSolve = Math.max(1, Math.round(expectedHashes / effectiveHashrateHps));
+  const formatEstTime = (secs: number) => {
+    if (secs < 60) return `~${secs}s`;
+    if (secs < 3600) {
+      const m = Math.floor(secs / 60);
+      const s = Math.round(secs % 60);
+      return `~${m}m ${s > 0 ? s + 's' : ''}`.trim();
+    }
+    const h = (secs / 3600).toFixed(1);
+    return `~${h}h`;
+  };
+  const estTimeToSolveStr = formatEstTime(estSecondsToSolve);
+
+  const formatOdds = (n: number) => {
+    if (n >= 1e9) return `1 in ${(n / 1e9).toFixed(2)}B`;
+    if (n >= 1e6) return `1 in ${(n / 1e6).toFixed(1)}M`;
+    if (n >= 1e3) return `1 in ${(n / 1e3).toFixed(1)}K`;
+    return `1 in ${Math.round(n)}`;
+  };
+  const winOddsStr = formatOdds(expectedHashes);
+
+  const hashesPerMin = effectiveHashrateHps * 60;
+  const winChancePerMin = Math.min(100, (hashesPerMin / expectedHashes) * 100);
+  const winChanceStr = winChancePerMin >= 1 
+    ? `${winChancePerMin.toFixed(1)}%` 
+    : winChancePerMin >= 0.01 
+    ? `${winChancePerMin.toFixed(2)}%` 
+    : `<0.01%`;
+
+  const gpuDisplayName = gpuInfo?.name || 'WebGPU Compute Core';
+
   // Compute animated active blocks in the 32-bit difficulty bar
   const totalBlocks = 32;
   const activeBlocksCount = Math.min(totalBlocks, Math.floor((targetBits / 40) * totalBlocks));
@@ -102,7 +138,9 @@ export const MiningDashboard: React.FC<MiningDashboardProps> = ({
       {/* Top Header Bar */}
       <div className="paper-header-red px-4 py-2 flex items-center justify-between text-xs tracking-wider">
         <div className="flex items-center space-x-2">
-          <span className="font-jersey text-base tracking-wider">FORGE MAIN RIG // WEBGPU WGSL CORE</span>
+          <span className="font-jersey text-base tracking-wider truncate max-w-[320px] sm:max-w-none">
+            FORGE MAIN RIG // {gpuDisplayName.toUpperCase()}
+          </span>
           <span className="text-[10px] font-dot text-[#24140a] bg-[#f5ebd7] px-1.5 py-0.5 font-bold border border-[#24140a]">
             ROBINHOOD L2
           </span>
@@ -161,8 +199,8 @@ export const MiningDashboard: React.FC<MiningDashboardProps> = ({
               </div>
             </div>
 
-            <div className="text-[11px] font-dot text-[#6b5443] mt-2 font-bold">
-              {gpuInfo?.name ? gpuInfo.name : 'WebGPU Hardware Compute Core'}
+            <div className="text-[11px] font-dot text-[#6b5443] mt-2 font-bold text-center">
+              <span className="text-[#24140a]">GPU:</span> {gpuDisplayName}
             </div>
           </div>
 
@@ -201,48 +239,86 @@ export const MiningDashboard: React.FC<MiningDashboardProps> = ({
               </p>
             </div>
 
-            {/* Middle Row: Live Telemetry Grid (6 Metrics) */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-              <div className="p-2 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
+            {/* Middle Row: Live Telemetry Grid (8 Metrics) */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <div className="p-2.5 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
+                <span className="text-[9px] font-dot text-[#6b5443] block uppercase font-bold">ACTIVE GPU</span>
+                <span className="text-sm font-jersey font-bold text-[#24140a] block truncate" title={gpuDisplayName}>
+                  {gpuDisplayName}
+                </span>
+                <span className="text-[9px] font-dot text-[#2e7d32] font-bold block truncate">
+                  {gpuInfo?.backend || 'WebGPU Core'}
+                </span>
+              </div>
+
+              <div className="p-2.5 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
+                <span className="text-[9px] font-dot text-[#6b5443] block uppercase font-bold">CHANCE OF WIN</span>
+                <span className="text-base font-jersey font-bold text-[#d83a2a] block">
+                  {winChanceStr} <span className="text-[10px] font-dot text-[#24140a]">/ MIN</span>
+                </span>
+                <span className="text-[9px] font-dot text-[#6b5443] font-bold block truncate">
+                  {winOddsStr} per hash
+                </span>
+              </div>
+
+              <div className="p-2.5 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
+                <span className="text-[9px] font-dot text-[#6b5443] block uppercase font-bold">TIME OF SOLVE (EST)</span>
+                <span className="text-base font-jersey font-bold text-[#19638b] block">
+                  {estTimeToSolveStr}
+                </span>
+                <span className="text-[9px] font-dot text-[#6b5443] font-bold block truncate">
+                  ETA @ {effectiveHashrateMH.toFixed(1)} MH/s
+                </span>
+              </div>
+
+              <div className="p-2.5 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
+                <span className="text-[9px] font-dot text-[#6b5443] block uppercase font-bold">SESSION TIME</span>
+                <span className="text-base font-jersey font-bold text-[#24140a] block">
+                  {formatTime(elapsedSeconds)}
+                </span>
+                <span className="text-[9px] font-dot text-[#6b5443] font-bold block truncate">
+                  {isMining ? 'Active Session' : 'Standby'}
+                </span>
+              </div>
+
+              <div className="p-2.5 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
                 <span className="text-[9px] font-dot text-[#6b5443] block uppercase font-bold">COMPUTE SPEED</span>
-                <span className="text-base font-jersey font-bold text-[#24140a]">
+                <span className="text-base font-jersey font-bold text-[#24140a] block">
                   {Number(totalHashrate || 0).toFixed(1)} <span className="text-[10px] font-dot text-[#d83a2a]">MH/S</span>
                 </span>
-              </div>
-
-              <div className="p-2 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
-                <span className="text-[9px] font-dot text-[#6b5443] block uppercase font-bold">HASHES COMPUTED</span>
-                <span className="text-base font-jersey font-bold text-[#24140a]">
-                  {noncesScanned.toLocaleString()}
+                <span className="text-[9px] font-dot text-[#6b5443] font-bold block truncate">
+                  {activeWorkerCount} Active Workers
                 </span>
               </div>
 
-              <div className="p-2 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
+              <div className="p-2.5 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
+                <span className="text-[9px] font-dot text-[#6b5443] block uppercase font-bold">NONCES SCANNED</span>
+                <span className="text-base font-jersey font-bold text-[#24140a] block">
+                  {noncesScanned.toLocaleString()}
+                </span>
+                <span className="text-[9px] font-dot text-[#6b5443] font-bold block truncate">
+                  Keccak-256 cycles
+                </span>
+              </div>
+
+              <div className="p-2.5 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
                 <span className="text-[9px] font-dot text-[#6b5443] block uppercase font-bold">GPU LOAD</span>
                 <span className="text-sm font-jersey font-bold text-[#2e7d32] flex items-center gap-1">
                   <span className={`w-2 h-2 rounded-full ${isMining ? 'bg-[#2e7d32] animate-ping' : 'bg-[#6b5443]'}`} />
                   {isMining ? '100% MAX' : 'IDLE 0%'}
                 </span>
-              </div>
-
-              <div className="p-2 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
-                <span className="text-[9px] font-dot text-[#6b5443] block uppercase font-bold">GPU POWER</span>
-                <span className="text-base font-jersey font-bold text-[#d83a2a]">
-                  {isMining ? `~${160 + activeWorkerCount * 25}W` : '15W IDLE'}
+                <span className="text-[9px] font-dot text-[#d83a2a] font-bold block truncate">
+                  {isMining ? `~${160 + activeWorkerCount * 25}W Power` : '15W Standby'}
                 </span>
               </div>
 
-              <div className="p-2 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
-                <span className="text-[9px] font-dot text-[#6b5443] block uppercase font-bold">SESSION TIME</span>
-                <span className="text-base font-jersey font-bold text-[#19638b]">
-                  {formatTime(elapsedSeconds)}
-                </span>
-              </div>
-
-              <div className="p-2 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
-                <span className="text-[9px] font-dot text-[#6b5443] block uppercase font-bold">WALLET LIMIT</span>
-                <span className="text-base font-jersey font-bold text-[#24140a]">
+              <div className="p-2.5 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
+                <span className="text-[9px] font-dot text-[#6b5443] block uppercase font-bold">WALLET QUOTA</span>
+                <span className="text-base font-jersey font-bold text-[#24140a] block">
                   {walletMints} <span className="text-[10px] font-dot text-[#6b5443]">/ {maxMints}</span>
+                </span>
+                <span className="text-[9px] font-dot text-[#6b5443] font-bold block truncate">
+                  {Math.max(0, maxMints - walletMints)} Available
                 </span>
               </div>
             </div>

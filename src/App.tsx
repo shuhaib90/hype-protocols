@@ -282,7 +282,8 @@ export const App: React.FC = () => {
             nonce: proof.nonce,
             solvedHash: proof.hash,
             difficulty: 4,
-            gpuRenderer: gpuInfo?.name || 'WebGPU',
+            gpuRenderer: gpuInfo?.name || 'WebGPU Compute Core',
+            timeToSolve: proof.timeElapsedSeconds || 0,
           }),
         }).then(() => setLedgerRefresh((prev) => prev + 1)).catch(() => {});
       },
@@ -528,6 +529,7 @@ export const App: React.FC = () => {
         mintFeeHype={config.mintFeeHype}
         currentEpoch={supply.currentEpoch}
         targetTokenId={supply.totalMined + 1}
+        gpuName={gpuInfo?.name}
         onClose={() => setLatestProof(null)}
         onMintSuccess={handleMintSuccess}
       />
