@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useWallet, HASHAPE_DEX_URL } from '../web3/WalletContext';
-import { Cpu, FileText, Wallet, Shield, Volume2, VolumeX, ShoppingCart, ExternalLink } from 'lucide-react';
+import { Wallet, Shield, Volume2, VolumeX, ShoppingCart, ExternalLink, Menu, X } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
 
 interface NavigationProps {
@@ -16,12 +16,10 @@ export const Navigation: React.FC<NavigationProps> = ({
   activeTab,
   setActiveTab,
   onOpenAdmin,
-  totalMined = 3,
-  maxSupply = 10000,
-  currentEpochId = 1,
 }) => {
-  const { isConnected, address, nativeHypeBalance, tokenHypeBalance, isAdmin, connectWallet, disconnectWallet } = useWallet();
+  const { isConnected, address, isAdmin, connectWallet, disconnectWallet } = useWallet();
   const [soundOn, setSoundOn] = useState(soundEffects.isEnabled());
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleTabClick = (tab: 'mining' | 'docs' | 'admin') => {
     soundEffects.playClickSound();
@@ -63,23 +61,22 @@ export const Navigation: React.FC<NavigationProps> = ({
             </div>
           </div>
 
-          {/* Arcade Navigation Links */}
-          <nav className="hidden md:flex items-center space-x-2 text-xs font-dot">
+          {/* Clean Navigation Links (No brackets, no bulky boxes) */}
+          <nav className="hidden md:flex items-center space-x-1 text-xs">
             <button
               onClick={() => {
                 handleTabClick('mining');
                 setTimeout(() => {
-                  const el = document.getElementById('miner-rig-section');
-                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  document.getElementById('miner-rig-section')?.scrollIntoView({ behavior: 'smooth' });
                 }, 50);
               }}
-              className={`px-3 py-1 uppercase tracking-wider transition-all border-2 border-[#24140a] ${
+              className={`px-3 py-1.5 uppercase tracking-wider font-bold transition-all ${
                 activeTab === 'mining'
-                  ? 'bg-[#d83a2a] text-white font-bold shadow-[2px_2px_0px_#24140a]'
-                  : 'bg-[#eee2ca] text-[#24140a] hover:bg-[#e4d3b4] shadow-[1px_1px_0px_#24140a]'
+                  ? 'bg-[#24140a] text-[#fdfbf7] shadow-[2px_2px_0px_#24140a]'
+                  : 'text-[#6b5443] hover:text-[#24140a] hover:bg-[#eee2ca]'
               }`}
             >
-              [ FORGE RIG ]
+              Forge Rig
             </button>
             <button
               onClick={() => {
@@ -93,9 +90,9 @@ export const Navigation: React.FC<NavigationProps> = ({
                   document.getElementById('collection-section')?.scrollIntoView({ behavior: 'smooth' });
                 }
               }}
-              className="px-3 py-1 bg-[#eee2ca] text-[#24140a] hover:bg-[#e4d3b4] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a] uppercase tracking-wider transition-all cursor-pointer"
+              className="px-3 py-1.5 text-[#6b5443] hover:text-[#24140a] hover:bg-[#eee2ca] uppercase tracking-wider font-bold transition-all"
             >
-              [ DOSSIER ]
+              Dossier
             </button>
             <button
               onClick={() => {
@@ -109,114 +106,171 @@ export const Navigation: React.FC<NavigationProps> = ({
                   document.getElementById('epochs-section')?.scrollIntoView({ behavior: 'smooth' });
                 }
               }}
-              className="px-3 py-1 bg-[#eee2ca] text-[#24140a] hover:bg-[#e4d3b4] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a] uppercase tracking-wider transition-all cursor-pointer"
+              className="px-3 py-1.5 text-[#6b5443] hover:text-[#24140a] hover:bg-[#eee2ca] uppercase tracking-wider font-bold transition-all"
             >
-              [ 10 STAGES ]
+              10 Stages
             </button>
             <button
               onClick={() => handleTabClick('docs')}
-              className={`px-3 py-1 uppercase tracking-wider transition-all border-2 border-[#24140a] ${
+              className={`px-3 py-1.5 uppercase tracking-wider font-bold transition-all ${
                 activeTab === 'docs'
-                  ? 'bg-[#d83a2a] text-white font-bold shadow-[2px_2px_0px_#24140a]'
-                  : 'bg-[#eee2ca] text-[#24140a] hover:bg-[#e4d3b4] shadow-[1px_1px_0px_#24140a]'
+                  ? 'bg-[#24140a] text-[#fdfbf7] shadow-[2px_2px_0px_#24140a]'
+                  : 'text-[#6b5443] hover:text-[#24140a] hover:bg-[#eee2ca]'
               }`}
             >
-              [ DOCS ]
+              Docs
             </button>
             {isAdmin && (
               <button
                 onClick={() => handleTabClick('admin')}
-                className={`px-3 py-1 uppercase tracking-wider transition-all border-2 border-[#24140a] ${
+                className={`px-3 py-1.5 uppercase tracking-wider font-bold transition-all flex items-center gap-1.5 ${
                   activeTab === 'admin'
-                    ? 'bg-[#d83a2a] text-white font-bold shadow-[2px_2px_0px_#24140a]'
-                    : 'bg-[#d48818] text-[#24140a] hover:bg-[#bb7410] font-bold shadow-[1px_1px_0px_#24140a]'
+                    ? 'bg-[#d83a2a] text-white shadow-[2px_2px_0px_#24140a]'
+                    : 'text-[#d48818] hover:text-[#24140a] hover:bg-[#eee2ca]'
                 }`}
               >
-                [ ADMIN ]
+                <Shield className="w-3.5 h-3.5 fill-current" />
+                <span>Admin</span>
               </button>
             )}
           </nav>
         </div>
 
-        {/* Right: Live Network Badge, Admin, SFX, & Connect Button */}
-        <div className="flex items-center space-x-2.5">
-          {/* Live Network Ticker Box */}
-          <div className="hidden lg:flex items-center space-x-2 px-3 py-1.5 bg-[#eee2ca] border-2 border-[#24140a] text-xs font-dot text-[#24140a] shadow-[2px_2px_0px_#24140a]">
-            <span className="w-2.5 h-2.5 bg-[#2e7d32] border border-[#24140a] inline-block shadow-[1px_1px_0px_#24140a]" />
-            <span className="text-[#24140a] font-bold">{totalMined.toLocaleString()}</span>
-            <span>/</span>
-            <span className="font-bold">{maxSupply.toLocaleString()} MINED</span>
-            <span className="text-[#6b5443]">|</span>
-            <span className="text-[#d83a2a] font-bold">STAGE #{currentEpochId}</span>
-          </div>
-
+        {/* Clean Action Suite on Right */}
+        <div className="flex items-center space-x-2 sm:space-x-3">
           {/* Buy $HASHAPE DEX button */}
           <a
             href={HASHAPE_DEX_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="paper-btn-red hidden sm:flex items-center space-x-1.5 px-2.5 py-1.5 text-xs font-dot font-bold uppercase no-underline shadow-[2px_2px_0px_#24140a]"
+            className="paper-btn-red text-xs px-2.5 sm:px-3 py-1.5 flex items-center gap-1.5 font-bold uppercase no-underline shadow-[2px_2px_0px_#24140a]"
             title="Buy $HASHAPE on LetsCash DEX"
           >
             <ShoppingCart className="w-3.5 h-3.5" />
             <span>BUY $HASHAPE</span>
-            <ExternalLink className="w-2.5 h-2.5" />
+            <ExternalLink className="w-2.5 h-2.5 opacity-80 hidden sm:inline" />
           </a>
 
-          {/* 8-Bit SFX Toggle */}
+          {/* Compact Retro Sound Toggle */}
           <button
             onClick={handleSoundToggle}
-            className={`px-2.5 py-1.5 border-2 border-[#24140a] text-xs font-dot flex items-center space-x-1.5 transition-all select-none shadow-[2px_2px_0px_#24140a] ${
-              soundOn
-                ? 'bg-[#eee2ca] text-[#2e7d32] font-bold'
-                : 'bg-[#e4d3b4] text-[#6b5443]'
+            className={`p-1.5 border-2 border-[#24140a] transition-all select-none shadow-[1px_1px_0px_#24140a] ${
+              soundOn ? 'bg-[#eee2ca] text-[#2e7d32] hover:bg-[#e4d3b4]' : 'bg-[#fdfbf7] text-[#8c7460] hover:bg-[#eee2ca]'
             }`}
-            title="Toggle Retro Sound Effects"
+            title={soundOn ? 'Retro SFX On (Click to Mute)' : 'Retro SFX Off (Click to Enable)'}
+            aria-label="Toggle retro sound effects"
           >
-            {soundOn ? <Volume2 className="w-3.5 h-3.5 text-[#2e7d32]" /> : <VolumeX className="w-3.5 h-3.5 text-[#6b5443]" />}
-            <span className="hidden sm:inline">{soundOn ? 'SFX ON' : 'SFX OFF'}</span>
+            {soundOn ? <Volume2 className="w-4 h-4 text-[#2e7d32]" /> : <VolumeX className="w-4 h-4 text-[#8c7460]" />}
           </button>
-
-          {/* Admin Shield Button */}
-          {isAdmin && (
-            <button
-              onClick={() => {
-                soundEffects.playClickSound();
-                handleTabClick('admin');
-              }}
-              className={`px-2.5 py-1.5 border-2 border-[#24140a] text-xs font-dot font-bold flex items-center space-x-1 transition-all shadow-[2px_2px_0px_#24140a] ${
-                activeTab === 'admin'
-                  ? 'bg-[#d83a2a] text-white'
-                  : 'bg-[#d48818] hover:bg-[#bb7410] text-[#24140a]'
-              }`}
-              title="Admin Dashboard & 10-Epoch Matrix"
-            >
-              <Shield className="w-3.5 h-3.5 fill-current" />
-              <span>ADMIN</span>
-            </button>
-          )}
 
           {/* Connect / Connected Wallet Button */}
           {isConnected ? (
             <button
               onClick={disconnectWallet}
-              className="paper-btn-gold px-3 py-1.5 text-xs sm:text-sm flex items-center space-x-2"
+              className="paper-btn-gold px-2.5 sm:px-3 py-1.5 text-xs font-bold flex items-center space-x-1.5"
               title="Connected Wallet — Click to Disconnect"
             >
-              <span className="w-2 h-2 bg-[#2e7d32] border border-[#24140a]" />
-              <span className="font-dot font-bold">{address.slice(0, 6)}...{address.slice(-4)}</span>
+              <span className="w-2 h-2 rounded-full bg-[#2e7d32] inline-block shadow-[0_0_4px_#2e7d32]" />
+              <span>{address.slice(0, 6)}...{address.slice(-4)}</span>
             </button>
           ) : (
             <button
               onClick={connectWallet}
-              className="paper-btn-red px-4 py-1.5 text-sm sm:text-base flex items-center space-x-2"
+              className="paper-btn-red px-3 sm:px-4 py-1.5 text-xs font-bold flex items-center space-x-1.5"
             >
-              <Wallet className="w-4 h-4" />
-              <span>CONNECT WALLET</span>
+              <Wallet className="w-3.5 h-3.5" />
+              <span>CONNECT</span>
+            </button>
+          )}
+
+          {/* Mobile Menu Toggle Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-1.5 bg-[#eee2ca] border-2 border-[#24140a] text-[#24140a] shadow-[1px_1px_0px_#24140a] hover:bg-[#e4d3b4]"
+            aria-label="Toggle mobile menu"
+          >
+            {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Clean Mobile Dropdown Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t-2 border-[#24140a] bg-[#fdfbf7] px-4 py-3 space-y-2 shadow-lg text-xs">
+          <button
+            onClick={() => {
+              handleTabClick('mining');
+              setTimeout(() => {
+                document.getElementById('miner-rig-section')?.scrollIntoView({ behavior: 'smooth' });
+              }, 50);
+            }}
+            className={`w-full text-left px-3 py-2 uppercase font-bold transition-all ${
+              activeTab === 'mining'
+                ? 'bg-[#24140a] text-[#fdfbf7]'
+                : 'text-[#6b5443] hover:bg-[#eee2ca] text-[#24140a]'
+            }`}
+          >
+            Forge Rig
+          </button>
+          <button
+            onClick={() => {
+              soundEffects.playClickSound();
+              setMobileMenuOpen(false);
+              if (activeTab !== 'mining') {
+                setActiveTab('mining');
+                setTimeout(() => {
+                  document.getElementById('collection-section')?.scrollIntoView({ behavior: 'smooth' });
+                }, 50);
+              } else {
+                document.getElementById('collection-section')?.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+            className="w-full text-left px-3 py-2 text-[#6b5443] hover:bg-[#eee2ca] hover:text-[#24140a] uppercase font-bold transition-all"
+          >
+            Dossier
+          </button>
+          <button
+            onClick={() => {
+              soundEffects.playClickSound();
+              setMobileMenuOpen(false);
+              if (activeTab !== 'mining') {
+                setActiveTab('mining');
+                setTimeout(() => {
+                  document.getElementById('epochs-section')?.scrollIntoView({ behavior: 'smooth' });
+                }, 50);
+              } else {
+                document.getElementById('epochs-section')?.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+            className="w-full text-left px-3 py-2 text-[#6b5443] hover:bg-[#eee2ca] hover:text-[#24140a] uppercase font-bold transition-all"
+          >
+            10 Stages
+          </button>
+          <button
+            onClick={() => handleTabClick('docs')}
+            className={`w-full text-left px-3 py-2 uppercase font-bold transition-all ${
+              activeTab === 'docs'
+                ? 'bg-[#24140a] text-[#fdfbf7]'
+                : 'text-[#6b5443] hover:bg-[#eee2ca] text-[#24140a]'
+            }`}
+          >
+            Docs
+          </button>
+          {isAdmin && (
+            <button
+              onClick={() => handleTabClick('admin')}
+              className={`w-full text-left px-3 py-2 uppercase font-bold transition-all flex items-center gap-2 ${
+                activeTab === 'admin'
+                  ? 'bg-[#d83a2a] text-white'
+                  : 'text-[#d48818] hover:bg-[#eee2ca]'
+              }`}
+            >
+              <Shield className="w-3.5 h-3.5 fill-current" />
+              <span>Admin Dashboard</span>
             </button>
           )}
         </div>
-      </div>
+      )}
     </header>
   );
 };
