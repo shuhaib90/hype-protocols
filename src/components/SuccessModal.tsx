@@ -28,7 +28,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
   if (!proof) return null;
 
   const feeToPay = currentEpoch ? currentEpoch.mintFeeEth : 0.0020;
-  const expectedToken = targetTokenId || (currentEpoch ? currentEpoch.startToken + (currentEpoch.minedInEpoch || 0) : 4);
+  const expectedToken = targetTokenId || (currentEpoch ? currentEpoch.startToken + (currentEpoch.minedInEpoch || 0) : 1);
 
   const handleMint = async () => {
     soundEffects.playClickSound();
@@ -51,6 +51,10 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
     const sec = (s % 60).toString().padStart(2, '0');
     return `${m}:${sec}`;
   };
+
+  const formattedBalance = nativeHypeBalance < 0.001 
+    ? nativeHypeBalance.toFixed(6) 
+    : nativeHypeBalance.toFixed(4);
 
   return (
     <div className="fixed inset-0 z-50 bg-[#24140a]/75 backdrop-blur-sm flex items-center justify-center p-4">
@@ -78,24 +82,24 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
         <div className="p-6 space-y-4 bg-[#fdfbf7] font-dot">
           <div className="p-4 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
             <div className="text-xs text-[#2e7d32] font-bold uppercase tracking-wider mb-3 flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4" />
+              <ShieldCheck className="w-4 h-4 text-[#2e7d32]" />
               <span>VALID PROOF-OF-WORK DISCOVERED</span>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-bold">
-              <div className="bg-[#fdfbf7] p-2 border border-[#24140a]">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+              <div className="bg-[#fdfbf7] p-2 border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
                 <span className="text-[#6b5443] text-[10px] uppercase block font-bold">TIME</span>
-                <span className="text-[#24140a] font-bold">{formatSecs(proof.timeElapsedSeconds)}</span>
+                <span className="font-mono font-bold text-[#24140a]">{formatSecs(proof.elapsedSecs)}</span>
               </div>
-              <div className="bg-[#fdfbf7] p-2 border border-[#24140a]">
+              <div className="bg-[#fdfbf7] p-2 border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
                 <span className="text-[#6b5443] text-[10px] uppercase block font-bold">WORKERS</span>
-                <span className="text-[#19638b] font-bold">{proof.workersUsed} / 5</span>
+                <span className="font-mono font-bold text-[#24140a]">{proof.workerId} / 5</span>
               </div>
-              <div className="bg-[#fdfbf7] p-2 border border-[#24140a]">
+              <div className="bg-[#fdfbf7] p-2 border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
                 <span className="text-[#6b5443] text-[10px] uppercase block font-bold">HASHRATE</span>
-                <span className="text-[#2e7d32] font-bold">{proof.averageHashrate} MH/s</span>
+                <span className="font-mono font-bold text-[#2e7d32]">{proof.hashrate.toFixed(2)} MH/s</span>
               </div>
-              <div className="bg-[#fdfbf7] p-2 border border-[#24140a]">
+              <div className="bg-[#fdfbf7] p-2 border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
                 <span className="text-[#6b5443] text-[10px] uppercase block font-bold">PROOF ID</span>
                 <span className="text-[#24140a] font-bold">{proof.proofId}</span>
               </div>
@@ -122,7 +126,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
               </div>
             </div>
             <p className="text-xs text-[#6b5443] leading-relaxed font-medium">
-              Your valid proof unlocks exactly 1 HashApe NFT mint entitlement in <strong className="text-[#24140a] font-bold">{currentEpoch?.name || 'Active Epoch'}</strong> (Token #{expectedToken}). Mint fee is strictly <strong className="text-[#d83a2a] font-bold">${currentEpoch?.mintFeeUsd || 5} ETH</strong>.
+              Your valid proof unlocks exactly 1 HashApe NFT mint entitlement in <strong className="text-[#24140a] font-bold">{currentEpoch?.name || 'Active Epoch'}</strong> (Token #{expectedToken}). Mint fee is strictly <strong className="text-[#d83a2a] font-bold">${currentEpoch?.mintFeeUsd || 5} ETH</strong> on Robinhood Chain Mainnet.
             </p>
           </div>
 
@@ -137,7 +141,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
         {/* Footer */}
         <div className="p-4 bg-[#eee2ca] border-t-2 border-[#24140a] flex items-center justify-between font-dot">
           <div className="text-xs text-[#6b5443] font-bold">
-            Balance: <span className="text-[#2e7d32] font-bold">{nativeHypeBalance.toFixed(4)} ETH</span>
+            Balance: <span className="text-[#2e7d32] font-bold">{formattedBalance} ETH</span>
           </div>
           <div className="flex items-center space-x-2.5">
             <button
@@ -158,7 +162,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
               {isMinting ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>BROADCASTING...</span>
+                  <span>BROADCASTING ON-CHAIN...</span>
                 </>
               ) : (
                 <>

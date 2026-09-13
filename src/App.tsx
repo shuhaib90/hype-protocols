@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Navigation } from './components/Navigation';
 import { Hero } from './components/Hero';
 import { WebGPUNotice } from './components/WebGPUNotice';
@@ -15,7 +15,8 @@ import { DocsContent } from './docs/DocsContent';
 import { WebGPUMiningEngine, GPUInfo } from './mining/WebGPUEngine';
 import { getAllWorkerRanges } from './mining/NoncePartition';
 import { MiningStatus, DifficultyBand, WorkerInfo, SupplyInfo, MiningProof, MintReceipt, ProtocolConfig } from './types';
-import { useWallet, ADMIN_WALLET } from './web3/WalletContext';
+import { useWallet, ADMIN_WALLET, OWNER_WALLET, CONTRACT_ADDRESS, RPC_URL } from './web3/WalletContext';
+import { ethers } from 'ethers';
 
 export const App: React.FC = () => {
   const { isConnected, address, activateWorkerOnChain } = useWallet();
@@ -49,12 +50,12 @@ export const App: React.FC = () => {
 
   // Authoritative Protocol Supply
   const [supply, setSupply] = useState<SupplyInfo>({
-    totalMined: 3,
+    totalMined: 0,
     maxSupply: 10000,
-    remaining: 9997,
+    remaining: 10000,
     difficultyBand: 'HARD',
     currentTargetHex: '0x00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
-    percentMined: 0.03,
+    percentMined: 0.0,
     walletCap: 5,
     currentEpoch: {
       id: 1,
@@ -67,10 +68,10 @@ export const App: React.FC = () => {
       mintFeeApe: 5,
       difficulty: 'HARD',
       target: '0x00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
-      nextToken: 4,
-      minedInEpoch: 3,
-      remainingInEpoch: 7,
-      percentInEpoch: 30.0,
+      nextToken: 1,
+      minedInEpoch: 0,
+      remainingInEpoch: 10,
+      percentInEpoch: 0.0,
       nextEpoch: {
         id: 2,
         name: 'EPOCH 2 (ASCENSION)',
@@ -110,6 +111,75 @@ export const App: React.FC = () => {
 
   const miningEngineRef = useRef<WebGPUMiningEngine | null>(null);
 
+  // Sync Live On-Chain State from Smart Contract
+  const syncOnChainState = useCallback(async (userAddr?: string) => {
+    try {
+      const provider = new ethers.JsonRpcProvider(RPC_URL);
+      const contract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        [
+          'function totalMined() view returns (uint256)',
+          'function currentChallenge() view returns (bytes32)',
+          'function getEpoch(uint256 tokenId) view returns (tuple(uint256 id, uint256 startToken, uint256 endToken, uint256 mintFeeWei, uint256 feeUsd, uint256 target, string name))',
+          'function isWorkerActive(address user, uint8 workerIndex) view returns (bool)',
+          'function workerActivationCost(uint256) view returns (uint256)'
+        ],
+        provider
+      );
+
+      const onChainMinedBig = await contract.totalMined();
+      const onChainMined = Number(onChainMinedBig);
+      const nextTokenId = onChainMined + 1;
+      const onChainEpoch = await contract.getEpoch(nextTokenId <= 10000 ? nextTokenId : 10000);
+
+      const feeEth = Number(parseFloat(ethers.formatEther(onChainEpoch.mintFeeWei)).toFixed(4));
+      const feeUsd = Number(onChainEpoch.feeUsd);
+
+      setSupply((prev) => ({
+        ...prev,
+        totalMined: onChainMined,
+        remaining: Math.max(0, 10000 - onChainMined),
+        percentMined: Number(((onChainMined / 10000) * 100).toFixed(2)),
+        currentEpoch: {
+          id: Number(onChainEpoch.id),
+          name: onChainEpoch.name,
+          startToken: Number(onChainEpoch.startToken),
+          endToken: Number(onChainEpoch.endToken),
+          count: Number(onChainEpoch.endToken - onChainEpoch.startToken + 1),
+          mintFeeUsd: feeUsd,
+          mintFeeEth: feeEth,
+          mintFeeApe: feeUsd,
+          difficulty: 'HARD',
+          target: '0x' + onChainEpoch.target.toString(16).padStart(64, '0'),
+          nextToken: nextTokenId,
+          minedInEpoch: Math.max(0, onChainMined - (Number(onChainEpoch.startToken) - 1)),
+          remainingInEpoch: Math.max(0, Number(onChainEpoch.endToken) - onChainMined),
+          percentInEpoch: Number(((Math.max(0, onChainMined - (Number(onChainEpoch.startToken) - 1)) / Number(onChainEpoch.endToken - onChainEpoch.startToken + 1)) * 100).toFixed(1)),
+        }
+      }));
+
+      // If user address is provided, sync worker entitlements from contract
+      if (userAddr) {
+        const workerChecks = await Promise.all([
+          contract.isWorkerActive(userAddr, 1),
+          contract.isWorkerActive(userAddr, 2),
+          contract.isWorkerActive(userAddr, 3),
+          contract.isWorkerActive(userAddr, 4),
+          contract.isWorkerActive(userAddr, 5),
+        ]);
+
+        setWorkers((prev) =>
+          prev.map((w, idx) => ({
+            ...w,
+            status: workerChecks[idx] ? 'ACTIVE' : 'LOCKED'
+          }))
+        );
+      }
+    } catch (err) {
+      console.warn('Could not sync on-chain state:', err);
+    }
+  }, []);
+
   // Fetch wallet status and escalating tier from backend
   const fetchWalletStatus = async (addr: string) => {
     if (!addr) return;
@@ -136,17 +206,20 @@ export const App: React.FC = () => {
   useEffect(() => {
     if (isConnected && address) {
       fetchWalletStatus(address);
+      syncOnChainState(address);
     } else {
       setWalletMints(0);
       setWalletQuotaCapped(false);
       setWalletDifficultyLabel('HARD (NFT 1/5)');
       setWalletTargetHex('0x00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
+      syncOnChainState();
     }
-  }, [isConnected, address, ledgerRefresh]);
+  }, [isConnected, address, ledgerRefresh, syncOnChainState]);
 
   // Initialize WebGPU detection & backend fetch on mount
   useEffect(() => {
     WebGPUMiningEngine.detectGPU().then(setGpuInfo);
+    syncOnChainState();
 
     // Fetch live supply and config from backend if available
     fetch('/api/config')
@@ -162,18 +235,15 @@ export const App: React.FC = () => {
       .then((r) => r.json())
       .then((data) => {
         if (data.success && data.supply) {
-          setSupply(data.supply);
-          if (data.supply.epochs) {
-            setConfig(prev => ({
-              ...prev,
-              epochs: data.supply.epochs,
-              currentEpoch: data.supply.currentEpoch || prev.currentEpoch,
-            }));
-          }
+          setSupply(prev => ({
+            ...prev,
+            ...data.supply,
+            totalMined: prev.totalMined || data.supply.totalMined,
+          }));
         }
       })
       .catch(() => {});
-  }, []);
+  }, [syncOnChainState]);
 
   // Initialize Mining Engine
   useEffect(() => {
@@ -233,6 +303,10 @@ export const App: React.FC = () => {
     }
 
     try {
+      const provider = new ethers.JsonRpcProvider(RPC_URL);
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, ['function currentChallenge() view returns (bytes32)'], provider);
+      const onChainChallenge = await contract.currentChallenge();
+
       const sessionRes = await fetch('/api/mining/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -247,7 +321,7 @@ export const App: React.FC = () => {
         }
       }
 
-      const challenge = sessionData.session?.challenge || '0x4f82c9e17b8120dca3491f0923eab9921477610098fcca4930129a0000000000';
+      const challenge = onChainChallenge || sessionData.session?.challenge || '0xb46af2c33fa24c1c27670e585a72800097d9a812bd959955973687b70334a26a';
       const targetHex = sessionData.session?.targetDifficulty || walletTargetHex;
       if (sessionData.session?.difficultyBand) {
         setWalletDifficultyLabel(sessionData.session.difficultyBand);
@@ -265,7 +339,7 @@ export const App: React.FC = () => {
       setIsMining(true);
       setMiningStatus('MINING');
       miningEngineRef.current?.start(
-        '0x4f82c9e17b8120dca3491f0923eab9921477610098fcca4930129a0000000000',
+        '0xb46af2c33fa24c1c27670e585a72800097d9a812bd959955973687b70334a26a',
         address,
         walletTargetHex,
         workers
@@ -283,11 +357,7 @@ export const App: React.FC = () => {
 
   const handleActivateWorker = async (workerId: number, costHype: number) => {
     await activateWorkerOnChain(workerId, costHype);
-
-    // Update worker status
-    setWorkers((prev) =>
-      prev.map((w) => (w.id === workerId ? { ...w, status: 'ACTIVE' } : w))
-    );
+    await syncOnChainState(address);
 
     // Sync to backend
     fetch('/api/workers/activate', {
@@ -297,7 +367,7 @@ export const App: React.FC = () => {
     }).catch(() => {});
   };
 
-  const handleMintSuccess = (tokenId: number, txHash: string) => {
+  const handleMintSuccess = async (tokenId: number, txHash: string) => {
     setLatestProof(null);
     setLatestReceipt({
       tokenId,
@@ -307,17 +377,7 @@ export const App: React.FC = () => {
       proofDigest: latestProof?.hash || '',
     });
 
-    // Increment supply
-    setSupply((prev) => {
-      const newTotal = prev.totalMined + 1;
-      const remaining = Math.max(0, prev.maxSupply - newTotal);
-      return {
-        ...prev,
-        totalMined: newTotal,
-        remaining,
-        percentMined: Number(((newTotal / prev.maxSupply) * 100).toFixed(2)),
-      };
-    });
+    await syncOnChainState(address);
 
     // Record mint on backend
     fetch('/api/mining/record', {
@@ -332,13 +392,7 @@ export const App: React.FC = () => {
       }),
     })
       .then((r) => r.json())
-      .then((data) => {
-        if (data.currentEpoch) {
-          setSupply((prev) => ({
-            ...prev,
-            currentEpoch: data.currentEpoch,
-          }));
-        }
+      .then(() => {
         setLedgerRefresh((prev) => prev + 1);
         if (address) fetchWalletStatus(address);
       })
@@ -349,7 +403,7 @@ export const App: React.FC = () => {
     setLatestProof({
       nonce: rec.nonce,
       hash: rec.solvedHash,
-      challenge: '0x4f82c9e17b8120dca3491f0923eab9921477610098fcca4930129a0000000000',
+      challenge: '0xb46af2c33fa24c1c27670e585a72800097d9a812bd959955973687b70334a26a',
       wallet: rec.wallet,
       difficulty: rec.difficulty || 4,
       timestamp: rec.solvedAt || Date.now(),

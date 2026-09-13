@@ -1,10 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ProtocolConfig } from '../types';
-import { useWallet } from '../web3/WalletContext';
+import {
+  useWallet,
+  CONTRACT_ADDRESS,
+  RIG_ACTIVATION_TOKEN_ADDRESS,
+  RPC_URL,
+  EXPLORER_URL
+} from '../web3/WalletContext';
+import { ethers } from 'ethers';
 import {
   Shield, Check, AlertCircle, ArrowLeft, RefreshCw,
   Coins, Wrench, Flame, Zap, Database, Lock, CheckCircle2,
-  ExternalLink, Layers
+  ExternalLink, Layers, Loader2
 } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
 
@@ -50,11 +57,20 @@ interface AdminDashboardProps {
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   config,
   onUpdateConfig,
-  totalMined = 3,
+  totalMined = 0,
   maxSupply = 10000,
   onBack,
 }) => {
-  const { address, isAdmin } = useWallet();
+  const {
+    address,
+    isAdmin,
+    setEpochMintFeesBatchOnChain,
+    setEpochMintFeeOnChain,
+    setWorkerActivationCostOnChain,
+    claimNativeMintFeesOnChain,
+    claimTokenActivationFeesOnChain,
+  } = useWallet();
+
   const adminAddress = '0xb8E3DfDd19b6Bf35b9Fd87F8373F7f82C53bc93C';
 
   // Treasury State
@@ -64,6 +80,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [claimingRigFees, setClaimingRigFees] = useState(false);
   const [claimSuccessMessage, setClaimSuccessMessage] = useState<string | null>(null);
   const [claimErrorMessage, setClaimErrorMessage] = useState<string | null>(null);
+  const [lastTxHash, setLastTxHash] = useState<string | null>(null);
 
   // Epoch Fees State
   const DEFAULT_10_EPOCHS = [
@@ -90,49 +107,117 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   });
 
   const [isSavingAllEpochs, setIsSavingAllEpochs] = useState(false);
+  const [savingSingleEpochId, setSavingSingleEpochId] = useState<number | null>(null);
   const [epochSuccessMsg, setEpochSuccessMsg] = useState<string | null>(null);
+  const [epochErrorMsg, setEpochErrorMsg] = useState<string | null>(null);
 
   // Worker Cost Controls
   const [worker2Cost, setWorker2Cost] = useState(config.workerCosts[2] || 100);
   const [worker3Cost, setWorker3Cost] = useState(config.workerCosts[3] || 200);
   const [worker4Cost, setWorker4Cost] = useState(config.workerCosts[4] || 300);
   const [worker5Cost, setWorker5Cost] = useState(config.workerCosts[5] || 500);
+  const [isSavingWorkerCosts, setIsSavingWorkerCosts] = useState(false);
   const [workerSavedMsg, setWorkerSavedMsg] = useState<string | null>(null);
+  const [workerErrorMsg, setWorkerErrorMsg] = useState<string | null>(null);
 
-  // Fetch Treasury Data
-  const fetchTreasury = async () => {
+  // Fetch Live On-Chain Treasury & Contract State
+  const fetchTreasury = useCallback(async () => {
     try {
       setLoadingTreasury(true);
-      const res = await fetch('/api/admin/treasury');
-      const data = await res.json();
-      if (data.success) {
-        setTreasury(data.treasury);
-      }
+      const provider = new ethers.JsonRpcProvider(RPC_URL);
+
+      // 1. Live on-chain ETH contract balance
+      const ethBalWei = await provider.getBalance(CONTRACT_ADDRESS);
+      const claimableEth = Number(parseFloat(ethers.formatEther(ethBalWei)).toFixed(4));
+
+      // 2. Live on-chain HASHAPE token contract balance
+      const tokenAbi = ['function balanceOf(address) view returns (uint256)'];
+      const tokenContract = new ethers.Contract(RIG_ACTIVATION_TOKEN_ADDRESS, tokenAbi, provider);
+      let claimableHashApe = 0;
+      try {
+        const tokenBalWei = await tokenContract.balanceOf(CONTRACT_ADDRESS);
+        claimableHashApe = Number(parseFloat(ethers.formatEther(tokenBalWei)).toFixed(2));
+      } catch (_) {}
+
+      // 3. Live on-chain worker costs
+      const nftAbi = [
+        'function workerActivationCost(uint256) view returns (uint256)',
+        'function getEpoch(uint256 tokenId) view returns (tuple(uint256 id, uint256 startToken, uint256 endToken, uint256 mintFeeWei, uint256 feeUsd, uint256 target, string name))',
+        'function totalMined() view returns (uint256)'
+      ];
+      const nftContract = new ethers.Contract(CONTRACT_ADDRESS, nftAbi, provider);
+
+      try {
+        const [w2, w3, w4, w5] = await Promise.all([
+          nftContract.workerActivationCost(2),
+          nftContract.workerActivationCost(3),
+          nftContract.workerActivationCost(4),
+          nftContract.workerActivationCost(5),
+        ]);
+        if (w2) setWorker2Cost(Number(ethers.formatEther(w2)));
+        if (w3) setWorker3Cost(Number(ethers.formatEther(w3)));
+        if (w4) setWorker4Cost(Number(ethers.formatEther(w4)));
+        if (w5) setWorker5Cost(Number(ethers.formatEther(w5)));
+      } catch (_) {}
+
+      // 4. Live on-chain epoch mint fees
+      try {
+        const loadedEpochMap: { [id: number]: number } = {};
+        for (const ep of displayedEpochs) {
+          try {
+            const onChainEp = await nftContract.getEpoch(ep.startToken);
+            if (onChainEp && onChainEp.feeUsd) {
+              loadedEpochMap[ep.id] = Number(onChainEp.feeUsd);
+            }
+          } catch (_) {}
+        }
+        if (Object.keys(loadedEpochMap).length > 0) {
+          setEpochFees(prev => ({ ...prev, ...loadedEpochMap }));
+        }
+      } catch (_) {}
+
+      // 5. Query historical claims from backend API
+      let historicalClaims = [];
+      try {
+        const res = await fetch('/api/admin/treasury');
+        const data = await res.json();
+        if (data.success && data.treasury?.claims) {
+          historicalClaims = data.treasury.claims;
+        }
+      } catch (_) {}
+
+      setTreasury({
+        adminWallet: adminAddress,
+        activationTokenContract: RIG_ACTIVATION_TOKEN_ADDRESS,
+        network: 'Robinhood Chain Mainnet (Chain ID 4663)',
+        mintFees: {
+          totalCollectedEth: claimableEth,
+          claimedEth: 0,
+          claimableEth,
+          mintedCount: totalMined,
+          currency: 'ETH',
+        },
+        rigFees: {
+          totalCollectedHashApe: claimableHashApe,
+          claimedHashApe: 0,
+          claimableHashApe,
+          activatedRigCount: 0,
+          currency: 'HASHAPE',
+        },
+        claims: historicalClaims,
+      });
     } catch (e) {
-      console.error('Failed to load treasury:', e);
+      console.error('Failed to load on-chain treasury:', e);
     } finally {
       setLoadingTreasury(false);
     }
-  };
+  }, [adminAddress, displayedEpochs, totalMined]);
 
   useEffect(() => {
     fetchTreasury();
-  }, []);
+  }, [fetchTreasury]);
 
-  // Update local epoch state if config updates
-  useEffect(() => {
-    if (config.epochs) {
-      setEpochFees(prev => {
-        const next = { ...prev };
-        config.epochs?.forEach(e => {
-          next[e.id] = e.mintFeeUsd;
-        });
-        return next;
-      });
-    }
-  }, [config.epochs]);
-
-  // Handle Claim Mint Fees (ETH)
+  // Handle On-Chain Claim Mint Fees (ETH)
   const handleClaimMintFees = async () => {
     soundEffects.playClickSound();
     setClaimSuccessMessage(null);
@@ -140,29 +225,30 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setClaimingMintFees(true);
 
     try {
-      const res = await fetch('/api/admin/claim-mint-fees', {
+      const txHash = await claimNativeMintFeesOnChain();
+      setLastTxHash(txHash);
+      soundEffects.playProofFoundSound();
+      setClaimSuccessMessage(`On-Chain Claim Confirmed! Tx: ${txHash.slice(0, 14)}...`);
+
+      // Notify backend to log receipt
+      await fetch('/api/admin/claim-mint-fees', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           wallet: address || adminAddress,
+          txHash,
         }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        soundEffects.playProofFoundSound();
-        setClaimSuccessMessage(`Successfully claimed ${data.claim.amount} ETH! Tx: ${data.claim.txHash.slice(0, 14)}...`);
-        if (data.treasury) setTreasury(data.treasury);
-      } else {
-        setClaimErrorMessage(data.error || 'Failed to claim mint fees');
-      }
+      }).catch(() => {});
+
+      await fetchTreasury();
     } catch (e: any) {
-      setClaimErrorMessage(e.message || 'Network error claiming mint fees');
+      setClaimErrorMessage(e.message || 'On-chain claim transaction failed');
     } finally {
       setClaimingMintFees(false);
     }
   };
 
-  // Handle Claim Rig Activation Fees (HASHAPE)
+  // Handle On-Chain Claim Rig Activation Fees (HASHAPE)
   const handleClaimRigFees = async () => {
     soundEffects.playClickSound();
     setClaimSuccessMessage(null);
@@ -170,35 +256,51 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setClaimingRigFees(true);
 
     try {
-      const res = await fetch('/api/admin/claim-rig-fees', {
+      const txHash = await claimTokenActivationFeesOnChain();
+      setLastTxHash(txHash);
+      soundEffects.playProofFoundSound();
+      setClaimSuccessMessage(`On-Chain Token Claim Confirmed! Tx: ${txHash.slice(0, 14)}...`);
+
+      // Notify backend to log receipt
+      await fetch('/api/admin/claim-rig-fees', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           wallet: address || adminAddress,
+          txHash,
         }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        soundEffects.playProofFoundSound();
-        setClaimSuccessMessage(`Successfully claimed ${data.claim.amount} HASHAPE tokens! Tx: ${data.claim.txHash.slice(0, 14)}...`);
-        if (data.treasury) setTreasury(data.treasury);
-      } else {
-        setClaimErrorMessage(data.error || 'Failed to claim rig activation fees');
-      }
+      }).catch(() => {});
+
+      await fetchTreasury();
     } catch (e: any) {
-      setClaimErrorMessage(e.message || 'Network error claiming rig activation fees');
+      setClaimErrorMessage(e.message || 'On-chain token claim transaction failed');
     } finally {
       setClaimingRigFees(false);
     }
   };
 
-  // Handle Batch Save All Epochs
+  // Handle On-Chain Batch Save All 10 Epochs
   const handleSaveAllEpochs = async () => {
     soundEffects.playClickSound();
     setIsSavingAllEpochs(true);
     setEpochSuccessMsg(null);
+    setEpochErrorMsg(null);
 
     try {
+      const epochIds = displayedEpochs.map(e => e.id);
+      const newFeesUsd = displayedEpochs.map(e => Math.round(epochFees[e.id] || e.mintFeeUsd));
+      const newFeesWei = displayedEpochs.map(e => {
+        const usd = epochFees[e.id] || e.mintFeeUsd;
+        const ethVal = (usd / 2500).toFixed(6);
+        return ethers.parseEther(ethVal);
+      });
+
+      const txHash = await setEpochMintFeesBatchOnChain(epochIds, newFeesWei, newFeesUsd);
+      setLastTxHash(txHash);
+      soundEffects.playProofFoundSound();
+      setEpochSuccessMsg(`All 10 epochs confirmed on-chain! Tx: ${txHash.slice(0, 14)}...`);
+
+      // Synchronize backend state with verified on-chain update
       const updates = displayedEpochs.map(e => ({
         id: e.id,
         mintFeeUsd: Number(epochFees[e.id] || e.mintFeeUsd),
@@ -206,55 +308,113 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         mintFeeApe: Number(epochFees[e.id] || e.mintFeeUsd),
       }));
 
-      const res = await fetch('/api/admin/epoch-fees-batch', {
+      await fetch('/api/admin/epoch-fees-batch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           wallet: address || adminAddress,
           epochs: updates,
+          txHash,
         }),
+      }).catch(() => {});
+
+      onUpdateConfig({
+        ...config,
+        epochs: updates,
       });
-      const data = await res.json();
-      if (data.success) {
-        setEpochSuccessMsg('All 10 epoch mint fees successfully updated!');
-        setTimeout(() => setEpochSuccessMsg(null), 4000);
-        if (data.epochs) {
-          onUpdateConfig({
-            ...config,
-            epochs: data.epochs,
-            currentEpoch: data.currentEpoch || config.currentEpoch,
-          });
-        }
-      }
-    } catch (err) {
-      console.error('Failed to batch update epoch fees:', err);
+
+      await fetchTreasury();
+    } catch (err: any) {
+      setEpochErrorMsg(err.message || 'On-chain batch epoch fee update failed');
     } finally {
       setIsSavingAllEpochs(false);
     }
   };
 
-  // Handle Save Worker Blade Costs
-  const handleSaveWorkerCosts = () => {
+  // Handle On-Chain Save Single Epoch
+  const handleSaveSingleEpoch = async (epochId: number) => {
     soundEffects.playClickSound();
-    onUpdateConfig({
-      ...config,
-      workerCosts: {
-        1: 0,
-        2: worker2Cost,
-        3: worker3Cost,
-        4: worker4Cost,
-        5: worker5Cost,
-      },
-    });
-    setWorkerSavedMsg('Worker blade activation pricing saved!');
-    setTimeout(() => setWorkerSavedMsg(null), 3000);
+    setSavingSingleEpochId(epochId);
+    setEpochSuccessMsg(null);
+    setEpochErrorMsg(null);
+
+    try {
+      const usdVal = Math.round(epochFees[epochId] || 5);
+      const ethVal = (usdVal / 2500).toFixed(6);
+      const feeWei = ethers.parseEther(ethVal);
+
+      const txHash = await setEpochMintFeeOnChain(epochId, feeWei, usdVal);
+      setLastTxHash(txHash);
+      soundEffects.playProofFoundSound();
+      setEpochSuccessMsg(`Epoch #${epochId} updated on-chain to $${usdVal} ETH! Tx: ${txHash.slice(0, 14)}...`);
+
+      await fetch('/api/admin/epoch-fee', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          wallet: address || adminAddress,
+          epochId,
+          mintFeeUsd: usdVal,
+          mintFeeEth: Number(ethVal),
+          txHash,
+        }),
+      }).catch(() => {});
+
+      await fetchTreasury();
+    } catch (err: any) {
+      setEpochErrorMsg(err.message || `On-chain fee update failed for Epoch #${epochId}`);
+    } finally {
+      setSavingSingleEpochId(null);
+    }
+  };
+
+  // Handle On-Chain Save Worker Blade Costs
+  const handleSaveWorkerCosts = async () => {
+    soundEffects.playClickSound();
+    setIsSavingWorkerCosts(true);
+    setWorkerSavedMsg(null);
+    setWorkerErrorMsg(null);
+
+    try {
+      const bladeCosts = [
+        { index: 2, cost: worker2Cost },
+        { index: 3, cost: worker3Cost },
+        { index: 4, cost: worker4Cost },
+        { index: 5, cost: worker5Cost },
+      ];
+
+      for (const blade of bladeCosts) {
+        const txHash = await setWorkerActivationCostOnChain(blade.index, blade.cost);
+        setLastTxHash(txHash);
+      }
+
+      soundEffects.playProofFoundSound();
+      setWorkerSavedMsg('Worker blade activation costs confirmed on-chain!');
+
+      onUpdateConfig({
+        ...config,
+        workerCosts: {
+          1: 0,
+          2: worker2Cost,
+          3: worker3Cost,
+          4: worker4Cost,
+          5: worker5Cost,
+        },
+      });
+
+      await fetchTreasury();
+    } catch (err: any) {
+      setWorkerErrorMsg(err.message || 'Failed to update worker blade pricing on-chain');
+    } finally {
+      setIsSavingWorkerCosts(false);
+    }
   };
 
   const claimableEth = treasury?.mintFees?.claimableEth ?? 0;
   const claimableHashApe = treasury?.rigFees?.claimableHashApe ?? 0;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-in fade-in duration-200">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-in fade-in duration-200 font-dot">
       {/* Top Dispatch Navigation Banner */}
       <div className="paper-chassis bg-[#eee2ca] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center space-x-3">
@@ -263,86 +423,77 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               soundEffects.playClickSound();
               onBack();
             }}
-            className="paper-btn-kraft px-3 py-1.5 text-xs font-dot font-bold flex items-center space-x-1.5"
+            className="paper-btn-kraft px-3 py-1.5 text-xs font-bold flex items-center space-x-1"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>RETURN TO MINING RIG</span>
+            <ArrowLeft className="w-4 h-4" />
+            <span>RETURN TO RIG</span>
           </button>
-          <div className="h-6 w-[2px] bg-[#24140a]" />
-          <div className="flex items-center space-x-2">
-            <Shield className="w-5 h-5 text-[#d83a2a]" />
-            <span className="font-jersey text-2xl text-[#24140a] uppercase tracking-wider">
-              ADMIN PROTOCOL DASHBOARD
-            </span>
+          <div>
+            <div className="flex items-center space-x-2">
+              <Shield className="w-5 h-5 text-[#d83a2a]" />
+              <h1 className="font-jersey text-2xl text-[#24140a] uppercase tracking-wider">
+                HYPEVM PROTOCOL ADMIN & TREASURY
+              </h1>
+            </div>
+            <p className="text-xs text-[#6b5443]">
+              Robinhood Chain Mainnet (Chain ID 4663) // Real On-Chain Contract Controls
+            </p>
           </div>
         </div>
-
-        <div className="flex items-center space-x-3 text-xs font-dot font-bold">
-          <span className="text-[#24140a] bg-[#fdfbf7] px-2.5 py-1 border border-[#24140a] shadow-[1px_1px_0px_#24140a]">
-            ROBINHOOD EVM L2
-          </span>
-          <span className="text-[#2e7d32] bg-[#fdfbf7] px-2.5 py-1 border border-[#24140a] shadow-[1px_1px_0px_#24140a] flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#2e7d32] inline-block animate-pulse" />
-            SECURE MASTER DISPATCH
-          </span>
-        </div>
-      </div>
-
-      {/* Admin Authorization Status Bar */}
-      <div className="p-3 bg-[#fdfbf7] border-2 border-[#24140a] shadow-[2px_2px_0px_#24140a] flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
-        <div className="flex items-center space-x-2 flex-wrap">
-          <span className="bg-[#eee2ca] px-2 py-0.5 border border-[#24140a] font-bold text-[#24140a] uppercase font-dot">
-            CREATOR & FEE RECIPIENT
-          </span>
-          <code className="text-[#d83a2a] font-bold select-all bg-[#eee2ca] px-2 py-0.5 border border-[#24140a]">
-            {adminAddress}
-          </code>
-        </div>
-        <div className="flex items-center space-x-2 text-[11px] font-dot font-bold">
-          <span className="text-[#24140a]">OPEN_SEA ROYALTY:</span>
-          <span className="text-[#d48818] bg-[#eee2ca] px-2 py-0.5 border border-[#24140a]">
+        <div className="flex items-center space-x-2 text-[11px] font-bold">
+          <span className="text-[#24140a]">ROYALTY:</span>
+          <span className="text-[#d48818] bg-[#fdfbf7] px-2 py-0.5 border border-[#24140a]">
             5.0% (500 BPS)
           </span>
           {isAdmin ? (
-            <span className="text-[#2e7d32] bg-[#eee2ca] px-2 py-0.5 border border-[#24140a]">
-              ✓ AUTHORIZED ADMIN
+            <span className="text-[#2e7d32] bg-[#fdfbf7] px-2 py-0.5 border border-[#24140a]">
+              ✓ AUTHORIZED ADMIN ({address.slice(0, 6)}...{address.slice(-4)})
             </span>
           ) : (
-            <span className="text-[#6b5443] bg-[#eee2ca] px-2 py-0.5 border border-[#24140a]">
-              READ-ONLY MODE (CONNECTED: {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'DISCONNECTED'})
+            <span className="text-[#d83a2a] bg-[#fdfbf7] px-2 py-0.5 border border-[#24140a]">
+              READ-ONLY MODE (CONNECT ADMIN WALLET)
             </span>
           )}
         </div>
       </div>
 
+      {/* Explorer Link & Last Tx Banner */}
+      {lastTxHash && (
+        <div className="p-3 bg-[#eee2ca] border-2 border-[#19638b] text-xs text-[#19638b] font-bold flex items-center justify-between shadow-[2px_2px_0px_#24140a]">
+          <div className="flex items-center space-x-2">
+            <ExternalLink className="w-4 h-4 text-[#19638b]" />
+            <span>Last On-Chain Transaction: <code className="text-[#24140a]">{lastTxHash}</code></span>
+          </div>
+          <a
+            href={`${EXPLORER_URL}/tx/${lastTxHash}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-[#24140a] flex items-center space-x-1"
+          >
+            <span>VIEW ON EXPLORER</span>
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        </div>
+      )}
+
       {/* Notification Banners */}
       {claimSuccessMessage && (
-        <div className="p-3.5 bg-[#eee2ca] border-2 border-[#2e7d32] text-xs font-dot text-[#2e7d32] font-bold flex items-center justify-between shadow-[2px_2px_0px_#24140a]">
+        <div className="p-3.5 bg-[#eee2ca] border-2 border-[#2e7d32] text-xs text-[#2e7d32] font-bold flex items-center justify-between shadow-[2px_2px_0px_#24140a]">
           <div className="flex items-center space-x-2">
             <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-[#2e7d32]" />
             <span>{claimSuccessMessage}</span>
           </div>
-          <button
-            onClick={() => setClaimSuccessMessage(null)}
-            className="text-[#24140a] hover:text-[#d83a2a] text-xs"
-          >
-            ✕
-          </button>
+          <button onClick={() => setClaimSuccessMessage(null)} className="text-[#24140a] hover:text-[#d83a2a] text-xs">✕</button>
         </div>
       )}
 
       {claimErrorMessage && (
-        <div className="p-3.5 bg-[#eee2ca] border-2 border-[#d83a2a] text-xs font-dot text-[#d83a2a] font-bold flex items-center justify-between shadow-[2px_2px_0px_#24140a]">
+        <div className="p-3.5 bg-[#eee2ca] border-2 border-[#d83a2a] text-xs text-[#d83a2a] font-bold flex items-center justify-between shadow-[2px_2px_0px_#24140a]">
           <div className="flex items-center space-x-2">
             <AlertCircle className="w-4 h-4 flex-shrink-0 text-[#d83a2a]" />
             <span>{claimErrorMessage}</span>
           </div>
-          <button
-            onClick={() => setClaimErrorMessage(null)}
-            className="text-[#24140a] hover:text-[#d83a2a] text-xs"
-          >
-            ✕
-          </button>
+          <button onClick={() => setClaimErrorMessage(null)} className="text-[#24140a] hover:text-[#d83a2a] text-xs">✕</button>
         </div>
       )}
 
@@ -352,16 +503,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <div className="flex items-center space-x-2">
             <Coins className="w-4 h-4 text-[#24140a]" />
             <span className="font-jersey text-base text-[#24140a] tracking-wider uppercase">
-              PROTOCOL TREASURY & ADMIN FEE CLAIM VAULTS
+              PROTOCOL TREASURY & ON-CHAIN FEE CLAIM VAULTS
             </span>
           </div>
           <button
             onClick={fetchTreasury}
             disabled={loadingTreasury}
-            className="paper-btn-kraft px-2 py-0.5 text-[11px] font-dot font-bold flex items-center space-x-1"
+            className="paper-btn-kraft px-2 py-0.5 text-[11px] font-bold flex items-center space-x-1"
           >
             <RefreshCw className={`w-3 h-3 ${loadingTreasury ? 'animate-spin' : ''}`} />
-            <span>REFRESH BALANCES</span>
+            <span>REFRESH ON-CHAIN STATE</span>
           </button>
         </div>
 
@@ -377,41 +528,32 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       MINT FEE VAULT (ETH)
                     </span>
                   </div>
-                  <span className="text-[10px] font-dot font-bold bg-[#fdfbf7] px-2 py-0.5 border border-[#24140a] text-[#19638b]">
-                    ROBINHOOD L2
+                  <span className="text-[10px] font-bold bg-[#fdfbf7] px-2 py-0.5 border border-[#24140a] text-[#19638b]">
+                    ROBINHOOD MAINNET
                   </span>
                 </div>
 
-                <p className="text-xs font-dot text-[#6b5443] font-medium leading-relaxed">
-                  Accumulated from all PoW manual mint fees across Epochs 1 through 10. Automatically routed to the creator admin wallet on Robinhood EVM L2.
+                <p className="text-xs text-[#6b5443] font-medium leading-relaxed">
+                  Direct contract balance accumulated from PoW mint fees across Epochs 1 through 10. Claiming executes <code className="text-[#24140a] font-bold">claimNativeMintFees()</code> directly on-chain.
                 </p>
 
                 <div className="p-2 bg-[#fdfbf7] border border-[#24140a] text-[10px] font-mono">
-                  <span className="text-[#6b5443] block uppercase font-dot font-bold">DEPLOYED NFT CONTRACT (CHAIN 4663):</span>
-                  <code className="text-[#19638b] font-bold select-all">
-                    0x7D959C29aa1098d93b307Ca40bEEEc0bF7bbfF85
-                  </code>
+                  <span className="text-[#6b5443] block uppercase font-bold">DEPLOYED NFT CONTRACT (CHAIN 4663):</span>
+                  <code className="text-[#19638b] font-bold select-all">{CONTRACT_ADDRESS}</code>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 pt-2">
+                <div className="grid grid-cols-2 gap-2 pt-2">
                   <div className="bg-[#fdfbf7] p-2.5 border-2 border-[#24140a]">
-                    <span className="text-[9px] font-dot text-[#6b5443] block uppercase font-bold">TOTAL COLLECTED</span>
+                    <span className="text-[9px] text-[#6b5443] block uppercase font-bold">CONTRACT ON-CHAIN BALANCE</span>
                     <span className="text-base font-jersey font-bold text-[#24140a]">
-                      {treasury?.mintFees?.totalCollectedEth ?? '0.0060'} <span className="text-xs font-dot text-[#d83a2a]">ETH</span>
-                    </span>
-                  </div>
-
-                  <div className="bg-[#fdfbf7] p-2.5 border-2 border-[#24140a]">
-                    <span className="text-[9px] font-dot text-[#6b5443] block uppercase font-bold">CLAIMED TO DATE</span>
-                    <span className="text-base font-jersey font-bold text-[#6b5443]">
-                      {treasury?.mintFees?.claimedEth ?? '0.0000'} <span className="text-xs font-dot text-[#6b5443]">ETH</span>
+                      {claimableEth} <span className="text-xs text-[#d83a2a]">ETH</span>
                     </span>
                   </div>
 
                   <div className="bg-[#fdfbf7] p-2.5 border-2 border-[#2e7d32]">
-                    <span className="text-[9px] font-dot text-[#2e7d32] block uppercase font-bold">CLAIMABLE BALANCE</span>
+                    <span className="text-[9px] text-[#2e7d32] block uppercase font-bold">CLAIMABLE BY ADMIN</span>
                     <span className="text-base font-jersey font-bold text-[#2e7d32]">
-                      {claimableEth} <span className="text-xs font-dot text-[#2e7d32]">ETH</span>
+                      {claimableEth} <span className="text-xs text-[#2e7d32]">ETH</span>
                     </span>
                   </div>
                 </div>
@@ -420,19 +562,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <div className="pt-5 mt-4 border-t-2 border-[#24140a]">
                 <button
                   onClick={handleClaimMintFees}
-                  disabled={claimingMintFees || claimableEth <= 0}
+                  disabled={claimingMintFees || claimableEth <= 0 || !isAdmin}
                   className={`w-full py-2.5 text-sm font-bold flex items-center justify-center space-x-2 transition-all ${
-                    claimableEth > 0
+                    claimableEth > 0 && isAdmin
                       ? 'paper-btn-red text-white'
                       : 'paper-btn-kraft opacity-60 cursor-not-allowed text-[#6b5443]'
                   }`}
                 >
-                  <Coins className="w-4 h-4" />
+                  {claimingMintFees ? <Loader2 className="w-4 h-4 animate-spin" /> : <Coins className="w-4 h-4" />}
                   <span>
                     {claimingMintFees
-                      ? 'TRANSFERRING ETH TO ADMIN...'
+                      ? 'CONFIRMING ON-CHAIN TRANSACTION...'
                       : claimableEth > 0
-                      ? `CLAIM MINT FEES (${claimableEth} ETH)`
+                      ? `CLAIM MINT FEES ON-CHAIN (${claimableEth} ETH)`
                       : 'ZERO CLAIMABLE MINT FEES'}
                   </span>
                 </button>
@@ -449,41 +591,32 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       RIG ACTIVATION VAULT (HASHAPE)
                     </span>
                   </div>
-                  <span className="text-[10px] font-dot font-bold bg-[#fdfbf7] px-2 py-0.5 border border-[#24140a] text-[#d48818]">
+                  <span className="text-[10px] font-bold bg-[#fdfbf7] px-2 py-0.5 border border-[#24140a] text-[#d48818]">
                     ERC-20 TOKEN
                   </span>
                 </div>
 
-                <p className="text-xs font-dot text-[#6b5443] font-medium leading-relaxed">
-                  Collected whenever miners unlock additional hardware Blades #2–#5 using official HashApe token contract.
+                <p className="text-xs text-[#6b5443] font-medium leading-relaxed">
+                  Collected on-chain when users unlock Workers #2 through #5. Claiming executes <code className="text-[#24140a] font-bold">claimTokenActivationFees()</code> to dispatch tokens to admin.
                 </p>
 
                 <div className="p-2 bg-[#fdfbf7] border border-[#24140a] text-[10px] font-mono">
-                  <span className="text-[#6b5443] block uppercase font-dot font-bold">TOKEN CONTRACT FOR ACTIVE RIG:</span>
-                  <code className="text-[#d83a2a] font-bold select-all">
-                    0x30E55c3cfB2BBe5d0B07051e0B15c8a532c45ecc
-                  </code>
+                  <span className="text-[#6b5443] block uppercase font-bold">ACTIVATION TOKEN CONTRACT:</span>
+                  <code className="text-[#19638b] font-bold select-all">{RIG_ACTIVATION_TOKEN_ADDRESS}</code>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 pt-1">
+                <div className="grid grid-cols-2 gap-2 pt-2">
                   <div className="bg-[#fdfbf7] p-2.5 border-2 border-[#24140a]">
-                    <span className="text-[9px] font-dot text-[#6b5443] block uppercase font-bold">TOTAL COLLECTED</span>
+                    <span className="text-[9px] text-[#6b5443] block uppercase font-bold">CONTRACT TOKEN HOLDINGS</span>
                     <span className="text-base font-jersey font-bold text-[#24140a]">
-                      {treasury?.rigFees?.totalCollectedHashApe ?? 0} <span className="text-xs font-dot text-[#d48818]">$APE</span>
-                    </span>
-                  </div>
-
-                  <div className="bg-[#fdfbf7] p-2.5 border-2 border-[#24140a]">
-                    <span className="text-[9px] font-dot text-[#6b5443] block uppercase font-bold">CLAIMED TO DATE</span>
-                    <span className="text-base font-jersey font-bold text-[#6b5443]">
-                      {treasury?.rigFees?.claimedHashApe ?? 0} <span className="text-xs font-dot text-[#6b5443]">$APE</span>
+                      {claimableHashApe} <span className="text-xs text-[#d48818]">$HASHAPE</span>
                     </span>
                   </div>
 
                   <div className="bg-[#fdfbf7] p-2.5 border-2 border-[#2e7d32]">
-                    <span className="text-[9px] font-dot text-[#2e7d32] block uppercase font-bold">CLAIMABLE BALANCE</span>
+                    <span className="text-[9px] text-[#2e7d32] block uppercase font-bold">CLAIMABLE BY ADMIN</span>
                     <span className="text-base font-jersey font-bold text-[#2e7d32]">
-                      {claimableHashApe} <span className="text-xs font-dot text-[#2e7d32]">$APE</span>
+                      {claimableHashApe} <span className="text-xs text-[#2e7d32]">$HASHAPE</span>
                     </span>
                   </div>
                 </div>
@@ -492,81 +625,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <div className="pt-5 mt-4 border-t-2 border-[#24140a]">
                 <button
                   onClick={handleClaimRigFees}
-                  disabled={claimingRigFees || claimableHashApe <= 0}
+                  disabled={claimingRigFees || claimableHashApe <= 0 || !isAdmin}
                   className={`w-full py-2.5 text-sm font-bold flex items-center justify-center space-x-2 transition-all ${
-                    claimableHashApe > 0
+                    claimableHashApe > 0 && isAdmin
                       ? 'paper-btn-gold text-[#24140a]'
                       : 'paper-btn-kraft opacity-60 cursor-not-allowed text-[#6b5443]'
                   }`}
                 >
-                  <Coins className="w-4 h-4" />
+                  {claimingRigFees ? <Loader2 className="w-4 h-4 animate-spin" /> : <Coins className="w-4 h-4" />}
                   <span>
                     {claimingRigFees
-                      ? 'TRANSFERRING HASHAPE TO ADMIN...'
+                      ? 'CONFIRMING ON-CHAIN TRANSACTION...'
                       : claimableHashApe > 0
-                      ? `CLAIM RIG ACTIVATION FEES (${claimableHashApe} HASHAPE)`
+                      ? `CLAIM RIG FEES ON-CHAIN (${claimableHashApe} HASHAPE)`
                       : 'ZERO CLAIMABLE RIG FEES'}
                   </span>
                 </button>
               </div>
             </div>
-          </div>
-
-          {/* Past Fee Claims Receipts Ledger */}
-          <div className="border-t-2 border-[#24140a] pt-4">
-            <div className="flex items-center justify-between mb-3 text-xs font-dot">
-              <span className="font-bold text-[#24140a] uppercase">RECENT TREASURY DISPATCH RECEIPTS</span>
-              <span className="text-[#6b5443]">{(treasury?.claims || []).length} DISPATCHES LOGGED</span>
-            </div>
-
-            {(treasury?.claims || []).length > 0 ? (
-              <div className="overflow-x-auto border-2 border-[#24140a]">
-                <table className="w-full text-left text-xs font-mono">
-                  <thead className="bg-[#eee2ca] border-b-2 border-[#24140a] text-[11px] font-dot font-bold">
-                    <tr>
-                      <th className="p-2">RECEIPT ID</th>
-                      <th className="p-2">VAULT ASSET</th>
-                      <th className="p-2">AMOUNT CLAIMED</th>
-                      <th className="p-2">DESTINATION</th>
-                      <th className="p-2">TRANSACTION HASH</th>
-                      <th className="p-2">TIMESTAMP</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#24140a] bg-[#fdfbf7]">
-                    {(treasury?.claims || []).map((c) => (
-                      <tr key={c.id} className="hover:bg-[#f5ebd7]">
-                        <td className="p-2 text-[#24140a] font-bold">{c.id}</td>
-                        <td className="p-2">
-                          <span className={`px-1.5 py-0.5 border text-[10px] font-bold ${
-                            c.type === 'MINT_FEES_ETH'
-                              ? 'bg-[#19638b]/10 border-[#19638b] text-[#19638b]'
-                              : 'bg-[#d48818]/10 border-[#d48818] text-[#d48818]'
-                          }`}>
-                            {c.currency}
-                          </span>
-                        </td>
-                        <td className="p-2 font-bold text-[#2e7d32]">
-                          +{c.amount} {c.currency}
-                        </td>
-                        <td className="p-2 text-[#6b5443] truncate max-w-[120px]" title={c.recipient}>
-                          {c.recipient.slice(0, 6)}...{c.recipient.slice(-4)}
-                        </td>
-                        <td className="p-2 text-[#d83a2a] truncate max-w-[140px]" title={c.txHash}>
-                          {c.txHash.slice(0, 10)}...
-                        </td>
-                        <td className="p-2 text-[#6b5443] text-[11px]">
-                          {new Date(c.timestamp).toLocaleString()}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="p-4 bg-[#eee2ca] border-2 border-dashed border-[#24140a] text-center text-xs font-dot text-[#6b5443]">
-                No claims dispatched yet. All collected fees are securely held in the on-chain protocol vault.
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -577,33 +653,38 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <div className="flex items-center space-x-2">
             <Layers className="w-4 h-4 text-white" />
             <span className="font-jersey text-base tracking-wider uppercase text-white">
-              10-EPOCH ESCALATING MINT PRICING MATRIX (10,000 HARD CAP)
+              10-EPOCH ESCALATING MINT PRICING MATRIX (ON-CHAIN ENFORCED)
             </span>
           </div>
           <div className="flex items-center space-x-2">
             {epochSuccessMsg && (
-              <span className="bg-[#2e7d32] text-white px-2 py-0.5 font-dot text-xs font-bold border border-[#24140a]">
+              <span className="bg-[#2e7d32] text-white px-2 py-0.5 text-xs font-bold border border-[#24140a]">
                 ✓ {epochSuccessMsg}
+              </span>
+            )}
+            {epochErrorMsg && (
+              <span className="bg-[#d83a2a] text-white px-2 py-0.5 text-xs font-bold border border-[#24140a]">
+                ⚠ {epochErrorMsg}
               </span>
             )}
             <button
               onClick={handleSaveAllEpochs}
-              disabled={isSavingAllEpochs}
-              className="paper-btn-gold px-3 py-1 text-xs font-dot font-bold flex items-center space-x-1"
+              disabled={isSavingAllEpochs || !isAdmin}
+              className="paper-btn-gold px-3 py-1 text-xs font-bold flex items-center space-x-1"
             >
-              <Check className="w-3.5 h-3.5" />
-              <span>{isSavingAllEpochs ? 'SAVING...' : 'SAVE ALL 10 EPOCHS'}</span>
+              {isSavingAllEpochs ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+              <span>{isSavingAllEpochs ? 'BROADCASTING ON-CHAIN...' : 'SAVE ALL 10 EPOCHS ON-CHAIN'}</span>
             </button>
           </div>
         </div>
 
         <div className="p-6 bg-[#fdfbf7] space-y-4">
-          <p className="text-xs font-dot text-[#6b5443] font-medium leading-relaxed">
-            Mint fees increase across epochs: Epoch 1 (Tokens 1–10) mines Hard at $5 ETH, Epoch 2 (Tokens 11–30) mines Harder at $7 ETH, escalating progressively up to 10,000 Hard Cap. Admins can configure the USD and ETH price per epoch below.
+          <p className="text-xs text-[#6b5443] font-medium leading-relaxed">
+            Mint fees are enforced directly by the smart contract on Robinhood Chain Mainnet via <code className="text-[#24140a] font-bold">setEpochMintFeesBatch()</code> or <code className="text-[#24140a] font-bold">setEpochMintFee()</code>. Modifying values below and clicking save sends an on-chain transaction signed by your connected admin wallet.
           </p>
 
           <div className="overflow-x-auto border-2 border-[#24140a]">
-            <table className="w-full text-left text-xs font-dot">
+            <table className="w-full text-left text-xs">
               <thead className="bg-[#eee2ca] border-b-2 border-[#24140a] text-[11px] font-bold">
                 <tr>
                   <th className="p-2.5">STAGE</th>
@@ -614,6 +695,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <th className="p-2.5">MINT FEE (USD)</th>
                   <th className="p-2.5">ETH VALUE</th>
                   <th className="p-2.5">STATUS</th>
+                  <th className="p-2.5">ACTION</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#24140a] bg-[#fdfbf7]">
@@ -622,6 +704,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   const isPast = totalMined >= epoch.endToken;
                   const usdVal = epochFees[epoch.id] !== undefined ? epochFees[epoch.id] : epoch.mintFeeUsd;
                   const ethVal = (usdVal / 2500).toFixed(4);
+                  const isSavingThis = savingSingleEpochId === epoch.id;
 
                   return (
                     <tr
@@ -652,6 +735,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                             type="number"
                             min="1"
                             max="500"
+                            disabled={!isAdmin || isSavingAllEpochs}
                             value={usdVal}
                             onChange={(e) => {
                               const val = Math.max(1, parseFloat(e.target.value) || 1);
@@ -679,6 +763,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           </span>
                         )}
                       </td>
+                      <td className="p-2.5">
+                        <button
+                          onClick={() => handleSaveSingleEpoch(epoch.id)}
+                          disabled={!isAdmin || isSavingThis || isSavingAllEpochs}
+                          className="paper-btn-kraft px-2 py-1 text-[10px] font-bold flex items-center space-x-1"
+                        >
+                          {isSavingThis ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <Check className="w-3 h-3 text-[#2e7d32]" />
+                          )}
+                          <span>{isSavingThis ? 'SAVING...' : 'SAVE ON-CHAIN'}</span>
+                        </button>
+                      </td>
                     </tr>
                   );
                 })}
@@ -688,7 +786,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
       </div>
 
-      {/* SECTION 3: WORKER BLADES ALLOCATION & HARDENED POW TELEMETRY */}
+      {/* SECTION 3: WORKER BLADES PRICING */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Worker Blades Pricing */}
         <div className="paper-chassis overflow-hidden">
@@ -696,22 +794,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <div className="flex items-center space-x-2">
               <Wrench className="w-4 h-4 text-[#24140a]" />
               <span className="font-jersey text-base text-[#24140a] tracking-wider uppercase">
-                GPU WORKER BLADE PRICING
+                GPU WORKER BLADE PRICING (ON-CHAIN)
               </span>
             </div>
             {workerSavedMsg && (
-              <span className="bg-[#2e7d32] text-white px-2 py-0.5 font-dot text-[10px] font-bold">
-                ✓ SAVED
+              <span className="bg-[#2e7d32] text-white px-2 py-0.5 text-[10px] font-bold">
+                ✓ {workerSavedMsg}
+              </span>
+            )}
+            {workerErrorMsg && (
+              <span className="bg-[#d83a2a] text-white px-2 py-0.5 text-[10px] font-bold">
+                ⚠ {workerErrorMsg}
               </span>
             )}
           </div>
 
           <div className="p-5 bg-[#fdfbf7] space-y-4">
-            <p className="text-xs font-dot text-[#6b5443]">
-              Worker #1 is 100% FREE. Workers #2–#5 require HashApe ($HASHAPE) tokens to activate.
+            <p className="text-xs text-[#6b5443]">
+              Worker #1 is hardcoded FREE in the contract. Workers #2 through #5 costs are written on-chain via <code className="text-[#24140a] font-bold">setWorkerActivationCost()</code>.
             </p>
 
-            <div className="space-y-3 font-dot text-xs">
+            <div className="space-y-3 text-xs">
               <div className="p-2.5 bg-[#eee2ca] border-2 border-[#24140a] flex items-center justify-between">
                 <span className="font-bold">BLADE #1 (CORE - PARTITION A)</span>
                 <span className="px-2 py-0.5 bg-[#fdfbf7] border border-[#24140a] text-[#2e7d32] font-bold">
@@ -724,6 +827,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <div className="flex items-center space-x-2">
                   <input
                     type="number"
+                    disabled={!isAdmin || isSavingWorkerCosts}
                     value={worker2Cost}
                     onChange={(e) => setWorker2Cost(Number(e.target.value))}
                     className="w-20 p-1 bg-[#fdfbf7] border border-[#24140a] font-mono text-right font-bold text-xs"
@@ -737,6 +841,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <div className="flex items-center space-x-2">
                   <input
                     type="number"
+                    disabled={!isAdmin || isSavingWorkerCosts}
                     value={worker3Cost}
                     onChange={(e) => setWorker3Cost(Number(e.target.value))}
                     className="w-20 p-1 bg-[#fdfbf7] border border-[#24140a] font-mono text-right font-bold text-xs"
@@ -750,6 +855,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <div className="flex items-center space-x-2">
                   <input
                     type="number"
+                    disabled={!isAdmin || isSavingWorkerCosts}
                     value={worker4Cost}
                     onChange={(e) => setWorker4Cost(Number(e.target.value))}
                     className="w-20 p-1 bg-[#fdfbf7] border border-[#24140a] font-mono text-right font-bold text-xs"
@@ -763,6 +869,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <div className="flex items-center space-x-2">
                   <input
                     type="number"
+                    disabled={!isAdmin || isSavingWorkerCosts}
                     value={worker5Cost}
                     onChange={(e) => setWorker5Cost(Number(e.target.value))}
                     className="w-20 p-1 bg-[#fdfbf7] border border-[#24140a] font-mono text-right font-bold text-xs"
@@ -774,10 +881,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
             <button
               onClick={handleSaveWorkerCosts}
-              className="paper-btn-gold w-full py-2 text-xs font-dot font-bold flex items-center justify-center space-x-2"
+              disabled={isSavingWorkerCosts || !isAdmin}
+              className="paper-btn-gold w-full py-2 text-xs font-bold flex items-center justify-center space-x-2"
             >
-              <Check className="w-3.5 h-3.5" />
-              <span>SAVE WORKER BLADE PRICING</span>
+              {isSavingWorkerCosts ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Check className="w-3.5 h-3.5" />
+              )}
+              <span>{isSavingWorkerCosts ? 'BROADCASTING ON-CHAIN...' : 'SAVE WORKER PRICING ON-CHAIN'}</span>
             </button>
           </div>
         </div>
@@ -788,47 +900,40 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <div className="flex items-center space-x-2">
               <Flame className="w-4 h-4 text-white" />
               <span className="font-jersey text-base tracking-wider uppercase text-white">
-                HARDENED GPU POW CONSTANT WEIGHTING
+                HARDENED GPU POW PROTOCOL CONSTANTS
               </span>
             </div>
-            <span className="text-[10px] font-dot font-bold bg-[#fdfbf7] text-[#d83a2a] px-2 py-0.5 border border-[#24140a]">
+            <span className="text-[10px] font-bold bg-[#fdfbf7] text-[#d83a2a] px-2 py-0.5 border border-[#24140a]">
               ENFORCED
             </span>
           </div>
 
           <div className="p-5 bg-[#fdfbf7] space-y-4">
-            <div className="p-3 bg-[#eee2ca] border-2 border-[#24140a] text-xs font-dot space-y-2">
-              <div className="flex items-center justify-between font-bold text-[#24140a]">
-                <span>DIFFICULTY DILUTION PROTECTION</span>
-                <span className="text-[#2e7d32]">ACTIVE (100% CONSTANT)</span>
+            <div className="p-3 bg-[#eee2ca] border-2 border-[#24140a] text-xs space-y-2">
+              <div className="flex items-center justify-between border-b border-[#24140a]/20 pb-1.5">
+                <span className="text-[#6b5443]">CRYPTOGRAPHIC HASH:</span>
+                <span className="font-mono font-bold text-[#24140a]">KECCAK-256 (SOLIDITY PACKED)</span>
               </div>
-              <p className="text-[11px] text-[#6b5443] leading-relaxed">
-                PoW difficulty is mathematically fixed to the active Epoch and user wallet quota. Low network rig counts never lower or dilute the cryptographic target.
-              </p>
-            </div>
-
-            <div className="space-y-2 text-xs font-dot">
-              <div className="flex items-center justify-between p-2 bg-[#eee2ca] border border-[#24140a]">
-                <span className="text-[#6b5443] font-bold">ALGORITHM</span>
-                <span className="font-mono font-bold text-[#24140a]">Keccak-256 (WGSL WebGPU)</span>
+              <div className="flex items-center justify-between border-b border-[#24140a]/20 pb-1.5">
+                <span className="text-[#6b5443]">ANTI-MEV FRONT-RUNNING:</span>
+                <span className="text-[#2e7d32] font-bold">MSG.SENDER BOUND IN HASH</span>
               </div>
-              <div className="flex items-center justify-between p-2 bg-[#eee2ca] border border-[#24140a]">
-                <span className="text-[#6b5443] font-bold">WALLET QUOTA DIFFICULTY SCALING</span>
-                <span className="font-mono font-bold text-[#24140a]">32 bits (1/5) → 36 bits (5/5)</span>
+              <div className="flex items-center justify-between border-b border-[#24140a]/20 pb-1.5">
+                <span className="text-[#6b5443]">CHALLENGE ROTATION:</span>
+                <span className="font-bold text-[#19638b]">AUTOMATIC EVERY MINT ROUND</span>
               </div>
-              <div className="flex items-center justify-between p-2 bg-[#eee2ca] border border-[#24140a]">
-                <span className="text-[#6b5443] font-bold">EPOCH DIFFICULTY SCALING</span>
-                <span className="font-mono font-bold text-[#24140a]">HARD (Ep 1) → OMEGA (Ep 10)</span>
+              <div className="flex items-center justify-between border-b border-[#24140a]/20 pb-1.5">
+                <span className="text-[#6b5443]">PER-WALLET MINT CAP:</span>
+                <span className="font-bold text-[#d83a2a]">STRICT 5 NFTS PER ADDRESS</span>
               </div>
-              <div className="flex items-center justify-between p-2 bg-[#eee2ca] border border-[#24140a]">
-                <span className="text-[#6b5443] font-bold">ANTI-RACE REPLAY PROTECTION</span>
-                <span className="font-mono font-bold text-[#2e7d32]">SHA3 Digest + Salt Nonce</span>
+              <div className="flex items-center justify-between">
+                <span className="text-[#6b5443]">TOTAL SUPPLY HARD CAP:</span>
+                <span className="font-bold text-[#24140a]">10,000 NFTS (ZERO PRE-MINT)</span>
               </div>
             </div>
 
-            <div className="p-3 bg-[#eee2ca] border-2 border-[#2e7d32] text-xs font-dot text-[#2e7d32] font-bold flex items-center space-x-2">
-              <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-              <span>Full cryptographic parity maintained with EVM Robinhood L2 verification.</span>
+            <div className="p-3 bg-[#fdfbf7] border border-[#24140a] text-[11px] text-[#6b5443] leading-relaxed">
+              Mining proofs require: <code className="text-[#24140a] font-bold">keccak256(challenge, miner, nonce) &lt; effectiveTarget</code>. Because <code className="text-[#24140a] font-bold">msg.sender</code> is part of the packed preimage, other actors or MEV searchers cannot extract and submit a discovered nonce.
             </div>
           </div>
         </div>

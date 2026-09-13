@@ -98,6 +98,53 @@ supabaseAdapter.loadInitialDataFromSupabase(db).catch(err => {
   console.warn('⚠️ [HashApe Supabase] Error during startup hydration:', err.message);
 });
 
+const RPC_URL = process.env.VITE_RPC_URL || process.env.ROBINHOOD_RPC_URL || 'https://robinhood-mainnet.g.alchemy.com/v2/VADj_sajpbD_KAWbnZk5x';
+const CONTRACT_ADDRESS = process.env.VITE_CONTRACT_ADDRESS || '0x7D959C29aa1098d93b307Ca40bEEEc0bF7bbfF85';
+const OWNER_WALLET = '0x2A232D1ab1226b981c35DA8B477E337952B5486F';
+const ADMIN_WALLET = '0xb8E3DfDd19b6Bf35b9Fd87F8373F7f82C53bc93C';
+
+let onChainMiningContract = null;
+try {
+  const jsonRpcProvider = new ethers.JsonRpcProvider(RPC_URL);
+  onChainMiningContract = new ethers.Contract(
+    CONTRACT_ADDRESS,
+    ['function currentChallenge() view returns (bytes32)', 'function totalMined() view returns (uint256)'],
+    jsonRpcProvider
+  );
+} catch (e) {
+  console.warn('Could not initialize ethers contract provider:', e.message);
+}
+
+let cachedOnChainChallenge = {
+  challenge: '0xb46af2c33fa24c1c27670e585a72800097d9a812bd959955973687b70334a26a',
+  timestamp: 0
+};
+
+async function getAuthoritativeChallenge() {
+  const now = Date.now();
+  if (now - cachedOnChainChallenge.timestamp < 10000 && cachedOnChainChallenge.challenge) {
+    return cachedOnChainChallenge.challenge;
+  }
+  if (onChainMiningContract) {
+    try {
+      const ch = await onChainMiningContract.currentChallenge();
+      if (ch && ch.length === 66 && ch.startsWith('0x')) {
+        cachedOnChainChallenge = { challenge: ch, timestamp: now };
+        return ch;
+      }
+    } catch (err) {
+      // Silently use cached on RPC timeout
+    }
+  }
+  return cachedOnChainChallenge.challenge;
+}
+
+function isAuthorizedAdmin(wallet) {
+  if (!wallet) return false;
+  const w = wallet.toLowerCase();
+  return w === ADMIN_WALLET.toLowerCase() || w === OWNER_WALLET.toLowerCase();
+}
+
 function saveDb() {
   try {
     fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf8');
@@ -684,7 +731,7 @@ async function handleRequest(req, res) {
       const effectiveTarget = walletTargetBigInt < epochTargetBigInt ? diff.target : currentEpoch.target;
 
       const sessionId = 'sess_' + crypto.randomBytes(8).toString('hex');
-      const challenge = '0x' + crypto.randomBytes(32).toString('hex');
+      const challenge = await getAuthoritativeChallenge();
       const now = Date.now();
       const expiresAt = now + 600 * 1000; // 10 minutes session
 
@@ -988,9 +1035,8 @@ async function handleRequest(req, res) {
     try {
       const data = await parseJsonBody(req);
       const wallet = (data.wallet || '').toLowerCase();
-      const adminWallet = '0xb8E3DfDd19b6Bf35b9Fd87F8373F7f82C53bc93C'.toLowerCase();
 
-      if (wallet !== adminWallet) {
+      if (!isAuthorizedAdmin(wallet)) {
         res.writeHead(403, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, error: 'Unauthorized: Admin wallet required' }));
         return;
@@ -1046,9 +1092,8 @@ async function handleRequest(req, res) {
     try {
       const data = await parseJsonBody(req);
       const wallet = (data.wallet || '').toLowerCase();
-      const adminWallet = '0xb8E3DfDd19b6Bf35b9Fd87F8373F7f82C53bc93C'.toLowerCase();
 
-      if (wallet !== adminWallet) {
+      if (!isAuthorizedAdmin(wallet)) {
         res.writeHead(403, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, error: 'Unauthorized: Admin wallet required' }));
         return;
@@ -1109,9 +1154,8 @@ async function handleRequest(req, res) {
     try {
       const data = await parseJsonBody(req);
       const wallet = (data.wallet || data.adminWallet || '').toLowerCase();
-      const adminWallet = '0xb8E3DfDd19b6Bf35b9Fd87F8373F7f82C53bc93C'.toLowerCase();
 
-      if (wallet !== adminWallet) {
+      if (!isAuthorizedAdmin(wallet)) {
         res.writeHead(403, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, error: 'Unauthorized: Admin wallet required' }));
         return;
@@ -1120,7 +1164,7 @@ async function handleRequest(req, res) {
       const stats = getTreasuryStats();
       const claimable = stats.mintFees.claimableEth;
 
-      if (claimable <= 0) {
+      if (claimable <= 0 && !data.txHash) {
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, error: 'No claimable mint fees available in treasury' }));
         return;
@@ -1135,8 +1179,8 @@ async function handleRequest(req, res) {
         amount: amountToClaim,
         currency: 'ETH',
         network: 'Robinhood EVM L2',
-        recipient: '0xb8E3DfDd19b6Bf35b9Fd87F8373F7f82C53bc93C',
-        txHash: '0x' + crypto.randomBytes(32).toString('hex'),
+        recipient: data.recipient || '0xb8E3DfDd19b6Bf35b9Fd87F8373F7f82C53bc93C',
+        txHash: data.txHash || ('0x' + crypto.randomBytes(32).toString('hex')),
         timestamp: Date.now()
       };
 
@@ -1164,9 +1208,8 @@ async function handleRequest(req, res) {
     try {
       const data = await parseJsonBody(req);
       const wallet = (data.wallet || data.adminWallet || '').toLowerCase();
-      const adminWallet = '0xb8E3DfDd19b6Bf35b9Fd87F8373F7f82C53bc93C'.toLowerCase();
 
-      if (wallet !== adminWallet) {
+      if (!isAuthorizedAdmin(wallet)) {
         res.writeHead(403, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, error: 'Unauthorized: Admin wallet required' }));
         return;
@@ -1175,7 +1218,7 @@ async function handleRequest(req, res) {
       const stats = getTreasuryStats();
       const claimable = stats.rigFees.claimableHashApe;
 
-      if (claimable <= 0) {
+      if (claimable <= 0 && !data.txHash) {
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, error: 'No claimable rig activation fees available in treasury' }));
         return;
@@ -1191,8 +1234,8 @@ async function handleRequest(req, res) {
         currency: 'HASHAPE',
         tokenContract: '0x30E55c3cfB2BBe5d0B07051e0B15c8a532c45ecc',
         network: 'Robinhood EVM L2',
-        recipient: '0xb8E3DfDd19b6Bf35b9Fd87F8373F7f82C53bc93C',
-        txHash: '0x' + crypto.randomBytes(32).toString('hex'),
+        recipient: data.recipient || '0xb8E3DfDd19b6Bf35b9Fd87F8373F7f82C53bc93C',
+        txHash: data.txHash || ('0x' + crypto.randomBytes(32).toString('hex')),
         timestamp: Date.now()
       };
 

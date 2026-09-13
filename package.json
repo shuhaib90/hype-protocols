@@ -11,7 +11,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "start": "node serve.js",
-    "test": "node test/test-mining-flow.js && node test/test-server-endpoints.js && node test/test-db-api.js && node test/verify-html.js && node test/test-cloudflare-headers.js",
+    "test": "node test/test-mining-flow.js && node test/test-server-endpoints.js && node test/test-db-api.js && node test/verify-html.js && node test/test-cloudflare-headers.js && node test/test-onchain-integration.js",
     "deploy:pages": "npx wrangler pages deploy dist",
     "deploy:worker": "npx wrangler deploy",
     "deploy:vercel": "npx vercel --prod",
