@@ -9,7 +9,7 @@ export const CollectionShowcase: React.FC = () => {
   const syndicateOperatives = [
     { id: 1, name: 'Alpha Genesis', code: 'OP-0001', bits: 32, rarity: 'ARCHETYPE', traits: { head: 'Visor Matrix', eyes: 'Cyber Scan', clothes: 'Flight Jacket', fur: 'Obsidian' } },
     { id: 2, name: 'Shadow Samurai', code: 'OP-0002', bits: 32, rarity: 'VANGUARD', traits: { head: 'Officer Cap', eyes: 'Eye Patch', clothes: 'Tactical Vest', fur: 'Cobalt' } },
-    { id: 3, name: 'Syndicate Boss', code: 'OP-0003', bits: 32, rarity: 'SOVEREIGN', traits: { head: 'Golden Crown', eyes: 'Cyan Shades', clothes: 'Navy Suit', fur: 'Espresso' } },
+    { id: 3, name: 'Sovereign Apex', code: 'OP-0003', bits: 32, rarity: 'SOVEREIGN', traits: { head: 'Golden Crown', eyes: 'Cyan Shades', clothes: 'Navy Suit', fur: 'Espresso' } },
     { id: 4, name: 'Quantum Void', code: 'OP-0004', bits: 33, rarity: 'STEALTH', traits: { head: 'Combat Band', eyes: 'Purple Laser', clothes: 'Shinobi Gi', fur: 'Chrome' } },
     { id: 5, name: 'Zero-Day Hunter', code: 'OP-0005', bits: 33, rarity: 'NETRUNNER', traits: { head: 'Earrings', eyes: 'VR Visor', clothes: 'Lab Robe', fur: 'Midnight' } },
     { id: 6, name: 'Glitch Runner', code: 'OP-0006', bits: 34, rarity: 'CYBORG', traits: { head: 'Cyber Cap', eyes: 'Spectacles', clothes: 'Smoking Suit', fur: 'Onyx' } },
@@ -36,7 +36,7 @@ export const CollectionShowcase: React.FC = () => {
           <div>
             <div className="inline-flex items-center space-x-2 text-xs font-dot text-[#d83a2a] uppercase mb-1 font-bold">
               <Layers className="w-3.5 h-3.5 text-[#d83a2a]" />
-              <span>SYNDICATE ARCHIVE // 10,000 DETERMINISTIC EDITIONS</span>
+              <span>HASHAPE ARCHIVE // 10,000 DETERMINISTIC EDITIONS</span>
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-jersey font-bold tracking-tight text-[#24140a] uppercase leading-none">
               THE APE DOSSIER

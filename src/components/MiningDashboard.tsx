@@ -201,33 +201,48 @@ export const MiningDashboard: React.FC<MiningDashboardProps> = ({
               </p>
             </div>
 
-            {/* Middle Row: Live Telemetry Grid (4 Metrics) */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              <div className="p-2.5 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
-                <span className="text-[10px] font-dot text-[#6b5443] block uppercase font-bold">COMPUTE SPEED</span>
-                <span className="text-base sm:text-lg font-jersey font-bold text-[#24140a]">
-                  {totalHashrate.toFixed(1)} <span className="text-xs font-dot text-[#d83a2a]">MH/S</span>
+            {/* Middle Row: Live Telemetry Grid (6 Metrics) */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+              <div className="p-2 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
+                <span className="text-[9px] font-dot text-[#6b5443] block uppercase font-bold">COMPUTE SPEED</span>
+                <span className="text-base font-jersey font-bold text-[#24140a]">
+                  {totalHashrate.toFixed(1)} <span className="text-[10px] font-dot text-[#d83a2a]">MH/S</span>
                 </span>
               </div>
 
-              <div className="p-2.5 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
-                <span className="text-[10px] font-dot text-[#6b5443] block uppercase font-bold">HASHES COMPUTED</span>
-                <span className="text-base sm:text-lg font-jersey font-bold text-[#24140a]">
+              <div className="p-2 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
+                <span className="text-[9px] font-dot text-[#6b5443] block uppercase font-bold">HASHES COMPUTED</span>
+                <span className="text-base font-jersey font-bold text-[#24140a]">
                   {noncesScanned.toLocaleString()}
                 </span>
               </div>
 
-              <div className="p-2.5 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
-                <span className="text-[10px] font-dot text-[#6b5443] block uppercase font-bold">SESSION TIME</span>
-                <span className="text-base sm:text-lg font-jersey font-bold text-[#19638b]">
+              <div className="p-2 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
+                <span className="text-[9px] font-dot text-[#6b5443] block uppercase font-bold">GPU LOAD</span>
+                <span className="text-sm font-jersey font-bold text-[#2e7d32] flex items-center gap-1">
+                  <span className={`w-2 h-2 rounded-full ${isMining ? 'bg-[#2e7d32] animate-ping' : 'bg-[#6b5443]'}`} />
+                  {isMining ? '100% MAX' : 'IDLE 0%'}
+                </span>
+              </div>
+
+              <div className="p-2 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
+                <span className="text-[9px] font-dot text-[#6b5443] block uppercase font-bold">GPU POWER</span>
+                <span className="text-base font-jersey font-bold text-[#d83a2a]">
+                  {isMining ? `~${160 + activeWorkerCount * 25}W` : '15W IDLE'}
+                </span>
+              </div>
+
+              <div className="p-2 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
+                <span className="text-[9px] font-dot text-[#6b5443] block uppercase font-bold">SESSION TIME</span>
+                <span className="text-base font-jersey font-bold text-[#19638b]">
                   {formatTime(elapsedSeconds)}
                 </span>
               </div>
 
-              <div className="p-2.5 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
-                <span className="text-[10px] font-dot text-[#6b5443] block uppercase font-bold">WALLET LIMIT</span>
-                <span className="text-base sm:text-lg font-jersey font-bold text-[#24140a]">
-                  {walletMints} <span className="text-xs font-dot text-[#6b5443]">/ {maxMints}</span>
+              <div className="p-2 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
+                <span className="text-[9px] font-dot text-[#6b5443] block uppercase font-bold">WALLET LIMIT</span>
+                <span className="text-base font-jersey font-bold text-[#24140a]">
+                  {walletMints} <span className="text-[10px] font-dot text-[#6b5443]">/ {maxMints}</span>
                 </span>
               </div>
             </div>

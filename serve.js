@@ -126,29 +126,29 @@ const WALLET_MAX_MINTS = 5;
 // Sequential Escalating Difficulty Targets Per-Wallet (NFT 1/5 through 5/5)
 // Each subsequent NFT minted by a wallet becomes progressively harder
 const WALLET_DIFFICULTY_TIERS = [
-  { tier: 1, label: 'HARD (NFT 1/5)', target: '0x0003ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', leadingZeros: 3, estHashes: '65K' },
-  { tier: 2, label: 'HARDER (NFT 2/5)', target: '0x0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', leadingZeros: 4, estHashes: '131K' },
-  { tier: 3, label: 'VERY HARD (NFT 3/5)', target: '0x00007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', leadingZeros: 5, estHashes: '524K' },
-  { tier: 4, label: 'EXTREME (NFT 4/5)', target: '0x00003fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', leadingZeros: 6, estHashes: '1.05M' },
-  { tier: 5, label: 'LEGENDARY (NFT 5/5)', target: '0x00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', leadingZeros: 7, estHashes: '4.19M' },
+  { tier: 1, label: 'HARD (NFT 1/5)', target: '0x' + '00000f'.padEnd(64, 'f'), leadingZeros: 5, estHashes: '1.05M' },
+  { tier: 2, label: 'HARDER (NFT 2/5)', target: '0x' + '000007'.padEnd(64, 'f'), leadingZeros: 5, estHashes: '2.10M' },
+  { tier: 3, label: 'VERY HARD (NFT 3/5)', target: '0x' + '000003'.padEnd(64, 'f'), leadingZeros: 6, estHashes: '4.19M' },
+  { tier: 4, label: 'EXTREME (NFT 4/5)', target: '0x' + '000001'.padEnd(64, 'f'), leadingZeros: 6, estHashes: '8.38M' },
+  { tier: 5, label: 'LEGENDARY (NFT 5/5)', target: '0x' + '000000f'.padEnd(64, 'f'), leadingZeros: 7, estHashes: '16.7M' },
 ];
 
 // Authoritative 10-Epoch Progressive Difficulty & Escalating Mint Fees
 // 10 Epochs across 10,000 supply:
-// Epoch 1: Tokens 1 to 10 (10 NFTs) - Mine Hard, Mint Fee: $5 ETH (0.0020 ETH / 5 $APE)
-// Epoch 2: Tokens 11 to 30 (20 NFTs) - Mine Harder, Mint Fee: $7 ETH (0.0028 ETH / 7 $APE)
+// Epoch 1: Tokens 1 to 10 (10 NFTs) - Mine Hard, Mint Fee: $5 ETH (0.0020 ETH)
+// Epoch 2: Tokens 11 to 30 (20 NFTs) - Mine Harder, Mint Fee: $7 ETH (0.0028 ETH)
 // Subsequent Epochs: Progressively escalating difficulty and fees up to 10,000 Hard Cap
 const BASE_EPOCHS = [
-  { id: 1, name: 'EPOCH 1 (GENESIS)', startToken: 1, endToken: 10, count: 10, mintFeeUsd: 5, mintFeeEth: 0.0020, mintFeeApe: 5, difficulty: 'HARD', target: '0x0003ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff' },
-  { id: 2, name: 'EPOCH 2 (ASCENSION)', startToken: 11, endToken: 30, count: 20, mintFeeUsd: 7, mintFeeEth: 0.0028, mintFeeApe: 7, difficulty: 'HARDER', target: '0x0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff' },
-  { id: 3, name: 'EPOCH 3 (EXPANSION)', startToken: 31, endToken: 70, count: 40, mintFeeUsd: 10, mintFeeEth: 0.0040, mintFeeApe: 10, difficulty: 'VERY HARD', target: '0x0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff' },
-  { id: 4, name: 'EPOCH 4 (SURGE)', startToken: 71, endToken: 150, count: 80, mintFeeUsd: 14, mintFeeEth: 0.0056, mintFeeApe: 14, difficulty: 'VERY HARD+', target: '0x00007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff' },
-  { id: 5, name: 'EPOCH 5 (NEXUS)', startToken: 151, endToken: 300, count: 150, mintFeeUsd: 18, mintFeeEth: 0.0072, mintFeeApe: 18, difficulty: 'EXTREME', target: '0x00003fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff' },
-  { id: 6, name: 'EPOCH 6 (APEX)', startToken: 301, endToken: 600, count: 300, mintFeeUsd: 22, mintFeeEth: 0.0088, mintFeeApe: 22, difficulty: 'EXTREME+', target: '0x00001fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff' },
-  { id: 7, name: 'EPOCH 7 (SOVEREIGN)', startToken: 601, endToken: 1200, count: 600, mintFeeUsd: 26, mintFeeEth: 0.0104, mintFeeApe: 26, difficulty: 'LEGENDARY', target: '0x00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff' },
-  { id: 8, name: 'EPOCH 8 (TITAN)', startToken: 1201, endToken: 2500, count: 1300, mintFeeUsd: 30, mintFeeEth: 0.0120, mintFeeApe: 30, difficulty: 'LEGENDARY+', target: '0x000007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff' },
-  { id: 9, name: 'EPOCH 9 (MYTHIC)', startToken: 2501, endToken: 5000, count: 2500, mintFeeUsd: 35, mintFeeEth: 0.0140, mintFeeApe: 35, difficulty: 'MYTHIC', target: '0x000003fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff' },
-  { id: 10, name: 'EPOCH 10 (OMEGA)', startToken: 5001, endToken: 10000, count: 5000, mintFeeUsd: 40, mintFeeEth: 0.0160, mintFeeApe: 40, difficulty: 'OMEGA', target: '0x000001fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff' },
+  { id: 1, name: 'EPOCH 1 (GENESIS)', startToken: 1, endToken: 10, count: 10, mintFeeUsd: 5, mintFeeEth: 0.0020, mintFeeApe: 5, difficulty: 'HARD', target: '0x' + '00000f'.padEnd(64, 'f') },
+  { id: 2, name: 'EPOCH 2 (ASCENSION)', startToken: 11, endToken: 30, count: 20, mintFeeUsd: 7, mintFeeEth: 0.0028, mintFeeApe: 7, difficulty: 'HARDER', target: '0x' + '000007'.padEnd(64, 'f') },
+  { id: 3, name: 'EPOCH 3 (EXPANSION)', startToken: 31, endToken: 70, count: 40, mintFeeUsd: 10, mintFeeEth: 0.0040, mintFeeApe: 10, difficulty: 'VERY HARD', target: '0x' + '000003'.padEnd(64, 'f') },
+  { id: 4, name: 'EPOCH 4 (SURGE)', startToken: 71, endToken: 150, count: 80, mintFeeUsd: 14, mintFeeEth: 0.0056, mintFeeApe: 14, difficulty: 'VERY HARD+', target: '0x' + '000001'.padEnd(64, 'f') },
+  { id: 5, name: 'EPOCH 5 (NEXUS)', startToken: 151, endToken: 300, count: 150, mintFeeUsd: 18, mintFeeEth: 0.0072, mintFeeApe: 18, difficulty: 'EXTREME', target: '0x' + '000000f'.padEnd(64, 'f') },
+  { id: 6, name: 'EPOCH 6 (APEX)', startToken: 301, endToken: 600, count: 300, mintFeeUsd: 22, mintFeeEth: 0.0088, mintFeeApe: 22, difficulty: 'EXTREME+', target: '0x' + '0000007'.padEnd(64, 'f') },
+  { id: 7, name: 'EPOCH 7 (SOVEREIGN)', startToken: 601, endToken: 1200, count: 600, mintFeeUsd: 26, mintFeeEth: 0.0104, mintFeeApe: 26, difficulty: 'LEGENDARY', target: '0x' + '0000003'.padEnd(64, 'f') },
+  { id: 8, name: 'EPOCH 8 (TITAN)', startToken: 1201, endToken: 2500, count: 1300, mintFeeUsd: 30, mintFeeEth: 0.0120, mintFeeApe: 30, difficulty: 'LEGENDARY+', target: '0x' + '0000001'.padEnd(64, 'f') },
+  { id: 9, name: 'EPOCH 9 (MYTHIC)', startToken: 2501, endToken: 5000, count: 2500, mintFeeUsd: 35, mintFeeEth: 0.0140, mintFeeApe: 35, difficulty: 'MYTHIC', target: '0x' + '0000000f'.padEnd(64, 'f') },
+  { id: 10, name: 'EPOCH 10 (OMEGA)', startToken: 5001, endToken: 10000, count: 5000, mintFeeUsd: 40, mintFeeEth: 0.0160, mintFeeApe: 40, difficulty: 'OMEGA', target: '0x' + '00000007'.padEnd(64, 'f') },
 ];
 
 function getEffectiveEpochs() {
@@ -1177,6 +1177,31 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // Dedicated image resolver: streams directly from dist/images, collection/images, or public/images
+  if (reqPath.startsWith('/images/')) {
+    const filename = path.basename(reqPath);
+    const candidatePaths = [
+      path.join(DIST_DIR, 'images', filename),
+      path.join(__dirname, 'collection', 'images', filename),
+      path.join(__dirname, 'public', 'images', filename)
+    ];
+    let foundImage = candidatePaths.find(p => fs.existsSync(p));
+    if (!foundImage) {
+      foundImage = path.join(DIST_DIR, 'preview.png');
+      if (!fs.existsSync(foundImage)) {
+        foundImage = path.join(__dirname, 'collection', 'preview.png');
+      }
+    }
+    if (foundImage && fs.existsSync(foundImage)) {
+      res.writeHead(200, {
+        'Content-Type': 'image/png',
+        'Cache-Control': 'public, max-age=31536000, s-maxage=31536000, immutable'
+      });
+      fs.createReadStream(foundImage).pipe(res);
+      return;
+    }
+  }
+
   // Static File Serving from dist/
   let filePath = path.join(DIST_DIR, reqPath === '/' ? 'index.html' : reqPath);
 
@@ -1207,7 +1232,7 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, () => {
   console.log(`====================================================`);
-  console.log(`⚡ ApeSyndicate NFT Mining Server listening on port ${PORT}`);
+  console.log(`⚡ HashApe NFT Mining Server listening on port ${PORT}`);
   console.log(`🌐 Web URL: http://localhost:${PORT}`);
   console.log(`💎 10,000 Hard Cap | WebGPU PoW | 5-Worker System`);
   console.log(`====================================================`);

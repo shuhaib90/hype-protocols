@@ -10,7 +10,7 @@ class SoundEffectsController {
 
   constructor() {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('apesyndicate_sfx_enabled');
+      const stored = localStorage.getItem('hashape_sfx_enabled');
       if (stored !== null) {
         this.soundEnabled = stored === 'true';
       }
@@ -38,7 +38,7 @@ class SoundEffectsController {
   public toggle(): boolean {
     this.soundEnabled = !this.soundEnabled;
     if (typeof window !== 'undefined') {
-      localStorage.setItem('apesyndicate_sfx_enabled', String(this.soundEnabled));
+      localStorage.setItem('hashape_sfx_enabled', String(this.soundEnabled));
     }
     if (this.soundEnabled) {
       this.playClickSound();

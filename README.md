@@ -1,7 +1,7 @@
-# 🦍 ApeSyndicate: HashApe WebGPU PoW NFT Mining Protocol
+# 🦍 HashApe: WebGPU PoW NFT Mining Protocol
 
 [![Network: Robinhood EVM L2](https://img.shields.io/badge/Network-Robinhood%20EVM%20L2-brightgreen)](https://github.com/shuhaib90/hype-protocols)
-[![Cloudflare: Deployed](https://img.shields.io/badge/Cloudflare-Live%20on%20Edge-orange)](https://hashape-mining.maize-decade.workers.dev)
+[![Cloudflare: Deployed](https://img.shields.io/badge/Cloudflare-Live%20on%20Edge-orange)](https://hashape-mining.dazed-region.workers.dev)
 [![Database: Supabase](https://img.shields.io/badge/Database-Supabase%20PostgreSQL-3ECF8E)](https://supabase.com)
 [![Supply: 10,000 Hard Cap](https://img.shields.io/badge/Max%20Supply-10%2C000%20Hard%20Cap-blue)](https://github.com/shuhaib90/hype-protocols)
 
@@ -11,9 +11,9 @@
 
 ## 🌐 Live Deployments
 
-- **Cloudflare Edge Live URL**: [https://hashape-mining.maize-decade.workers.dev](https://hashape-mining.maize-decade.workers.dev)
+- **Cloudflare Edge Live URL**: [https://hashape-mining.dazed-region.workers.dev](https://hashape-mining.dazed-region.workers.dev)
 - **GitHub Repository**: [https://github.com/shuhaib90/hype-protocols](https://github.com/shuhaib90/hype-protocols)
-- **Claim Cloudflare Worker into your permanent account**: [Claim Link](https://dash.cloudflare.com/claim-preview?claimToken=qCfg0Jsc5Fb9gPm6E2PPX7gtLW17McECsSJhThmvo7E) *(Valid for 60 minutes)*
+- **Claim Cloudflare Worker into your permanent account**: [Claim Link](https://dash.cloudflare.com/claim-preview?claimToken=oePNq9Gv-tXVe2HNhxKa7nE0eA7J30V1x7EeEOpOvU8) *(Valid for 60 minutes)*
 
 ---
 

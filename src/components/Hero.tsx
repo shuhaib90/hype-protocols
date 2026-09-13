@@ -48,7 +48,7 @@ export const Hero: React.FC<HeroProps> = ({
             <span className="text-[#19638b] font-bold">CONTRACT: 0xb8E3...c93C</span>
           </div>
           <div className="flex items-center space-x-4 flex-wrap">
-            <span className="font-bold">Zero ETH Gas (Native $APEBROKER)</span>
+            <span className="font-bold">Native ETH Mint Fees</span>
             <span className="text-[#6b5443]">•</span>
             <span className="text-[#d83a2a] font-bold">5.0% OpenSea Royalty</span>
             <span className="text-[#6b5443]">•</span>

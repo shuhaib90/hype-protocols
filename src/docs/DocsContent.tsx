@@ -22,7 +22,7 @@ export const DocsContent: React.FC = () => {
     { id: 'overview', title: '01. Overview', icon: BookOpen },
     { id: 'how-it-works', title: '02. How Mining Works', icon: Zap },
     { id: 'workers', title: '03. Mining Workers', icon: Users },
-    { id: 'hype-token', title: '04. APEBROKER Worker Activation', icon: Coins },
+    { id: 'hype-token', title: '04. HashApe ($HASHAPE) Activation', icon: Coins },
     { id: 'difficulty', title: '05. Difficulty', icon: Activity },
     { id: 'verification', title: '06. Proof Verification', icon: ShieldCheck },
     { id: 'minting', title: '07. NFT Minting', icon: Sparkles },
@@ -77,10 +77,10 @@ export const DocsContent: React.FC = () => {
                   <span>Topic 01 // Overview</span>
                 </div>
                 <h1 className="font-display font-extrabold text-3xl text-white tracking-tight">
-                  ApeSyndicate Proof-of-Work NFT Mining Protocol
+                  HashApe Proof-of-Work NFT Mining Protocol
                 </h1>
                 <p>
-                  <strong>ApeSyndicate NFT Mining</strong> is a fair-launch, proof-of-work-based NFT distribution system.
+                  <strong>HashApe NFT Mining</strong> is a fair-launch, proof-of-work-based NFT distribution system on Robinhood EVM L2.
                   Public users cannot directly call a standard public mint function to purchase an NFT with capital alone.
                   Instead, every participant must compute a valid cryptographic Proof-of-Work solution using their in-browser GPU.
                 </p>
@@ -108,7 +108,7 @@ export const DocsContent: React.FC = () => {
                   How Mining Works: End-to-End Workflow
                 </h1>
                 <p>
-                  The mining lifecycle transitions through sequential states between the client GPU, the authoritative session engine, and the ApeSyndicate smart contract.
+                  The mining lifecycle transitions through sequential states between the client GPU, the authoritative session engine, and the HashApe smart contract.
                 </p>
 
                 {/* ASCII Sequence Diagram */}
@@ -129,7 +129,7 @@ export const DocsContent: React.FC = () => {
       │<─ 7. MINING COMPLETE ──│                            │                       │
       │                        │                            │                       │
       │── 8. Call mintWithMiningProof(nonce, challenge) ───────────────────────────>│
-      │      [Pays 0.05 $APEBROKER Mint Fee]                     │                       │
+      │      [Pays Native ETH Mint Fee (Epoch-scaled)]    │                       │
       │                                                     │   9. Verify Proof:    │
       │                                                     │   hash < Target &     │
       │                                                     │   usedProofs == false │
@@ -143,7 +143,7 @@ export const DocsContent: React.FC = () => {
                   <li><strong>Request Session:</strong> Verifier issues an expiring challenge bound to the user's address, collection ID, and current difficulty.</li>
                   <li><strong>Compute in WebGPU:</strong> Up to 5 parallel workers search isolated partitions of the nonce space.</li>
                   <li><strong>Proof Discovery:</strong> When any worker discovers a nonce yielding a hash beneath the target, all other workers stop immediately.</li>
-                  <li><strong>On-Chain Mint:</strong> The miner calls the smart contract, paying the 0.05 $APEBROKER fee. The contract validates the math and mints the token.</li>
+                  <li><strong>On-Chain Mint:</strong> The miner calls the smart contract, paying the native ETH fee (Epoch-scaled, starting at $5 ETH / 0.0020 ETH). The contract validates the math and mints the token.</li>
                 </ol>
               </section>
             )}
@@ -178,31 +178,31 @@ export const DocsContent: React.FC = () => {
                         <td className="p-3 border border-cyber-borderSubtle text-cyber-blue font-bold">Worker #1</td>
                         <td className="p-3 border border-cyber-borderSubtle text-cyber-mint">FREE (Default)</td>
                         <td className="p-3 border border-cyber-borderSubtle"><code>0x0000000000 … 0x00ffffffff</code></td>
-                        <td className="p-3 border border-cyber-borderSubtle text-cyber-mint">0 APEBROKER</td>
+                        <td className="p-3 border border-cyber-borderSubtle text-cyber-mint">0 HASHAPE</td>
                       </tr>
                       <tr>
                         <td className="p-3 border border-cyber-borderSubtle text-cyber-blue font-bold">Worker #2</td>
-                        <td className="p-3 border border-cyber-borderSubtle text-cyber-dim">APEBROKER Activated</td>
+                        <td className="p-3 border border-cyber-borderSubtle text-cyber-dim">HASHAPE Activated</td>
                         <td className="p-3 border border-cyber-borderSubtle"><code>0x0100000000 … 0x01ffffffff</code></td>
-                        <td className="p-3 border border-cyber-borderSubtle text-white">100 APEBROKER</td>
+                        <td className="p-3 border border-cyber-borderSubtle text-white">100 HASHAPE</td>
                       </tr>
                       <tr>
                         <td className="p-3 border border-cyber-borderSubtle text-cyber-blue font-bold">Worker #3</td>
-                        <td className="p-3 border border-cyber-borderSubtle text-cyber-dim">APEBROKER Activated</td>
+                        <td className="p-3 border border-cyber-borderSubtle text-cyber-dim">HASHAPE Activated</td>
                         <td className="p-3 border border-cyber-borderSubtle"><code>0x0200000000 … 0x02ffffffff</code></td>
-                        <td className="p-3 border border-cyber-borderSubtle text-white">200 APEBROKER</td>
+                        <td className="p-3 border border-cyber-borderSubtle text-white">200 HASHAPE</td>
                       </tr>
                       <tr>
                         <td className="p-3 border border-cyber-borderSubtle text-cyber-blue font-bold">Worker #4</td>
-                        <td className="p-3 border border-cyber-borderSubtle text-cyber-dim">APEBROKER Activated</td>
+                        <td className="p-3 border border-cyber-borderSubtle text-cyber-dim">HASHAPE Activated</td>
                         <td className="p-3 border border-cyber-borderSubtle"><code>0x0300000000 … 0x03ffffffff</code></td>
-                        <td className="p-3 border border-cyber-borderSubtle text-white">300 APEBROKER</td>
+                        <td className="p-3 border border-cyber-borderSubtle text-white">300 HASHAPE</td>
                       </tr>
                       <tr>
                         <td className="p-3 border border-cyber-borderSubtle text-cyber-blue font-bold">Worker #5</td>
-                        <td className="p-3 border border-cyber-borderSubtle text-cyber-dim">APEBROKER Activated</td>
+                        <td className="p-3 border border-cyber-borderSubtle text-cyber-dim">HASHAPE Activated</td>
                         <td className="p-3 border border-cyber-borderSubtle"><code>0x0400000000 … 0x04ffffffff</code></td>
-                        <td className="p-3 border border-cyber-borderSubtle text-white">500 APEBROKER</td>
+                        <td className="p-3 border border-cyber-borderSubtle text-white">500 HASHAPE</td>
                       </tr>
                     </tbody>
                   </table>
@@ -214,7 +214,7 @@ export const DocsContent: React.FC = () => {
               </section>
             )}
 
-            {/* 04. APEBROKER Worker Activation */}
+            {/* 04. HashApe ($HASHAPE) Worker Activation */}
             {activeSection === 'hype-token' && (
               <section className="space-y-4">
                 <div className="flex items-center space-x-2 text-xs font-mono text-cyber-blue uppercase font-bold">
@@ -222,10 +222,10 @@ export const DocsContent: React.FC = () => {
                   <span>Topic 04 // Token Economics</span>
                 </div>
                 <h1 className="font-display font-extrabold text-3xl text-white tracking-tight">
-                  APEBROKER Token Worker Activation
+                  HashApe ($HASHAPE) Worker Activation
                 </h1>
                 <p>
-                  To prevent Sybil flooding and incentivize the ApeSyndicate ecosystem, additional workers (Workers 2 to 5) require activation via the native <strong>APEBROKER token</strong>.
+                  To prevent Sybil flooding and incentivize the HashApe ecosystem, additional workers (Workers 2 to 5) require activation via the native <strong>HashApe ($HASHAPE) token</strong>.
                 </p>
 
                 <div className="p-3.5 bg-[#eee2ca] border-2 border-[#24140a] font-mono text-xs shadow-[2px_2px_0px_#24140a]">
@@ -245,7 +245,7 @@ export const DocsContent: React.FC = () => {
                 <div className="space-y-3 font-mono text-xs">
                   <div className="p-3 bg-cyber-surface rounded-lg border border-cyber-borderSubtle">
                     <span className="text-cyber-blue font-bold block mb-1">1. Token Check:</span>
-                    The UI and contract query the user's ERC-20 APEBROKER balance.
+                    The UI and contract query the user's ERC-20 HashApe ($HASHAPE) balance.
                   </div>
                   <div className="p-3 bg-cyber-surface rounded-lg border border-cyber-borderSubtle">
                     <span className="text-cyber-blue font-bold block mb-1">2. Approval & Transfer:</span>
@@ -532,7 +532,7 @@ export const DocsContent: React.FC = () => {
                   <div className="text-white font-bold">Parameters required by `mintWithMiningProof`:</div>
                   <div>• <code>nonce</code>: uint256 solution discovered by WebGPU</div>
                   <div>• <code>challenge</code>: bytes32 challenge hash currently active</div>
-                  <div>• <code>msg.value</code>: 0.05 native $HYPE fee (HyperEVM network gas token)</div>
+                  <div>• <code>msg.value</code>: native ETH fee (Epoch-scaled, starting at $5 ETH / 0.0020 ETH)</div>
                 </div>
               </section>
             )}
@@ -548,7 +548,7 @@ export const DocsContent: React.FC = () => {
                   NFT Metadata & Self-Hosted Storage Architecture
                 </h1>
                 <p>
-                  Every ApeSyndicate HashApe NFT is accompanied by rich, deterministic metadata and full-resolution graphics hosted permanently on the protocol's dedicated web storage.
+                  Every HashApe NFT is accompanied by rich, deterministic metadata and full-resolution graphics hosted permanently on the protocol's dedicated web storage.
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -565,9 +565,9 @@ export const DocsContent: React.FC = () => {
                   <div className="p-4 bg-cyber-surface border border-cyber-borderSubtle rounded-xl font-mono text-xs space-y-2">
                     <span className="text-white font-bold block">Self-Hosted Endpoints</span>
                     <ul className="list-disc pl-4 space-y-1 text-cyber-dim">
-                      <li>Metadata: <code>https://apesyndicate.xyz/metadata/:id.json</code></li>
-                      <li>Images: <code>https://apesyndicate.xyz/images/:id.png</code></li>
-                      <li>Storefront: <code>https://apesyndicate.xyz/storefront.json</code></li>
+                      <li>Metadata: <code>/metadata/:id.json</code></li>
+                      <li>Images: <code>/images/:id.png</code></li>
+                      <li>Storefront: <code>/storefront.json</code></li>
                       <li>Storage: 10,000 local JSON & PNG assets with zero IPFS gateway lag</li>
                     </ul>
                   </div>
@@ -597,7 +597,7 @@ export const DocsContent: React.FC = () => {
                   10,000 Maximum Supply & Final Race Conditions
                 </h1>
                 <p>
-                  The ApeSyndicate HashApe collection features a strict, immutably enforced hard cap of <strong>10,000 NFTs</strong>.
+                  The HashApe collection features a strict, immutably enforced hard cap of <strong>10,000 NFTs</strong>.
                   There are no team reserves, pre-mints, or inflationary mechanics.
                 </p>
 
@@ -679,7 +679,7 @@ export const DocsContent: React.FC = () => {
                 <div className="p-4 bg-cyber-surface border border-cyber-borderSubtle rounded-xl font-mono text-xs space-y-2">
                   <h4 className="text-white font-bold">HashCats Inspiration & Technical Comparison</h4>
                   <p className="text-cyber-dim">
-                    Inspired by the cryptographic proof-of-work mechanics pioneered by HashCats, ApeSyndicate adopts GPU-driven proof generation while tailoring execution for HyperEVM's ultra-fast consensus, native $APEBROKER gas economics (zero ETH), and up to 5 concurrent WebGPU compute workers with disjoint nonce partitions.
+                    Inspired by the cryptographic proof-of-work mechanics pioneered by HashCats, HashApe adopts GPU-driven proof generation while tailoring execution for Robinhood EVM L2's ultra-fast consensus, native ETH mint fees, and up to 5 concurrent WebGPU compute workers with disjoint nonce partitions.
                   </p>
                 </div>
               </section>
@@ -693,18 +693,18 @@ export const DocsContent: React.FC = () => {
                   <span>Topic 12 // Smart Contract</span>
                 </div>
                 <h1 className="font-display font-extrabold text-3xl text-white tracking-tight">
-                  ApeSyndicateNFTMining.sol Specification
+                  HashApeNFTMining.sol Specification
                 </h1>
                 <p>
-                  The protocol is governed by an immutable, verified smart contract deployed on HyperEVM. Direct mint functions are disabled; tokens can only be minted by presenting a valid Keccak-256 proof.
+                  The protocol is governed by an immutable, verified smart contract deployed on Robinhood EVM L2. Direct mint functions are disabled; tokens can only be minted by presenting a valid Keccak-256 proof.
                 </p>
                 <div className="bg-[#060d24] p-4 rounded-xl border border-cyber-borderSubtle font-mono text-xs overflow-x-auto text-cyber-dim">
                   <pre>{`// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-contract HypeVMNFTMining {
+contract HashApeNFTMining {
     uint256 public constant MAX_SUPPLY = 10000;
-    uint256 public mintFee = 0.05 ether; // 0.05 $APEBROKER native token
+    uint256 public mintFee = 0.0020 ether; // Native ETH starting fee, escalates by epoch
     address public constant CREATOR_ADMIN_WALLET = 0xb8E3DfDd19b6Bf35b9Fd87F8373F7f82C53bc93C;
     bool public miningPaused;
     
@@ -735,15 +735,15 @@ contract HypeVMNFTMining {
                 <div className="space-y-4 font-mono text-xs">
                   <div className="p-4 bg-cyber-surface rounded-xl border border-cyber-borderSubtle">
                     <h3 className="text-white font-bold mb-1">Does mining cost gas or native tokens?</h3>
-                    <p className="text-cyber-dim">No. The mining computation occurs 100% off-chain inside your browser GPU. You only pay network gas and the 0.05 APEBROKER mint fee when submitting the on-chain mint transaction after finding a valid proof.</p>
+                    <p className="text-cyber-dim">No. The mining computation occurs 100% off-chain inside your browser GPU. You only pay network gas and the native ETH mint fee ($5 ETH / 0.0020 ETH, escalating by epoch) when submitting the on-chain mint transaction after finding a valid proof.</p>
                   </div>
                   <div className="p-4 bg-cyber-surface rounded-xl border border-cyber-borderSubtle">
-                    <h3 className="text-white font-bold mb-1">Why is there no ETH support on HyperEVM?</h3>
-                    <p className="text-cyber-dim">HyperEVM uses native $APEBROKER as its Layer-1 gas currency. All network transactions, gas fees, and mint fees are settled strictly in $APEBROKER.</p>
+                    <h3 className="text-white font-bold mb-1">What currency is used for gas and mint fees?</h3>
+                    <p className="text-cyber-dim">Mint fees and network gas are settled strictly in native ETH on Robinhood EVM L2. Worker rig activations (Workers 2–5) utilize HashApe ($HASHAPE) tokens at contract 0x30E55c3cfB2BBe5d0B07051e0B15c8a532c45ecc.</p>
                   </div>
                   <div className="p-4 bg-cyber-surface rounded-xl border border-cyber-borderSubtle">
                     <h3 className="text-white font-bold mb-1">Can I mine on multiple workers?</h3>
-                    <p className="text-cyber-dim">Yes! Miner 01 is 100% free for all connected wallets. Additional workers (Miner 02 to Miner 05) can be activated using APEBROKER tokens to divide the cryptographic search space and increase your total hashrate.</p>
+                    <p className="text-cyber-dim">Yes! Miner 01 is 100% free for all connected wallets. Additional workers (Miner 02 to Miner 05) can be activated using HashApe ($HASHAPE) tokens to divide the cryptographic search space and increase your total hashrate.</p>
                   </div>
                   <div className="p-4 bg-cyber-surface rounded-xl border border-cyber-borderSubtle">
                     <h3 className="text-white font-bold mb-1">What happens if two miners solve the final NFT simultaneously?</h3>

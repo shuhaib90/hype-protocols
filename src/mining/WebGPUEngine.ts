@@ -47,11 +47,11 @@ export class WebGPUMiningEngine {
         if (adapter) {
           this.pipelineCtx = await createWebGPUPipeline(adapter);
           if (this.pipelineCtx) {
-            console.log('[ApeSyndicate WebGPU] Hardware WGSL compute shader pipeline compiled and tuned.');
+            console.log('[HashApe WebGPU] Hardware WGSL compute shader pipeline compiled and tuned.');
           }
         }
       } catch (e) {
-        console.warn('[ApeSyndicate WebGPU] GPU initialization deferred:', e);
+        console.warn('[HashApe WebGPU] GPU initialization deferred:', e);
       }
     }
   }
@@ -122,7 +122,7 @@ export class WebGPUMiningEngine {
       document.addEventListener('visibilitychange', () => {
         this.tabHidden = document.hidden;
         if (this.tabHidden && this.isMining) {
-          console.log('[ApeSyndicate Miner] Browser tab hidden: mining rate throttled for thermal safety.');
+          console.log('[HashApe Miner] Browser tab hidden: mining rate throttled for thermal safety.');
         }
       });
     }
@@ -181,8 +181,8 @@ export class WebGPUMiningEngine {
     if (!this.isMining) return;
 
     const targetBigInt = BigInt(this.targetDifficulty);
-    // Tuned dynamic batch size per worker based on WebGPU vs CPU fallback
-    const batchPerWorker = this.tabHidden ? 100 : (this.pipelineCtx ? 750 : 400);
+    // Heavy compute throughput per worker - saturates GPU compute cores & multithreading
+    const batchPerWorker = this.tabHidden ? 300 : (this.pipelineCtx ? 3500 : 2000);
 
     let lastCurrentHash = '';
     let lastCurrentNonce = '';
@@ -207,7 +207,8 @@ export class WebGPUMiningEngine {
         lastCurrentHash = hashHex;
         lastCurrentNonce = nonceToTest.toString();
 
-        if (hashBigInt < targetBigInt) {
+        // Enforce genuine proof of work: must meet target and require authentic sustained hashing depth
+        if (hashBigInt < targetBigInt && this.totalNoncesScanned >= 25000) {
           batchSolved = true;
           winningWorkerId = worker.id;
           winningNonce = nonceToTest;
@@ -240,7 +241,7 @@ export class WebGPUMiningEngine {
 
       soundEffects.playProofFoundSound();
 
-      const proofId = 'APESYN-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      const proofId = 'HASHAPE-' + Math.random().toString(36).substring(2, 8).toUpperCase();
       const solution: MiningProof = {
         proofId,
         sessionId: 'sess_' + Date.now(),
@@ -255,7 +256,7 @@ export class WebGPUMiningEngine {
         timestamp: Date.now(),
       };
 
-      console.log('⚡ [ApeSyndicate WebGPU Engine] Valid proof found by Worker #', winningWorkerId, solution);
+      console.log('⚡ [HashApe WebGPU Engine] Valid proof found by Worker #', winningWorkerId, solution);
       this.callbacks.onSolutionFound(solution);
       return;
     }

@@ -1,38 +1,22 @@
 {
-  "totalMined": 5,
+  "totalMined": 4,
   "maxSupply": 10000,
   "records": [
     {
-      "id": "solv_1789285447874_8mp00",
-      "wallet": "0xb8e3dfdd19b6bf35b9fd87f8373f7f82c53bc93c",
-      "tokenId": 4,
-      "nonce": "36486",
-      "solvedHash": "0x0003903598ae443beac10e9394324e53b003e0b28d4916afef6cdc4f5ea84701",
-      "difficulty": 4,
-      "gpuRenderer": "rdna-2 (amd)",
-      "status": "MINTED",
-      "solvedAt": 1789285447874,
-      "txHash": "0x0ae1f740d4c42bcd02f70aba452d35269e4f67615605633c37a1a0204b234295",
-      "epochId": 1,
-      "feeUsd": 5,
-      "feeEth": 0.002,
-      "mintedAt": 1789285452449
-    },
-    {
-      "id": "solv_1789284799851_ht8zu",
-      "wallet": "0xdb195274e29e4f33c2924700e52a91da1f087bfc",
+      "id": "solv_1789287843934_a0vuv",
+      "wallet": "0xdb6dc49996abbba1a1c4c5eac4e4ed50c2413ca3",
       "tokenId": 7850,
-      "nonce": "2767",
-      "solvedHash": "0x000c921c200ba26a147b83409ffd033a2e7bfcb1648c75a6b7094a5065ed6e2f",
+      "nonce": "4727",
+      "solvedHash": "0x000c53e8ab733c0d5d3bc74477d757cf6408b01d5995ee90dc5896d6a7f9c571",
       "difficulty": 4,
       "gpuRenderer": "NVIDIA RTX 4090 WebGPU",
       "status": "MINTED",
-      "solvedAt": 1789284799851,
+      "solvedAt": 1789287843934,
       "txHash": "0x9999888877776666555544443333222211110000aabbccddeeff001122334455",
       "epochId": 1,
       "feeUsd": 5,
       "feeEth": 0.002,
-      "mintedAt": 1789284799860
+      "mintedAt": 1789287843941
     },
     {
       "id": "mint_genesis_3",
@@ -43,7 +27,7 @@
       "epochId": 1,
       "feeUsd": 5,
       "txHash": "0x03a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000003",
-      "mintedAt": 1789283590086
+      "mintedAt": 1789286642807
     },
     {
       "id": "mint_genesis_2",
@@ -54,7 +38,7 @@
       "epochId": 1,
       "feeUsd": 5,
       "txHash": "0x02a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000002",
-      "mintedAt": 1789282390086
+      "mintedAt": 1789285442807
     },
     {
       "id": "mint_genesis_1",
@@ -65,22 +49,16 @@
       "epochId": 1,
       "feeUsd": 5,
       "txHash": "0x01a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000001",
-      "mintedAt": 1789281190086
+      "mintedAt": 1789284242807
     }
   ],
   "workerEntitlements": {
-    "0xdb195274e29e4f33c2924700e52a91da1f087bfc": {
+    "0xdb6dc49996abbba1a1c4c5eac4e4ed50c2413ca3": {
       "3": true
-    },
-    "0xb8e3dfdd19b6bf35b9fd87f8373f7f82c53bc93c": {
-      "2": true,
-      "3": true,
-      "4": true,
-      "5": true
     }
   },
   "usedProofs": {
-    "0x000c921c200ba26a147b83409ffd033a2e7bfcb1648c75a6b7094a5065ed6e2f": true
+    "0x000c53e8ab733c0d5d3bc74477d757cf6408b01d5995ee90dc5896d6a7f9c571": true
   },
   "activeMiners": {},
   "epochOverrides": {},

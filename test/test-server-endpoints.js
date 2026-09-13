@@ -28,7 +28,7 @@ async function testEndpoints() {
   const htmlRes = await fetch('http://localhost:3000/');
   assert(htmlRes.status === 200, 'Frontend HTML responds with HTTP 200');
   const htmlText = await htmlRes.text();
-  assert(htmlText.includes('APESYNDICATE // WebGPU Proof-of-Work NFT Mining Protocol') || htmlText.includes('WebGPU Proof-of-Work NFT Mining Protocol'), 'HTML title and bundle delivered');
+  assert(htmlText.includes('HASHAPE // WebGPU Proof-of-Work NFT Mining Protocol') || htmlText.includes('WebGPU Proof-of-Work NFT Mining Protocol'), 'HTML title and bundle delivered');
   assert(htmlText.includes('/assets/index-'), 'Compiled Vite JS and CSS assets linked');
 
   // 2. Test /api/mining/supply

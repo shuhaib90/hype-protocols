@@ -48,7 +48,7 @@ export const Navigation: React.FC<NavigationProps> = ({
             </div>
             <div className="flex flex-col">
               <div className="font-jersey text-2xl font-bold tracking-wider text-[#24140a] uppercase flex items-center gap-1.5 leading-none">
-                <span>APESYNDICATE</span>
+                <span>HASHAPE</span>
                 <span className="text-[10px] font-dot text-white border border-[#24140a] px-1 py-0.2 bg-[#d83a2a] shadow-[1px_1px_0px_#24140a]">
                   FORGE
                 </span>

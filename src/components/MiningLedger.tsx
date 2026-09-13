@@ -200,7 +200,7 @@ export const MiningLedger: React.FC<MiningLedgerProps> = ({ onMintRecord, refres
                         }}
                         className="paper-btn-red px-4 py-2 text-xs flex items-center gap-1.5 font-bold"
                       >
-                        <span>MINT NFT (0.05 APEBROKER)</span>
+                        <span>MINT NFT (NATIVE ETH)</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </button>
                     )}

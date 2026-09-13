@@ -43,20 +43,22 @@ assert(miningLedgerTsx.includes('SOLVED PROOFS & MINT HISTORY'), 'Solved Proofs 
 
 // 3. WebGPU PoW & 5-Worker System
 assert(workerPanelTsx.includes('MINING WORKERS (5 MAX)'), '5-Worker GPU management panel present');
-assert(workerPanelTsx.includes('Worker #1 is 100% FREE. Workers #2–#5 require APEBROKER tokens') || workerPanelTsx.includes('Worker #1 is 100% FREE. Workers #2–#5 require HYPE tokens'), 'APEBROKER token worker activation described');
+assert(workerPanelTsx.includes('Worker #1 is 100% FREE. Workers #2–#5 require HashApe ($HASHAPE) tokens'), 'HashApe ($HASHAPE) token worker activation described');
 assert(workerPanelTsx.includes('0x30E55c3cfB2BBe5d0B07051e0B15c8a532c45ecc'), '0x30E55c3cfB2BBe5d0B07051e0B15c8a532c45ecc token contract for active rig displayed in WorkerPanel');
 
-// 4. Zero ETH Gas & Native $APEBROKER
-assert(allSources.includes('0.05') && (allSources.includes('APEBROKER') || allSources.includes('HYPE')), '0.05 $APEBROKER native mint fee specified');
-assert(allSources.includes('Zero ETH Gas') || allSources.includes('Zero ETH') || allSources.includes('No ETH'), 'Zero ETH gas policy displayed');
-assert(allSources.includes('HyperEVM') || allSources.includes('HypeVM') || allSources.includes('ApeSyndicate'), 'HyperEVM network target explicit');
+// 4. Native ETH Mint Fees & Clean Ecosystem Branding
+assert(allSources.includes('0.0020') && allSources.includes('ETH'), 'Native ETH mint fee specified');
+assert(allSources.includes('Native ETH'), 'Native ETH fee policy displayed');
+assert(allSources.includes('Robinhood EVM L2') || allSources.includes('HashApe'), 'Robinhood EVM L2 and HashApe explicit');
+assert(!allSources.toLowerCase().includes('apebroker'), 'APEBROKER completely purged from UI sources');
+assert(!allSources.toLowerCase().includes('hyperevm'), 'HyperEVM completely purged from UI sources');
 
 // 5. OpenSea 5% Royalty
 assert(allSources.includes('5.0%') || allSources.includes('5% Creator Royalty'), '5% Creator Royalty documented and displayed');
 
 // 6. Manual Minting Flow
-assert(successModalTsx.includes('MINING COMPLETE') || successModalTsx.includes('CONFIRM & MINT NFT'), 'Manual mint modal implemented');
-assert(successModalTsx.includes('mintFeeHype') || successModalTsx.includes('APEBROKER'), 'Manual mint modal specifies fee payment');
+assert(successModalTsx.includes('MINING COMPLETE') || successModalTsx.includes('CONFIRM & MINT NFT') || successModalTsx.includes('MINT YOUR HASHAPE'), 'Manual mint modal implemented');
+assert(successModalTsx.includes('mintFeeEth') || successModalTsx.includes('ETH'), 'Manual mint modal specifies native ETH fee payment');
 
 // 7. Technical Documentation
 assert(docsContentTsx.includes('WebGPU Architecture & Compute Pipeline'), 'WebGPU compute pipeline documented in docs');

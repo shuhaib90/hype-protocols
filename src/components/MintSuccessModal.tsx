@@ -45,7 +45,7 @@ export const MintSuccessModal: React.FC<MintSuccessModalProps> = ({ receipt, onC
         <div className="p-6 space-y-4 bg-[#0d0e15] font-dot">
           <div className="text-center py-4 bg-[#10121b] border border-[#232738]">
             <div className="text-[10px] text-[#8b9bb4] uppercase tracking-widest mb-2">
-              APESYNDICATE HASHAPE MINTED
+              HASHAPE NFT MINTED
             </div>
             <div className="relative mx-auto w-36 h-36 mb-3 border-2 border-[#a3e635] bg-[#07070a] shadow-[0_0_20px_rgba(163,230,53,0.3)]">
               <img

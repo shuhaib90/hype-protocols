@@ -11,8 +11,8 @@ interface WalletContextType {
   address: string;
   nativeHypeBalance: number;
   tokenHypeBalance: number;
-  nativeApeBrokerBalance: number;
-  tokenApeBrokerBalance: number;
+  nativeEthBalance: number;
+  tokenHashApeBalance: number;
   rigActivationTokenAddress: string;
   isAdmin: boolean;
   isConnecting: boolean;
@@ -100,7 +100,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       throw new Error('Please connect your Web3 wallet first.');
     }
     if (tokenBalance < costHype) {
-      throw new Error(`Insufficient APEBROKER token balance: ${costHype} APEBROKER required.`);
+      throw new Error(`Insufficient HashApe ($HASHAPE) token balance: ${costHype} $HASHAPE required.`);
     }
 
     if (typeof window !== 'undefined') {
@@ -141,7 +141,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       throw new Error('Wallet required to execute mint transaction.');
     }
     if (nativeBalance < mintFeeHype) {
-      throw new Error(`Insufficient native gas balance. Requires ${mintFeeHype} APEBROKER.`);
+      throw new Error(`Insufficient native ETH balance. Requires ${mintFeeHype} ETH.`);
     }
 
     const fakeTxHash = '0x' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
@@ -181,8 +181,8 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         address,
         nativeHypeBalance: nativeBalance,
         tokenHypeBalance: tokenBalance,
-        nativeApeBrokerBalance: nativeBalance,
-        tokenApeBrokerBalance: tokenBalance,
+        nativeEthBalance: nativeBalance,
+        tokenHashApeBalance: tokenBalance,
         rigActivationTokenAddress: RIG_ACTIVATION_TOKEN_ADDRESS,
         isAdmin,
         isConnecting,

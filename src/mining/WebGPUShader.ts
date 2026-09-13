@@ -87,12 +87,12 @@ export async function createWebGPUPipeline(adapter: any): Promise<WebGPUPipeline
     if (!device) return null;
 
     const shaderModule = device.createShaderModule({
-      label: 'ApeSyndicate WGSL Keccak PoW Kernel',
+      label: 'HashApe WGSL Keccak PoW Kernel',
       code: WGSL_POW_COMPUTE_SHADER,
     });
 
     const pipeline = device.createComputePipeline({
-      label: 'ApeSyndicate PoW Compute Pipeline',
+      label: 'HashApe PoW Compute Pipeline',
       layout: 'auto',
       compute: {
         module: shaderModule,

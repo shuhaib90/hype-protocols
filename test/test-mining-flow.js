@@ -259,11 +259,11 @@ async function runTests() {
   // --- Test 9: Sequential Escalating Difficulty Ladder Per-Wallet ---
   console.log('\n--- Test 9: Sequential Escalating Difficulty Ladder Per-Wallet ---');
   const WALLET_TIERS = [
-    { tier: 1, label: 'HARD (NFT 1/5)', target: BigInt('0x0003ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff') },
-    { tier: 2, label: 'HARDER (NFT 2/5)', target: BigInt('0x0001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff') },
-    { tier: 3, label: 'VERY HARD (NFT 3/5)', target: BigInt('0x00007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff') },
-    { tier: 4, label: 'EXTREME (NFT 4/5)', target: BigInt('0x00003fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff') },
-    { tier: 5, label: 'LEGENDARY (NFT 5/5)', target: BigInt('0x00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff') },
+    { tier: 1, label: 'HARD (NFT 1/5)', target: BigInt('0x' + '00000f'.padEnd(64, 'f')) },
+    { tier: 2, label: 'HARDER (NFT 2/5)', target: BigInt('0x' + '000007'.padEnd(64, 'f')) },
+    { tier: 3, label: 'VERY HARD (NFT 3/5)', target: BigInt('0x' + '000003'.padEnd(64, 'f')) },
+    { tier: 4, label: 'EXTREME (NFT 4/5)', target: BigInt('0x' + '000001'.padEnd(64, 'f')) },
+    { tier: 5, label: 'LEGENDARY (NFT 5/5)', target: BigInt('0x' + '000000f'.padEnd(64, 'f')) },
   ];
 
   function getTargetForWalletMint(mintCount) {

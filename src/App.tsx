@@ -45,7 +45,7 @@ export const App: React.FC = () => {
   const [walletMints, setWalletMints] = useState(0);
   const [walletQuotaCapped, setWalletQuotaCapped] = useState(false);
   const [walletDifficultyLabel, setWalletDifficultyLabel] = useState('HARD (NFT 1/5)');
-  const [walletTargetHex, setWalletTargetHex] = useState('0x0003fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
+  const [walletTargetHex, setWalletTargetHex] = useState('0x00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
 
   // Authoritative Protocol Supply
   const [supply, setSupply] = useState<SupplyInfo>({
@@ -53,7 +53,7 @@ export const App: React.FC = () => {
     maxSupply: 10000,
     remaining: 9997,
     difficultyBand: 'HARD',
-    currentTargetHex: '0x0003fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+    currentTargetHex: '0x00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
     percentMined: 0.03,
     walletCap: 5,
     currentEpoch: {
@@ -66,7 +66,7 @@ export const App: React.FC = () => {
       mintFeeEth: 0.0020,
       mintFeeApe: 5,
       difficulty: 'HARD',
-      target: '0x0003fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+      target: '0x00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
       nextToken: 4,
       minedInEpoch: 3,
       remainingInEpoch: 7,
@@ -140,7 +140,7 @@ export const App: React.FC = () => {
       setWalletMints(0);
       setWalletQuotaCapped(false);
       setWalletDifficultyLabel('HARD (NFT 1/5)');
-      setWalletTargetHex('0x0003fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
+      setWalletTargetHex('0x00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
     }
   }, [isConnected, address, ledgerRefresh]);
 
@@ -444,7 +444,7 @@ export const App: React.FC = () => {
       <footer className="border-t-4 border-[#24140a] bg-[#eee2ca] py-8 font-dot">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#5c4636]">
           <div className="flex items-center space-x-3">
-            <span className="text-[#24140a] font-jersey text-xl tracking-wider uppercase">APESYNDICATE</span>
+            <span className="text-[#24140a] font-jersey text-xl tracking-wider uppercase">HASHAPE</span>
             <span className="font-bold">© 2026 // WebGPU Proof-of-Work Protocol</span>
           </div>
           <div className="flex items-center space-x-4 flex-wrap text-[11px] font-bold">
@@ -452,7 +452,7 @@ export const App: React.FC = () => {
             <span className="text-[#24140a]">▪</span>
             <span className="text-[#19638b] bg-[#f5ebd7] px-2 py-0.5 border border-[#24140a]">10 ESCALATING EPOCHS</span>
             <span className="text-[#24140a]">▪</span>
-            <span className="text-[#24140a] bg-[#f5ebd7] px-2 py-0.5 border border-[#24140a]">Zero ETH Gas (Native $APEBROKER)</span>
+            <span className="text-[#24140a] bg-[#f5ebd7] px-2 py-0.5 border border-[#24140a]">Robinhood EVM L2 (Native ETH)</span>
             <span className="text-[#24140a]">▪</span>
             <span className="text-[#9c6208] bg-[#f5ebd7] px-2 py-0.5 border border-[#24140a]">5.0% CREATOR ROYALTY</span>
           </div>

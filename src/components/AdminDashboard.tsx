@@ -701,7 +701,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
           <div className="p-5 bg-[#fdfbf7] space-y-4">
             <p className="text-xs font-dot text-[#6b5443]">
-              Worker #1 is 100% FREE. Workers #2–#5 require APEBROKER tokens (HashApe) to activate.
+              Worker #1 is 100% FREE. Workers #2–#5 require HashApe ($HASHAPE) tokens to activate.
             </p>
 
             <div className="space-y-3 font-dot text-xs">

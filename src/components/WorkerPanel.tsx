@@ -26,7 +26,7 @@ export const WorkerPanel: React.FC<WorkerPanelProps> = ({
       return;
     }
     if (tokenHypeBalance < worker.costHype) {
-      setErrorMessage(`Insufficient HashApe (APEBROKER) balance. Need ${worker.costHype} $HASHAPE to activate Miner 0${worker.id}.`);
+      setErrorMessage(`Insufficient HashApe ($HASHAPE) balance. Need ${worker.costHype} $HASHAPE to activate Miner 0${worker.id}.`);
       setTimeout(() => setErrorMessage(null), 5000);
       return;
     }
@@ -61,7 +61,7 @@ export const WorkerPanel: React.FC<WorkerPanelProps> = ({
 
       <div className="p-5 bg-[#fdfbf7] space-y-4">
         <p className="text-xs font-dot text-[#6b5443] font-medium">
-          Worker #1 is 100% FREE. Workers #2–#5 require APEBROKER tokens (HashApe $HASHAPE) to activate. Each worker computes nonces across dedicated, non-overlapping 64-bit address intervals.
+          Worker #1 is 100% FREE. Workers #2–#5 require HashApe ($HASHAPE) tokens to activate. Each worker computes nonces across dedicated, non-overlapping 64-bit address intervals.
         </p>
 
         {/* Token Contract for Active Rig */}

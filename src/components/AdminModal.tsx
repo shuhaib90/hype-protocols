@@ -125,8 +125,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     triggerConfirmation({
       title: 'Mint Price',
       field: 'NFT Mint Fee',
-      oldValue: `${config.mintFeeHype || 0.05} APEBROKER`,
-      newValue: `${mintFee} APEBROKER`,
+      oldValue: `${config.mintFeeHype || 0.0020} ETH`,
+      newValue: `${mintFee} ETH`,
       applyFn: () => {
         onUpdateConfig({
           ...config,
@@ -227,8 +227,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     triggerConfirmation({
       title: 'Mining Worker Fees',
       field: 'Worker 2–5 Activation Costs',
-      oldValue: `W2:${config.workerCosts[2]} | W3:${config.workerCosts[3]} | W4:${config.workerCosts[4]} | W5:${config.workerCosts[5]} APEBROKER`,
-      newValue: `W2:${worker2Cost} | W3:${worker3Cost} | W4:${worker4Cost} | W5:${worker5Cost} APEBROKER`,
+      oldValue: `W2:${config.workerCosts[2]} | W3:${config.workerCosts[3]} | W4:${config.workerCosts[4]} | W5:${config.workerCosts[5]} HASHAPE`,
+      newValue: `W2:${worker2Cost} | W3:${worker3Cost} | W4:${worker4Cost} | W5:${worker5Cost} HASHAPE`,
       applyFn: () => {
         onUpdateConfig({
           ...config,
@@ -264,7 +264,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
             </div>
             <h2 className="font-display font-black text-sm sm:text-base text-[#24140a] uppercase tracking-wider flex items-center gap-2">
               <Shield className="w-5 h-5 text-[#d83a2a]" />
-              <span>APESYNDICATE ADMIN / NFT MINING</span>
+              <span>HASHAPE ADMIN / NFT MINING</span>
             </h2>
           </div>
           <button
@@ -437,7 +437,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     onChange={(e) => setWorker2Cost(parseInt(e.target.value) || 0)}
                     className="w-20 bg-[#fdfbf7] border-2 border-[#24140a] px-2 py-1 text-right text-[#24140a] font-mono font-bold"
                   />
-                  <span className="text-[#6b5443] text-xs font-bold">APEBROKER</span>
+                  <span className="text-[#6b5443] text-xs font-bold">HASHAPE</span>
                 </div>
               </div>
               <div className="flex items-center justify-between p-2.5 bg-[#fdfbf7] border-2 border-[#24140a]">
@@ -449,7 +449,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     onChange={(e) => setWorker3Cost(parseInt(e.target.value) || 0)}
                     className="w-20 bg-[#fdfbf7] border-2 border-[#24140a] px-2 py-1 text-right text-[#24140a] font-mono font-bold"
                   />
-                  <span className="text-[#6b5443] text-xs font-bold">APEBROKER</span>
+                  <span className="text-[#6b5443] text-xs font-bold">HASHAPE</span>
                 </div>
               </div>
               <div className="flex items-center justify-between p-2.5 bg-[#fdfbf7] border-2 border-[#24140a]">
@@ -461,7 +461,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     onChange={(e) => setWorker4Cost(parseInt(e.target.value) || 0)}
                     className="w-20 bg-[#fdfbf7] border-2 border-[#24140a] px-2 py-1 text-right text-[#24140a] font-mono font-bold"
                   />
-                  <span className="text-[#6b5443] text-xs font-bold">APEBROKER</span>
+                  <span className="text-[#6b5443] text-xs font-bold">HASHAPE</span>
                 </div>
               </div>
               <div className="flex items-center justify-between p-2.5 bg-[#fdfbf7] border-2 border-[#24140a]">
@@ -473,7 +473,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     onChange={(e) => setWorker5Cost(parseInt(e.target.value) || 0)}
                     className="w-20 bg-[#fdfbf7] border-2 border-[#24140a] px-2 py-1 text-right text-[#24140a] font-mono font-bold"
                   />
-                  <span className="text-[#6b5443] text-xs font-bold">APEBROKER</span>
+                  <span className="text-[#6b5443] text-xs font-bold">HASHAPE</span>
                 </div>
               </div>
             </div>

@@ -27,7 +27,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
 
   if (!proof) return null;
 
-  const feeToPay = currentEpoch ? currentEpoch.mintFeeApe : mintFeeHype;
+  const feeToPay = currentEpoch ? currentEpoch.mintFeeEth : 0.0020;
   const expectedToken = targetTokenId || (currentEpoch ? currentEpoch.startToken + (currentEpoch.minedInEpoch || 0) : 4);
 
   const handleMint = async () => {
@@ -117,7 +117,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
               <div className="text-right">
                 <span className="text-[10px] text-[#6b5443] uppercase block font-bold">MINT FEE</span>
                 <span className="text-sm font-jersey font-bold text-[#d83a2a]">
-                  {currentEpoch ? `$${currentEpoch.mintFeeUsd} ETH (${currentEpoch.mintFeeEth.toFixed(4)} ETH)` : `${mintFeeHype} APEBROKER`}
+                  {currentEpoch ? `$${currentEpoch.mintFeeUsd} ETH (${currentEpoch.mintFeeEth.toFixed(4)} ETH)` : '$5 ETH (0.0020 ETH)'}
                 </span>
               </div>
             </div>
@@ -137,7 +137,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
         {/* Footer */}
         <div className="p-4 bg-[#eee2ca] border-t-2 border-[#24140a] flex items-center justify-between font-dot">
           <div className="text-xs text-[#6b5443] font-bold">
-            Balance: <span className="text-[#2e7d32] font-bold">{nativeHypeBalance.toFixed(2)} HashApe ($HASHAPE / APEBROKER)</span>
+            Balance: <span className="text-[#2e7d32] font-bold">{nativeHypeBalance.toFixed(4)} ETH</span>
           </div>
           <div className="flex items-center space-x-2.5">
             <button
