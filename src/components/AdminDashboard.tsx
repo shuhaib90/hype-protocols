@@ -11,9 +11,26 @@ import { ethers } from 'ethers';
 import {
   Shield, Check, AlertCircle, ArrowLeft, RefreshCw,
   Coins, Wrench, Flame, Zap, Database, Lock, CheckCircle2,
-  ExternalLink, Layers, Loader2
+  ExternalLink, Layers, Loader2, Cpu, Users, Server, HardDrive, CheckCircle
 } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
+
+export interface MinerInfo {
+  wallet: string;
+  mintedCount: number;
+  solvedCount: number;
+  activeBlades: number[];
+  totalActiveBlades: number;
+}
+
+export interface MinerStats {
+  totalMinersCount: number;
+  totalMined: number;
+  totalActivatedBlades: number;
+  bladeBreakdown: Record<number, number>;
+  activeWallets: string[];
+  minersList?: MinerInfo[];
+}
 
 interface TreasuryData {
   adminWallet: string;
@@ -33,6 +50,7 @@ interface TreasuryData {
     activatedRigCount: number;
     currency: string;
   };
+  minerStats?: MinerStats;
   claims: Array<{
     id: string;
     type: string;
@@ -122,6 +140,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [workerSavedMsg, setWorkerSavedMsg] = useState<string | null>(null);
   const [workerErrorMsg, setWorkerErrorMsg] = useState<string | null>(null);
 
+  // Active Miners & Blade Telemetry State
+  const [minersData, setMinersData] = useState<{
+    minerStats: MinerStats | null;
+    minersList: MinerInfo[];
+    adminBlades: Record<number, boolean>;
+  }>({
+    minerStats: null,
+    minersList: [],
+    adminBlades: { 1: true, 2: false, 3: false, 4: false, 5: false },
+  });
+
   useEffect(() => {
     if (config.workerCosts) {
       if (config.workerCosts[2]) setWorker2Cost(config.workerCosts[2]);
@@ -150,11 +179,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         claimableHashApe = Number(parseFloat(ethers.formatEther(tokenBalWei)).toFixed(2));
       } catch (_) {}
 
-      // 3. Live on-chain worker costs
+      // 3. Live on-chain worker costs & status
       const nftAbi = [
         'function workerActivationCost(uint256) view returns (uint256)',
         'function getEpoch(uint256 tokenId) view returns (tuple(uint256 id, uint256 startToken, uint256 endToken, uint256 mintFeeWei, uint256 feeUsd, uint256 target, string name))',
-        'function totalMined() view returns (uint256)'
+        'function totalMined() view returns (uint256)',
+        'function isWorkerActive(address user, uint8 workerIndex) view returns (bool)'
       ];
       const nftContract = new ethers.Contract(CONTRACT_ADDRESS, nftAbi, provider);
 
@@ -170,6 +200,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         if (w4) setWorker4Cost(Number(ethers.formatEther(w4)));
         if (w5) setWorker5Cost(Number(ethers.formatEther(w5)));
       } catch (_) {}
+
+      // 3.5 Query on-chain blade activation status for connected/admin wallet
+      const queryWallet = address || adminAddress;
+      const verifiedAdminBlades: Record<number, boolean> = { 1: true, 2: false, 3: false, 4: false, 5: false };
+      try {
+        const [b2, b3, b4, b5] = await Promise.all([
+          nftContract.isWorkerActive(queryWallet, 2),
+          nftContract.isWorkerActive(queryWallet, 3),
+          nftContract.isWorkerActive(queryWallet, 4),
+          nftContract.isWorkerActive(queryWallet, 5),
+        ]);
+        verifiedAdminBlades[2] = Boolean(b2);
+        verifiedAdminBlades[3] = Boolean(b3);
+        verifiedAdminBlades[4] = Boolean(b4);
+        verifiedAdminBlades[5] = Boolean(b5);
+      } catch (e) {
+        console.warn('On-chain isWorkerActive check fallback:', e);
+      }
 
       // 4. Live on-chain epoch mint fees
       try {
@@ -187,15 +235,65 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         }
       } catch (_) {}
 
-      // 5. Query historical claims from backend API
+      // 5. Query historical claims and miner activation telemetry from backend API
       let historicalClaims = [];
+      let fetchedMinerStats: MinerStats | null = null;
+      let fetchedMinersList: MinerInfo[] = [];
+
       try {
-        const res = await fetch('/api/admin/treasury');
-        const data = await res.json();
-        if (data.success && data.treasury?.claims) {
-          historicalClaims = data.treasury.claims;
+        const [resTreasury, resMiners] = await Promise.all([
+          fetch('/api/admin/treasury'),
+          fetch('/api/admin/miners'),
+        ]);
+        const dataTreasury = await resTreasury.json();
+        if (dataTreasury.success && dataTreasury.treasury) {
+          if (dataTreasury.treasury.claims) {
+            historicalClaims = dataTreasury.treasury.claims;
+          }
+          if (dataTreasury.treasury.minerStats) {
+            fetchedMinerStats = dataTreasury.treasury.minerStats;
+          }
         }
-      } catch (_) {}
+
+        const dataMiners = await resMiners.json();
+        if (dataMiners.success && dataMiners.minerStats) {
+          fetchedMinerStats = dataMiners.minerStats;
+          fetchedMinersList = dataMiners.minerStats.minersList || [];
+        }
+      } catch (e) {
+        console.warn('Failed to load miner telemetry:', e);
+      }
+
+      // Synchronize verified on-chain admin blades into miners list
+      const normalizedQuery = queryWallet.toLowerCase();
+      const existingAdminIdx = fetchedMinersList.findIndex(m => m.wallet.toLowerCase() === normalizedQuery);
+      const activeAdminBladeIds = [1];
+      for (let i = 2; i <= 5; i++) {
+        if (verifiedAdminBlades[i]) activeAdminBladeIds.push(i);
+      }
+      if (existingAdminIdx >= 0) {
+        fetchedMinersList[existingAdminIdx].activeBlades = Array.from(new Set([
+          ...fetchedMinersList[existingAdminIdx].activeBlades,
+          ...activeAdminBladeIds
+        ])).sort((a, b) => a - b);
+        fetchedMinersList[existingAdminIdx].totalActiveBlades = fetchedMinersList[existingAdminIdx].activeBlades.length;
+      } else {
+        fetchedMinersList.push({
+          wallet: queryWallet,
+          mintedCount: 0,
+          solvedCount: 0,
+          activeBlades: activeAdminBladeIds,
+          totalActiveBlades: activeAdminBladeIds.length
+        });
+      }
+
+      setMinersData({
+        minerStats: fetchedMinerStats,
+        minersList: fetchedMinersList,
+        adminBlades: verifiedAdminBlades,
+      });
+
+      const totalActiveBladesCount = fetchedMinerStats?.totalActivatedBlades ?? 0;
 
       setTreasury({
         adminWallet: adminAddress,
@@ -212,9 +310,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           totalCollectedHashApe: claimableHashApe,
           claimedHashApe: 0,
           claimableHashApe,
-          activatedRigCount: 0,
+          activatedRigCount: totalActiveBladesCount,
           currency: 'HASHAPE',
         },
+        minerStats: fetchedMinerStats || undefined,
         claims: historicalClaims,
       });
     } catch (e) {
@@ -222,7 +321,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     } finally {
       setLoadingTreasury(false);
     }
-  }, [adminAddress, displayedEpochs, totalMined]);
+  }, [adminAddress, address, displayedEpochs, totalMined]);
 
   useEffect(() => {
     fetchTreasury();
@@ -539,6 +638,359 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
       )}
 
+      {/* SECTION: ACTIVE MINERS & HARDWARE BLADE CLUSTER TELEMETRY */}
+      <div className="paper-chassis overflow-hidden">
+        <div className="paper-header-gold px-4 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+          <div className="flex items-center space-x-2">
+            <Cpu className="w-4 h-4 text-[#24140a]" />
+            <span className="font-jersey text-base text-[#24140a] tracking-wider uppercase">
+              ACTIVE MINERS &amp; HARDWARE BLADE CLUSTER TELEMETRY
+            </span>
+            <span className="text-[10px] text-[#24140a] bg-[#f5ebd7] px-1.5 py-0.5 border border-[#24140a] font-bold">
+              ON-CHAIN VERIFIED
+            </span>
+          </div>
+          <div className="flex items-center space-x-3 text-xs">
+            <div className="flex items-center space-x-1 bg-[#fdfbf7] px-2 py-0.5 border border-[#24140a] font-bold text-[#24140a]">
+              <span className="w-2.5 h-2.5 bg-[#2e7d32] border border-[#24140a] inline-block shadow-[1px_1px_0px_#24140a]" />
+              <span>ACTIVE MINERS: {minersData.minerStats?.totalMinersCount ?? minersData.minersList.length}</span>
+            </div>
+            <div className="flex items-center space-x-1 bg-[#fdfbf7] px-2 py-0.5 border border-[#24140a] font-bold text-[#19638b]">
+              <Zap className="w-3.5 h-3.5 text-[#19638b]" />
+              <span>PAID BLADES UNLOCKED: {minersData.minerStats?.totalActivatedBlades ?? 0}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6 bg-[#fdfbf7] space-y-6">
+          {/* 4 Summary Stat Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Card 1: Total Registered Miners */}
+            <div className="bg-[#eee2ca] border-2 border-[#24140a] p-4 shadow-[2px_2px_0px_#24140a]">
+              <div className="flex items-center justify-between pb-1 text-[#6b5443]">
+                <span className="text-[10px] font-bold uppercase tracking-wider">ACTIVE MINER WALLETS</span>
+                <Users className="w-4 h-4 text-[#24140a]" />
+              </div>
+              <div className="flex items-baseline space-x-2">
+                <span className="font-jersey text-3xl font-bold text-[#24140a]">
+                  {minersData.minerStats?.totalMinersCount ?? minersData.minersList.length}
+                </span>
+                <span className="text-xs font-bold text-[#2e7d32]">WALLETS</span>
+              </div>
+              <p className="text-[11px] text-[#6b5443] mt-1">
+                Hardware wallets with on-chain proofs or worker entitlements on Robinhood Chain.
+              </p>
+            </div>
+
+            {/* Card 2: Total Paid Blades Activated */}
+            <div className="bg-[#eee2ca] border-2 border-[#24140a] p-4 shadow-[2px_2px_0px_#24140a]">
+              <div className="flex items-center justify-between pb-1 text-[#6b5443]">
+                <span className="text-[10px] font-bold uppercase tracking-wider">NETWORK BLADES UNLOCKED</span>
+                <Zap className="w-4 h-4 text-[#d48818]" />
+              </div>
+              <div className="flex items-baseline space-x-2">
+                <span className="font-jersey text-3xl font-bold text-[#d48818]">
+                  {minersData.minerStats?.totalActivatedBlades ?? 0}
+                </span>
+                <span className="text-xs font-bold text-[#24140a]">PAID BLADES</span>
+              </div>
+              <p className="text-[11px] text-[#6b5443] mt-1">
+                Workers #2–#5 activated across network via $HASHAPE burning on-chain.
+              </p>
+            </div>
+
+            {/* Card 3: Admin Connected Rig Blades */}
+            <div className="bg-[#eee2ca] border-2 border-[#24140a] p-4 shadow-[2px_2px_0px_#24140a]">
+              <div className="flex items-center justify-between pb-1 text-[#6b5443]">
+                <span className="text-[10px] font-bold uppercase tracking-wider">CONNECTED RIG BLADES</span>
+                <Server className="w-4 h-4 text-[#19638b]" />
+              </div>
+              <div className="flex items-baseline space-x-2">
+                <span className="font-jersey text-3xl font-bold text-[#19638b]">
+                  {Object.values(minersData.adminBlades).filter(Boolean).length} / 5
+                </span>
+                <span className="text-xs font-bold text-[#2e7d32]">ONLINE</span>
+              </div>
+              <p className="text-[11px] text-[#6b5443] mt-1 truncate" title={(address || adminAddress)}>
+                Rig hardware status for {(address || adminAddress).slice(0, 6)}...{(address || adminAddress).slice(-4)}.
+              </p>
+            </div>
+
+            {/* Card 4: Global Mined Total */}
+            <div className="bg-[#eee2ca] border-2 border-[#24140a] p-4 shadow-[2px_2px_0px_#24140a]">
+              <div className="flex items-center justify-between pb-1 text-[#6b5443]">
+                <span className="text-[10px] font-bold uppercase tracking-wider">GLOBAL MINED PROGRESS</span>
+                <Flame className="w-4 h-4 text-[#d83a2a]" />
+              </div>
+              <div className="flex items-baseline space-x-2">
+                <span className="font-jersey text-3xl font-bold text-[#d83a2a]">
+                  {totalMined}
+                </span>
+                <span className="text-xs font-bold text-[#24140a]">/ {maxSupply.toLocaleString()} NFTS</span>
+              </div>
+              <p className="text-[11px] text-[#6b5443] mt-1">
+                {((totalMined / 10) * 100).toFixed(0)}% of Epoch 1 (Genesis) supply claimed.
+              </p>
+            </div>
+          </div>
+
+          {/* 5-Blade Hardware Partition Matrix */}
+          <div className="border-2 border-[#24140a] bg-[#eee2ca] p-4 shadow-[2px_2px_0px_#24140a]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b-2 border-[#24140a] gap-2 mb-3">
+              <div>
+                <h3 className="font-jersey text-lg text-[#24140a] uppercase tracking-wider flex items-center gap-2">
+                  <span>5-BLADE HARDWARE PARTITION &amp; NETWORK ACTIVATION MATRIX</span>
+                </h3>
+                <p className="text-xs text-[#6b5443]">
+                  Live state across all 5 rack blade units: on-chain verification, 64-bit nonce ranges, and miner activation count.
+                </p>
+              </div>
+              <span className="text-[10px] font-bold bg-[#fdfbf7] px-2 py-1 border border-[#24140a] text-[#19638b] self-start sm:self-auto">
+                ROBINHOOD MAINNET // PROTOCOL HARDWARE
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+              {[
+                {
+                  id: 1,
+                  name: 'BLADE #1',
+                  unit: 'CORE',
+                  partition: 'PARTITION A',
+                  range: '0x0000000000000000 - 0x3333333333333333',
+                  costLabel: 'FREE (0 $HASHAPE)',
+                  isFree: true,
+                  activeOnAdmin: true,
+                  networkActive: minersData.minerStats?.bladeBreakdown?.[1] || (minersData.minerStats?.totalMinersCount ?? minersData.minersList.length),
+                },
+                {
+                  id: 2,
+                  name: 'BLADE #2',
+                  unit: 'VECTOR',
+                  partition: 'PARTITION B',
+                  range: '0x3333333333333334 - 0x6666666666666666',
+                  costLabel: `${worker2Cost.toLocaleString()} $HASHAPE`,
+                  isFree: false,
+                  activeOnAdmin: Boolean(minersData.adminBlades[2]),
+                  networkActive: minersData.minerStats?.bladeBreakdown?.[2] || 0,
+                },
+                {
+                  id: 3,
+                  name: 'BLADE #3',
+                  unit: 'MATRIX',
+                  partition: 'PARTITION C',
+                  range: '0x6666666666666667 - 0x9999999999999999',
+                  costLabel: `${worker3Cost.toLocaleString()} $HASHAPE`,
+                  isFree: false,
+                  activeOnAdmin: Boolean(minersData.adminBlades[3]),
+                  networkActive: minersData.minerStats?.bladeBreakdown?.[3] || 0,
+                },
+                {
+                  id: 4,
+                  name: 'BLADE #4',
+                  unit: 'TENSOR',
+                  partition: 'PARTITION D',
+                  range: '0x999999999999999a - 0xcccccccccccccccc',
+                  costLabel: `${worker4Cost.toLocaleString()} $HASHAPE`,
+                  isFree: false,
+                  activeOnAdmin: Boolean(minersData.adminBlades[4]),
+                  networkActive: minersData.minerStats?.bladeBreakdown?.[4] || 0,
+                },
+                {
+                  id: 5,
+                  name: 'BLADE #5',
+                  unit: 'QUANTUM',
+                  partition: 'PARTITION E',
+                  range: '0xcccccccccccccccd - 0xffffffffffffffff',
+                  costLabel: `${worker5Cost.toLocaleString()} $HASHAPE`,
+                  isFree: false,
+                  activeOnAdmin: Boolean(minersData.adminBlades[5]),
+                  networkActive: minersData.minerStats?.bladeBreakdown?.[5] || 0,
+                },
+              ].map((b) => (
+                <div
+                  key={b.id}
+                  className={`paper-chassis p-3 flex flex-col justify-between border-2 shadow-[2px_2px_0px_#24140a] ${
+                    b.activeOnAdmin
+                      ? 'bg-[#eee2ca] border-[#24140a]'
+                      : 'bg-[#eee2ca]/50 border-dashed border-[#24140a]/40'
+                  }`}
+                >
+                  <div>
+                    {/* Blade Title & Unit */}
+                    <div className="flex items-center justify-between mb-1.5 pb-1 border-b border-[#24140a]/20">
+                      <span className="font-jersey text-base font-bold text-[#24140a] uppercase tracking-wide">
+                        {b.name} [{b.unit}]
+                      </span>
+                      <span
+                        className={`text-[9px] px-1.5 py-0.5 border font-bold ${
+                          b.activeOnAdmin
+                            ? 'bg-[#2e7d32] text-white border-[#24140a]'
+                            : 'bg-[#fdfbf7] text-[#6b5443] border-[#24140a]'
+                        }`}
+                      >
+                        {b.isFree ? 'FREE' : b.activeOnAdmin ? 'ONLINE' : 'LOCKED'}
+                      </span>
+                    </div>
+
+                    {/* Partition & Cost */}
+                    <div className="text-[10px] space-y-1 mb-2">
+                      <div className="flex items-center justify-between text-[#6b5443] font-bold">
+                        <span>{b.partition}</span>
+                        <span className="text-[#19638b]">64-BIT</span>
+                      </div>
+                      <div className="flex items-center justify-between font-mono">
+                        <span className="text-[#6b5443]">ACTIVATION:</span>
+                        <span className="text-[#24140a] font-bold truncate">{b.costLabel}</span>
+                      </div>
+                    </div>
+
+                    {/* Nonce Range */}
+                    <div className="bg-[#fdfbf7] p-1.5 border border-[#24140a] text-[9px] font-mono mb-2 shadow-[1px_1px_0px_#24140a]">
+                      <span className="text-[#6b5443] block text-[8px] font-bold">INTERVAL RANGE</span>
+                      <div className="truncate text-[#24140a]" title={b.range}>
+                        {b.range}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Telemetry Footer */}
+                  <div className="pt-2 border-t border-[#24140a]/20 flex items-center justify-between text-[10px]">
+                    <span className="text-[#6b5443] font-medium">NETWORK:</span>
+                    <span className="font-bold text-[#24140a] bg-[#fdfbf7] px-1.5 py-0.5 border border-[#24140a]">
+                      {b.networkActive} ACTIVE
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Active Miner Wallets Ledger Table */}
+          <div className="border-2 border-[#24140a] overflow-hidden shadow-[2px_2px_0px_#24140a]">
+            <div className="bg-[#eee2ca] px-4 py-2.5 border-b-2 border-[#24140a] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center space-x-2">
+                <Users className="w-4 h-4 text-[#24140a]" />
+                <span className="font-jersey text-base text-[#24140a] uppercase tracking-wider">
+                  REGISTERED MINER WALLETS &amp; ACTIVATED BLADES LEDGER
+                </span>
+              </div>
+              <div className="flex items-center space-x-2 text-[10px] font-bold">
+                <span className="bg-[#fdfbf7] px-2 py-0.5 border border-[#24140a] text-[#2e7d32]">
+                  {minersData.minersList.length} MINERS RECORDED
+                </span>
+                <span className="bg-[#fdfbf7] px-2 py-0.5 border border-[#24140a] text-[#19638b]">
+                  ROBINHOOD CHAIN (4663)
+                </span>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs bg-[#fdfbf7]">
+                <thead className="bg-[#eee2ca] border-b-2 border-[#24140a] text-[11px] font-bold">
+                  <tr>
+                    <th className="p-2.5">#</th>
+                    <th className="p-2.5">MINER WALLET ADDRESS</th>
+                    <th className="p-2.5">MINTS CONFIRMED</th>
+                    <th className="p-2.5">PROOFS SOLVED</th>
+                    <th className="p-2.5">ACTIVE WORKER BLADES</th>
+                    <th className="p-2.5">HARDWARE STATUS</th>
+                    <th className="p-2.5 text-right">EXPLORER</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#24140a]">
+                  {minersData.minersList.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="p-4 text-center text-[#6b5443] font-medium">
+                        No active miner records found.
+                      </td>
+                    </tr>
+                  ) : (
+                    minersData.minersList.map((miner, idx) => {
+                      const isCurrentConnected = address && miner.wallet.toLowerCase() === address.toLowerCase();
+                      const isAdminRig = miner.wallet.toLowerCase() === adminAddress.toLowerCase();
+                      const bladeNamesMap: Record<number, string> = {
+                        1: 'CORE',
+                        2: 'VECTOR',
+                        3: 'MATRIX',
+                        4: 'TENSOR',
+                        5: 'QUANTUM',
+                      };
+
+                      return (
+                        <tr
+                          key={miner.wallet}
+                          className={`hover:bg-[#f5ebd7] transition-colors ${
+                            isCurrentConnected ? 'bg-[#2e7d32]/10 font-bold' : ''
+                          }`}
+                        >
+                          <td className="p-2.5 font-bold text-[#6b5443]">#{idx + 1}</td>
+                          <td className="p-2.5 font-mono text-[11px]">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-[#24140a] font-bold">{miner.wallet}</span>
+                              {isAdminRig && (
+                                <span className="bg-[#eee2ca] text-[#d83a2a] px-1.5 py-0.2 text-[9px] font-bold border border-[#24140a]">
+                                  ADMIN RIG
+                                </span>
+                              )}
+                              {isCurrentConnected && !isAdminRig && (
+                                <span className="bg-[#2e7d32] text-white px-1.5 py-0.2 text-[9px] font-bold border border-[#24140a]">
+                                  YOU
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="p-2.5 font-bold text-[#24140a]">
+                            <span className="px-1.5 py-0.5 bg-[#eee2ca] border border-[#24140a] text-[10px]">
+                              {miner.mintedCount} / 5 MINTS
+                            </span>
+                          </td>
+                          <td className="p-2.5 font-mono text-[#19638b] font-bold">
+                            {miner.solvedCount} SOLVED
+                          </td>
+                          <td className="p-2.5">
+                            <div className="flex flex-wrap gap-1">
+                              {(miner.activeBlades || [1]).map((bId) => (
+                                <span
+                                  key={bId}
+                                  className={`text-[9px] px-1.5 py-0.5 font-bold border ${
+                                    bId === 1
+                                      ? 'bg-[#fdfbf7] text-[#2e7d32] border-[#24140a]'
+                                      : 'bg-[#2e7d32] text-white border-[#24140a]'
+                                  }`}
+                                >
+                                  #{bId} {bladeNamesMap[bId] || `BLADE ${bId}`}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="p-2.5">
+                            <span className="text-[10px] font-bold bg-[#eee2ca] px-2 py-0.5 border border-[#24140a] text-[#24140a]">
+                              {miner.totalActiveBlades} / 5 ONLINE
+                            </span>
+                          </td>
+                          <td className="p-2.5 text-right">
+                            <a
+                              href={`https://robinhoodchain.blockscout.com/address/${miner.wallet}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="paper-btn-kraft px-2 py-1 text-[10px] font-bold inline-flex items-center space-x-1 hover:text-[#24140a]"
+                            >
+                              <span>VIEW</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* SECTION 1: TREASURY FEE VAULTS */}
       <div className="paper-chassis overflow-hidden">
         <div className="paper-header-gold px-4 py-2.5 flex items-center justify-between text-xs">
@@ -647,7 +1099,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <code className="text-[#19638b] font-bold select-all">{RIG_ACTIVATION_TOKEN_ADDRESS}</code>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 pt-2">
+                <div className="grid grid-cols-3 gap-2 pt-2">
                   <div className="bg-[#fdfbf7] p-2.5 border-2 border-[#24140a]">
                     <span className="text-[9px] text-[#6b5443] block uppercase font-bold">CONTRACT TOKEN HOLDINGS</span>
                     <span className="text-base font-jersey font-bold text-[#24140a]">
@@ -659,6 +1111,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <span className="text-[9px] text-[#2e7d32] block uppercase font-bold">CLAIMABLE BY ADMIN</span>
                     <span className="text-base font-jersey font-bold text-[#2e7d32]">
                       {claimableHashApe} <span className="text-xs text-[#2e7d32]">$HASHAPE</span>
+                    </span>
+                  </div>
+
+                  <div className="bg-[#fdfbf7] p-2.5 border-2 border-[#d48818]">
+                    <span className="text-[9px] text-[#d48818] block uppercase font-bold">ACTIVATED RIG BLADES</span>
+                    <span className="text-base font-jersey font-bold text-[#d48818]">
+                      {treasury?.rigFees?.activatedRigCount || 0} <span className="text-xs text-[#24140a]">BLADES</span>
                     </span>
                   </div>
                 </div>
@@ -858,14 +1317,36 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
             <div className="space-y-3 text-xs">
               <div className="p-2.5 bg-[#eee2ca] border-2 border-[#24140a] flex items-center justify-between">
-                <span className="font-bold">BLADE #1 (CORE - PARTITION A)</span>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="font-bold">BLADE #1 (CORE - PARTITION A)</span>
+                    <span className="px-1.5 py-0.2 bg-[#2e7d32] text-white text-[9px] font-bold border border-[#24140a]">
+                      ONLINE ON RIG
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-[#6b5443] font-medium">
+                    {minersData.minerStats?.bladeBreakdown?.[1] || (minersData.minerStats?.totalMinersCount ?? minersData.minersList.length)} Active Miners Network-Wide
+                  </div>
+                </div>
                 <span className="px-2 py-0.5 bg-[#fdfbf7] border border-[#24140a] text-[#2e7d32] font-bold">
                   FREE (0 $HASHAPE)
                 </span>
               </div>
 
               <div className="p-2.5 bg-[#eee2ca] border-2 border-[#24140a] flex items-center justify-between">
-                <span className="font-bold">BLADE #2 (VECTOR - PARTITION B)</span>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="font-bold">BLADE #2 (VECTOR - PARTITION B)</span>
+                    <span className={`px-1.5 py-0.2 text-[9px] font-bold border border-[#24140a] ${
+                      minersData.adminBlades[2] ? 'bg-[#2e7d32] text-white' : 'bg-[#fdfbf7] text-[#6b5443]'
+                    }`}>
+                      {minersData.adminBlades[2] ? 'ONLINE ON RIG' : 'LOCKED'}
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-[#6b5443] font-medium">
+                    {minersData.minerStats?.bladeBreakdown?.[2] || 0} Active Miners Network-Wide
+                  </div>
+                </div>
                 <div className="flex items-center space-x-2">
                   <input
                     type="number"
@@ -879,7 +1360,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
 
               <div className="p-2.5 bg-[#eee2ca] border-2 border-[#24140a] flex items-center justify-between">
-                <span className="font-bold">BLADE #3 (MATRIX - PARTITION C)</span>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="font-bold">BLADE #3 (MATRIX - PARTITION C)</span>
+                    <span className={`px-1.5 py-0.2 text-[9px] font-bold border border-[#24140a] ${
+                      minersData.adminBlades[3] ? 'bg-[#2e7d32] text-white' : 'bg-[#fdfbf7] text-[#6b5443]'
+                    }`}>
+                      {minersData.adminBlades[3] ? 'ONLINE ON RIG' : 'LOCKED'}
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-[#6b5443] font-medium">
+                    {minersData.minerStats?.bladeBreakdown?.[3] || 0} Active Miners Network-Wide
+                  </div>
+                </div>
                 <div className="flex items-center space-x-2">
                   <input
                     type="number"
@@ -893,7 +1386,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
 
               <div className="p-2.5 bg-[#eee2ca] border-2 border-[#24140a] flex items-center justify-between">
-                <span className="font-bold">BLADE #4 (TENSOR - PARTITION D)</span>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="font-bold">BLADE #4 (TENSOR - PARTITION D)</span>
+                    <span className={`px-1.5 py-0.2 text-[9px] font-bold border border-[#24140a] ${
+                      minersData.adminBlades[4] ? 'bg-[#2e7d32] text-white' : 'bg-[#fdfbf7] text-[#6b5443]'
+                    }`}>
+                      {minersData.adminBlades[4] ? 'ONLINE ON RIG' : 'LOCKED'}
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-[#6b5443] font-medium">
+                    {minersData.minerStats?.bladeBreakdown?.[4] || 0} Active Miners Network-Wide
+                  </div>
+                </div>
                 <div className="flex items-center space-x-2">
                   <input
                     type="number"
@@ -907,7 +1412,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
 
               <div className="p-2.5 bg-[#eee2ca] border-2 border-[#24140a] flex items-center justify-between">
-                <span className="font-bold">BLADE #5 (QUANTUM - PARTITION E)</span>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="font-bold">BLADE #5 (QUANTUM - PARTITION E)</span>
+                    <span className={`px-1.5 py-0.2 text-[9px] font-bold border border-[#24140a] ${
+                      minersData.adminBlades[5] ? 'bg-[#2e7d32] text-white' : 'bg-[#fdfbf7] text-[#6b5443]'
+                    }`}>
+                      {minersData.adminBlades[5] ? 'ONLINE ON RIG' : 'LOCKED'}
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-[#6b5443] font-medium">
+                    {minersData.minerStats?.bladeBreakdown?.[5] || 0} Active Miners Network-Wide
+                  </div>
+                </div>
                 <div className="flex items-center space-x-2">
                   <input
                     type="number"

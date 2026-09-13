@@ -315,6 +315,17 @@ async function testEndpoints() {
   });
   assert(unauthWorkerCostRes.status === 403, 'Non-admin rejected from editing worker costs with HTTP 403');
 
+  // 22. Test Miner Activation Telemetry (GET /api/admin/miners)
+  const minersRes = await fetch('http://localhost:3000/api/admin/miners');
+  assert(minersRes.status === 200, 'GET /api/admin/miners responds with HTTP 200');
+  const minersPayload = await minersRes.json();
+  assert(minersPayload.success === true, 'Miners telemetry reports success');
+  assert(typeof minersPayload.minerStats.totalMinersCount === 'number', 'Total miners count is a number');
+  assert(typeof minersPayload.minerStats.totalActivatedBlades === 'number', 'Total activated blades is a number');
+  assert(Array.isArray(minersPayload.minerStats.minersList), 'Miners list is an array');
+  assert(minersPayload.minerStats.minersList.length > 0, 'Miners list contains active miner records');
+  assert(minersPayload.minerStats.bladeBreakdown && minersPayload.minerStats.bladeBreakdown[1] !== undefined, 'Blade breakdown reports Blade 1 activations');
+
   // Final cleanup reset to default genesis
   await fetch('http://localhost:3000/api/mining/reset', { method: 'POST' });
 
