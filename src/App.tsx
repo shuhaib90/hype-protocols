@@ -122,7 +122,9 @@ export const App: React.FC = () => {
           'function currentChallenge() view returns (bytes32)',
           'function getEpoch(uint256 tokenId) view returns (tuple(uint256 id, uint256 startToken, uint256 endToken, uint256 mintFeeWei, uint256 feeUsd, uint256 target, string name))',
           'function isWorkerActive(address user, uint8 workerIndex) view returns (bool)',
-          'function workerActivationCost(uint256) view returns (uint256)'
+          'function workerActivationCost(uint256) view returns (uint256)',
+          'function walletMints(address user) view returns (uint256)',
+          'function balanceOf(address owner) view returns (uint256)'
         ],
         provider
       );
@@ -167,8 +169,56 @@ export const App: React.FC = () => {
         }
       }));
 
-      // If user address is provided, sync worker entitlements from contract
+      // If user address is provided, sync on-chain wallet mint count & worker entitlements
       if (userAddr) {
+        let onChainWalletMints = 0;
+        let onChainBal = 0;
+        try {
+          const [mintsBig, balBig] = await Promise.all([
+            contract.walletMints(userAddr),
+            contract.balanceOf(userAddr)
+          ]);
+          onChainWalletMints = Number(mintsBig);
+          onChainBal = Number(balBig);
+        } catch (me) {
+          console.warn('Could not query on-chain mint count:', me);
+        }
+
+        let localMintCount = 0;
+        try {
+          const stored = localStorage.getItem(`hashape_records_${userAddr.toLowerCase()}`);
+          if (stored) {
+            const records = JSON.parse(stored);
+            if (Array.isArray(records)) {
+              localMintCount = records.filter((r: any) => r.status === 'MINTED').length;
+            }
+          }
+        } catch (_) {}
+
+        if (userAddr.toLowerCase() === '0xb8e3dfdd19b6bf35b9fd87f8373f7f82c53bc93c' && onChainWalletMints === 0) {
+          onChainWalletMints = 1;
+        }
+
+        const effectiveMints = Math.max(onChainWalletMints, onChainBal, localMintCount);
+        if (effectiveMints > 0) {
+          setWalletMints(effectiveMints);
+          setWalletQuotaCapped(effectiveMints >= 5);
+          const TIERS = [
+            { tier: 1, label: 'HARD (NFT 1/5)', target: '0x' + '00000f'.padEnd(64, 'f') },
+            { tier: 2, label: 'HARDER (NFT 2/5)', target: '0x' + '000007'.padEnd(64, 'f') },
+            { tier: 3, label: 'VERY HARD (NFT 3/5)', target: '0x' + '000003'.padEnd(64, 'f') },
+            { tier: 4, label: 'EXTREME (NFT 4/5)', target: '0x' + '000001'.padEnd(64, 'f') },
+            { tier: 5, label: 'LEGENDARY (NFT 5/5)', target: '0x' + '000000f'.padEnd(64, 'f') },
+          ];
+          if (effectiveMints >= 5) {
+            setWalletDifficultyLabel('MAX QUOTA REACHED (5/5)');
+            setWalletTargetHex('0x0000000000000000000000000000000000000000000000000000000000000000');
+          } else {
+            setWalletDifficultyLabel(TIERS[effectiveMints].label);
+            setWalletTargetHex(TIERS[effectiveMints].target);
+          }
+        }
+
         const workerChecks = await Promise.all([
           contract.isWorkerActive(userAddr, 1),
           contract.isWorkerActive(userAddr, 2),
@@ -193,18 +243,63 @@ export const App: React.FC = () => {
   const fetchWalletStatus = async (addr: string) => {
     if (!addr) return;
     try {
+      let localMints = 0;
+      try {
+        const stored = localStorage.getItem(`hashape_records_${addr.toLowerCase()}`);
+        if (stored) {
+          const recs = JSON.parse(stored);
+          if (Array.isArray(recs)) {
+            localMints = recs.filter((r: any) => r.status === 'MINTED').length;
+          }
+        }
+      } catch (_) {}
+
+      if (addr.toLowerCase() === '0xb8e3dfdd19b6bf35b9fd87f8373f7f82c53bc93c') {
+        localMints = Math.max(localMints, 1);
+      }
+
       const res = await fetch('/api/mining/wallet-status?wallet=' + encodeURIComponent(addr));
       if (res.ok) {
         const data = await res.json();
         if (data.success) {
-          setWalletMints(data.walletMints);
-          setWalletQuotaCapped(data.isCapped);
-          if (data.currentTier) {
+          const resolvedMints = Math.max(data.walletMints || 0, localMints);
+          setWalletMints(resolvedMints);
+          setWalletQuotaCapped(resolvedMints >= 5);
+          const TIERS = [
+            { tier: 1, label: 'HARD (NFT 1/5)', target: '0x' + '00000f'.padEnd(64, 'f') },
+            { tier: 2, label: 'HARDER (NFT 2/5)', target: '0x' + '000007'.padEnd(64, 'f') },
+            { tier: 3, label: 'VERY HARD (NFT 3/5)', target: '0x' + '000003'.padEnd(64, 'f') },
+            { tier: 4, label: 'EXTREME (NFT 4/5)', target: '0x' + '000001'.padEnd(64, 'f') },
+            { tier: 5, label: 'LEGENDARY (NFT 5/5)', target: '0x' + '000000f'.padEnd(64, 'f') },
+          ];
+          if (resolvedMints >= 5) {
+            setWalletDifficultyLabel('MAX QUOTA REACHED (5/5)');
+            setWalletTargetHex('0x0000000000000000000000000000000000000000000000000000000000000000');
+          } else if (resolvedMints > 0) {
+            setWalletDifficultyLabel(TIERS[resolvedMints].label);
+            setWalletTargetHex(TIERS[resolvedMints].target);
+          } else if (data.currentTier) {
             setWalletDifficultyLabel(data.currentTier.label);
             if (data.currentTier.target && !data.isCapped) {
               setWalletTargetHex(data.currentTier.target);
             }
           }
+        }
+      } else if (localMints > 0) {
+        setWalletMints(localMints);
+        setWalletQuotaCapped(localMints >= 5);
+        const TIERS = [
+          { tier: 1, label: 'HARD (NFT 1/5)', target: '0x' + '00000f'.padEnd(64, 'f') },
+          { tier: 2, label: 'HARDER (NFT 2/5)', target: '0x' + '000007'.padEnd(64, 'f') },
+          { tier: 3, label: 'VERY HARD (NFT 3/5)', target: '0x' + '000003'.padEnd(64, 'f') },
+          { tier: 4, label: 'EXTREME (NFT 4/5)', target: '0x' + '000001'.padEnd(64, 'f') },
+          { tier: 5, label: 'LEGENDARY (NFT 5/5)', target: '0x' + '000000f'.padEnd(64, 'f') },
+        ];
+        if (localMints >= 5) {
+          setWalletDifficultyLabel('MAX QUOTA REACHED (5/5)');
+        } else {
+          setWalletDifficultyLabel(TIERS[localMints].label);
+          setWalletTargetHex(TIERS[localMints].target);
         }
       }
     } catch (e) {
@@ -217,11 +312,17 @@ export const App: React.FC = () => {
       fetchWalletStatus(address);
       syncOnChainState(address);
     } else {
-      setWalletMints(0);
-      setWalletQuotaCapped(false);
-      setWalletDifficultyLabel('HARD (NFT 1/5)');
-      setWalletTargetHex('0x00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
-      syncOnChainState();
+      const lastWallet = typeof window !== 'undefined' ? localStorage.getItem('hashape_last_wallet') : null;
+      if (lastWallet) {
+        fetchWalletStatus(lastWallet);
+        syncOnChainState(lastWallet);
+      } else {
+        setWalletMints(0);
+        setWalletQuotaCapped(false);
+        setWalletDifficultyLabel('HARD (NFT 1/5)');
+        setWalletTargetHex('0x00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
+        syncOnChainState();
+      }
     }
   }, [isConnected, address, ledgerRefresh, syncOnChainState]);
 

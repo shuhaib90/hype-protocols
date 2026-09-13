@@ -3,20 +3,20 @@
   "maxSupply": 10000,
   "records": [
     {
-      "id": "solv_1789313921410_q7yjp",
-      "wallet": "0xdb809633c1d50e6d89a8a3af32a11c76a888675f",
+      "id": "solv_1789314282026_ml1yw",
+      "wallet": "0xdb453772afbf498bed0a359c4b616bfd36e335b5",
       "tokenId": 7850,
-      "nonce": "1052",
-      "solvedHash": "0x0004154d70142f79f62a3367fb4bbe4cf68fff3b9057dd3cfda45a2e3b14a197",
+      "nonce": "1630",
+      "solvedHash": "0x0003c76e3d5d1ae8014440dff539fcbe47f3eb91dc4a640fdd93b427e371609c",
       "difficulty": 4,
       "gpuRenderer": "NVIDIA RTX 4090 WebGPU",
       "status": "MINTED",
-      "solvedAt": 1789313921410,
+      "solvedAt": 1789314282026,
       "txHash": "0x9999888877776666555544443333222211110000aabbccddeeff001122334455",
       "epochId": 1,
       "feeUsd": 5,
       "feeEth": 0.002,
-      "mintedAt": 1789313921414
+      "mintedAt": 1789314282031
     },
     {
       "id": "mint_genesis_3",
@@ -27,7 +27,7 @@
       "epochId": 1,
       "feeUsd": 5,
       "txHash": "0x03a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000003",
-      "mintedAt": 1789312720950
+      "mintedAt": 1789313081478
     },
     {
       "id": "mint_genesis_2",
@@ -38,7 +38,7 @@
       "epochId": 1,
       "feeUsd": 5,
       "txHash": "0x02a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000002",
-      "mintedAt": 1789311520950
+      "mintedAt": 1789311881478
     },
     {
       "id": "mint_genesis_1",
@@ -49,16 +49,16 @@
       "epochId": 1,
       "feeUsd": 5,
       "txHash": "0x01a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000001",
-      "mintedAt": 1789310320950
+      "mintedAt": 1789310681478
     }
   ],
   "workerEntitlements": {
-    "0xdb809633c1d50e6d89a8a3af32a11c76a888675f": {
+    "0xdb453772afbf498bed0a359c4b616bfd36e335b5": {
       "3": true
     }
   },
   "usedProofs": {
-    "0x0004154d70142f79f62a3367fb4bbe4cf68fff3b9057dd3cfda45a2e3b14a197": true
+    "0x0003c76e3d5d1ae8014440dff539fcbe47f3eb91dc4a640fdd93b427e371609c": true
   },
   "activeMiners": {},
   "epochOverrides": {
@@ -66,7 +66,7 @@
       "mintFeeUsd": 5,
       "mintFeeEth": 0.002,
       "mintFeeApe": 5,
-      "updatedAt": 1789313922677
+      "updatedAt": 1789314283492
     }
   },
   "treasury": {

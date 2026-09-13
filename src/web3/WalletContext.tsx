@@ -129,6 +129,61 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   }, []);
 
+  useEffect(() => {
+    const tryAutoConnect = async () => {
+      if (typeof window !== 'undefined') {
+        const injected = (window as any).robinhood?.ethereum || (window as any).ethereum;
+        if (injected) {
+          try {
+            const accounts = await injected.request({ method: 'eth_accounts' });
+            if (accounts && accounts.length > 0) {
+              const userAddr = accounts[0];
+              setAddress(userAddr);
+              setIsConnected(true);
+              try { localStorage.setItem('hashape_last_wallet', userAddr.toLowerCase()); } catch (_) {}
+              const provider = new ethers.BrowserProvider(injected);
+              await fetchBalances(userAddr, provider);
+            }
+          } catch (e) {
+            console.warn('Silent auto-connect check failed:', e);
+          }
+        }
+      }
+    };
+    tryAutoConnect();
+
+    if (typeof window !== 'undefined') {
+      const injected = (window as any).robinhood?.ethereum || (window as any).ethereum;
+      if (injected && injected.on) {
+        const handleAccountsChanged = (accounts: string[]) => {
+          if (accounts && accounts.length > 0) {
+            const userAddr = accounts[0];
+            setAddress(userAddr);
+            setIsConnected(true);
+            try { localStorage.setItem('hashape_last_wallet', userAddr.toLowerCase()); } catch (_) {}
+            const provider = new ethers.BrowserProvider(injected);
+            fetchBalances(userAddr, provider);
+          } else {
+            setIsConnected(false);
+            setAddress('');
+            try { localStorage.removeItem('hashape_last_wallet'); } catch (_) {}
+          }
+        };
+        const handleChainChanged = () => {
+          window.location.reload();
+        };
+        injected.on('accountsChanged', handleAccountsChanged);
+        injected.on('chainChanged', handleChainChanged);
+        return () => {
+          if (injected.removeListener) {
+            injected.removeListener('accountsChanged', handleAccountsChanged);
+            injected.removeListener('chainChanged', handleChainChanged);
+          }
+        };
+      }
+    }
+  }, [fetchBalances]);
+
   const connectWallet = async () => {
     soundEffects.playClickSound();
     setIsConnecting(true);
@@ -143,6 +198,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             const userAddr = accounts[0];
             setAddress(userAddr);
             setIsConnected(true);
+            try { localStorage.setItem('hashape_last_wallet', userAddr.toLowerCase()); } catch (_) {}
             await fetchBalances(userAddr, provider);
             return;
           }
@@ -161,6 +217,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     soundEffects.playClickSound();
     setAddress(OWNER_WALLET);
     setIsConnected(true);
+    try { localStorage.setItem('hashape_last_wallet', OWNER_WALLET.toLowerCase()); } catch (_) {}
     try {
       const rpcProvider = new ethers.JsonRpcProvider(RPC_URL);
       await fetchBalances(OWNER_WALLET, rpcProvider);
@@ -176,6 +233,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setAddress('');
     setNativeBalance(0.0);
     setTokenBalance(0.0);
+    try { localStorage.removeItem('hashape_last_wallet'); } catch (_) {}
   };
 
   const refreshBalances = async () => {
