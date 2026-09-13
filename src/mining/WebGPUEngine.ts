@@ -154,6 +154,7 @@ export class WebGPUMiningEngine {
     }
 
     soundEffects.playMiningStartSound();
+    soundEffects.startGpuRunningSound();
 
     this.challenge = challenge;
     this.wallet = wallet;
@@ -181,6 +182,7 @@ export class WebGPUMiningEngine {
 
   public stop() {
     this.isMining = false;
+    soundEffects.stopGpuRunningSound();
     if (this.abortController) {
       this.abortController.abort();
       this.abortController = null;

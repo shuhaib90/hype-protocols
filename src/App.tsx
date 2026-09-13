@@ -17,6 +17,7 @@ import { getAllWorkerRanges } from './mining/NoncePartition';
 import { MiningStatus, DifficultyBand, WorkerInfo, SupplyInfo, MiningProof, MintReceipt, ProtocolConfig, EpochInfo } from './types';
 import { useWallet, ADMIN_WALLET, OWNER_WALLET, CONTRACT_ADDRESS, RPC_URL } from './web3/WalletContext';
 import { ethers } from 'ethers';
+import { soundEffects } from './utils/soundEffects';
 
 export const App: React.FC = () => {
   const { isConnected, address, activateWorkerOnChain } = useWallet();
@@ -492,6 +493,7 @@ export const App: React.FC = () => {
         console.error('Mining engine error:', err);
         setIsMining(false);
         setMiningStatus('ERROR');
+        soundEffects.stopGpuRunningSound();
       },
     });
 
@@ -499,6 +501,7 @@ export const App: React.FC = () => {
       if (miningEngineRef.current) {
         miningEngineRef.current.stop();
       }
+      soundEffects.stopGpuRunningSound();
     };
   }, [supply.totalMined, gpuInfo?.name]);
 
@@ -562,6 +565,7 @@ export const App: React.FC = () => {
     setIsMining(false);
     setMiningStatus('READY');
     miningEngineRef.current?.stop();
+    soundEffects.stopGpuRunningSound();
     setTotalHashrate(0);
     setWorkerHashrates({});
   };

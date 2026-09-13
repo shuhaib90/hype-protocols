@@ -69,6 +69,12 @@ assert(docsContentTsx.includes('Anti-Race Condition & Mempool Security'), 'Anti-
 assert(distHtml.includes('<div id="root"></div>'), 'Production HTML root container present');
 assert(distHtml.includes('/assets/index-'), 'Production bundled assets referenced');
 
+// 9. GPU Running Audio Synthesizer
+const soundEffectsTs = fs.readFileSync(path.join(srcDir, 'utils/soundEffects.ts'), 'utf8');
+const webGPUEngineTs = fs.readFileSync(path.join(srcDir, 'mining/WebGPUEngine.ts'), 'utf8');
+assert(soundEffectsTs.includes('startGpuRunningSound') && soundEffectsTs.includes('stopGpuRunningSound'), 'Continuous GPU running sound synthesizer implemented in soundEffects.ts');
+assert(webGPUEngineTs.includes('startGpuRunningSound') && webGPUEngineTs.includes('stopGpuRunningSound'), 'GPU running sound triggered on mining start and stopped on termination');
+
 console.log('\n====================================================');
 console.log(`🎉 ALL ${passed}/${total} FRONTEND INTEGRITY TESTS PASSED!`);
 console.log('====================================================');
