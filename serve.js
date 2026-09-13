@@ -304,6 +304,16 @@ function getDifficultyForSupply(totalMined, maxSupply) {
 
 // Parse incoming JSON body
 function parseJsonBody(req) {
+  if (req.body && typeof req.body === 'object') {
+    return Promise.resolve(req.body);
+  }
+  if (typeof req.body === 'string') {
+    try {
+      return Promise.resolve(JSON.parse(req.body));
+    } catch (e) {
+      return Promise.reject(new Error('Invalid JSON'));
+    }
+  }
   return new Promise((resolve, reject) => {
     let body = '';
     req.on('data', chunk => {
@@ -337,8 +347,10 @@ const MIME_TYPES = {
   '.woff': 'font/woff',
 };
 
-// Real Client IP resolution supporting Cloudflare Edge Proxy headers
+// Real Client IP resolution supporting Vercel and Cloudflare Edge Proxy headers
 function getClientIp(req) {
+  const xVercelForwarded = req.headers['x-vercel-forwarded-for'];
+  if (xVercelForwarded) return xVercelForwarded.split(',')[0].trim();
   const cfIp = req.headers['cf-connecting-ip'];
   if (cfIp) return cfIp.trim();
   const trueClientIp = req.headers['true-client-ip'];
@@ -366,14 +378,15 @@ function checkRateLimit(ip, limit = 60, windowMs = 60000) {
 }
 
 // Periodic cleanup of expired rate limit windows (every 5 minutes)
-setInterval(() => {
+const cleanupTimer = setInterval(() => {
   const now = Date.now();
   for (const [ip, record] of rateLimits.entries()) {
     if (now > record.resetTime) rateLimits.delete(ip);
   }
 }, 300000);
+if (cleanupTimer.unref) cleanupTimer.unref();
 
-const server = http.createServer(async (req, res) => {
+async function handleRequest(req, res) {
   const parsedUrl = new URL(req.url, `http://localhost:${PORT}`);
   let reqPath = parsedUrl.pathname;
 
@@ -457,8 +470,12 @@ const server = http.createServer(async (req, res) => {
         }
       }
     }
-    res.writeHead(404, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Metadata not found' }));
+    // Fallback to 4EVERLAND Decentralized IPFS Metadata
+    res.writeHead(302, {
+      'Location': `https://endpoint.4everland.co/hashape/metadata/${tokenId}.json`,
+      'Cache-Control': 'public, max-age=86400, s-maxage=86400'
+    });
+    res.end();
     return;
   }
 
@@ -467,6 +484,8 @@ const server = http.createServer(async (req, res) => {
   if (imgMatch && req.method === 'GET') {
     const tokenId = parseInt(imgMatch[1], 10);
     const imgFilePath = path.join(COLLECTION_DIR, 'images', `${tokenId}.png`);
+    const distImgPath = path.join(DIST_DIR, 'images', `${tokenId}.png`);
+
     if (fs.existsSync(imgFilePath)) {
       res.writeHead(200, {
         'Content-Type': 'image/png',
@@ -475,9 +494,22 @@ const server = http.createServer(async (req, res) => {
       });
       fs.createReadStream(imgFilePath).pipe(res);
       return;
+    } else if (fs.existsSync(distImgPath)) {
+      res.writeHead(200, {
+        'Content-Type': 'image/png',
+        'Cache-Control': 'public, max-age=2592000, s-maxage=31536000, immutable',
+        'Access-Control-Allow-Origin': '*'
+      });
+      fs.createReadStream(distImgPath).pipe(res);
+      return;
     }
-    res.writeHead(404, { 'Content-Type': 'text/plain' });
-    res.end('Image not found');
+
+    // Fallback to 4EVERLAND Decentralized IPFS Image
+    res.writeHead(302, {
+      'Location': `https://endpoint.4everland.co/hashape/images/${tokenId}.png`,
+      'Cache-Control': 'public, max-age=2592000, s-maxage=31536000, immutable'
+    });
+    res.end();
     return;
   }
 
@@ -486,8 +518,8 @@ const server = http.createServer(async (req, res) => {
     const protocol = req.headers['x-forwarded-proto'] || 'http';
     const host = req.headers.host || `localhost:${PORT}`;
     const storefront = {
-      name: "ApeSyndicate HashApes",
-      description: "10,000 unique, named pixel-art ape editions mined strictly via in-browser WebGPU Proof-of-Work. Assembled through deterministic pixel editing of licensed reference artwork on HyperEVM. Zero direct public mints.",
+      name: "HashApe PoW Mining Protocol",
+      description: "10,000 unique, named pixel-art ape editions mined strictly via in-browser WebGPU Proof-of-Work on Robinhood EVM L2. Zero direct public mints.",
       image: `${protocol}://${host}/preview.png`,
       external_link: `${protocol}://${host}`,
       seller_fee_basis_points: 500, // 5% royalty
@@ -1234,12 +1266,25 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     res.end('404 Not Found');
   }
-});
+}
 
-server.listen(PORT, () => {
-  console.log(`====================================================`);
-  console.log(`⚡ HashApe NFT Mining Server listening on port ${PORT}`);
-  console.log(`🌐 Web URL: http://localhost:${PORT}`);
-  console.log(`💎 10,000 Hard Cap | WebGPU PoW | 5-Worker System`);
-  console.log(`====================================================`);
-});
+const server = http.createServer(handleRequest);
+
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`====================================================`);
+    console.log(`⚡ HashApe NFT Mining Server listening on port ${PORT}`);
+    console.log(`🌐 Web URL: http://localhost:${PORT}`);
+    console.log(`💎 10,000 Hard Cap | WebGPU PoW | 5-Worker System`);
+    console.log(`====================================================`);
+  });
+}
+
+module.exports = {
+  server,
+  handleRequest,
+  db,
+  initDb,
+  saveDb,
+  supabaseAdapter
+};

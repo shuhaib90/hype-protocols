@@ -14,6 +14,7 @@
     "test": "node test/test-mining-flow.js && node test/test-server-endpoints.js && node test/test-db-api.js && node test/verify-html.js && node test/test-cloudflare-headers.js",
     "deploy:pages": "npx wrangler pages deploy dist",
     "deploy:worker": "npx wrangler deploy",
+    "deploy:vercel": "npx vercel --prod",
     "upload:4everland": "node scripts/upload-to-4everland.js"
   },
   "keywords": [],

@@ -3,20 +3,20 @@
   "maxSupply": 10000,
   "records": [
     {
-      "id": "solv_1789304442816_yghha",
-      "wallet": "0xdb977783c1fb78b8345a29ba4798ac3c8afd0e19",
+      "id": "solv_1789305148262_i4elz",
+      "wallet": "0xdb5e83050cf5748011d5bf297a528226ce5677b9",
       "tokenId": 7850,
-      "nonce": "1629",
-      "solvedHash": "0x000099a5137fd66b08aa654021d1733fb249ddcc883d5cffc77ee954099afee9",
+      "nonce": "5134",
+      "solvedHash": "0x000419eac63b39f289f310969e5b4d4cd9b19a2077bddbb50478fa9650071993",
       "difficulty": 4,
       "gpuRenderer": "NVIDIA RTX 4090 WebGPU",
       "status": "MINTED",
-      "solvedAt": 1789304442816,
+      "solvedAt": 1789305148262,
       "txHash": "0x9999888877776666555544443333222211110000aabbccddeeff001122334455",
       "epochId": 1,
       "feeUsd": 5,
       "feeEth": 0.002,
-      "mintedAt": 1789304442824
+      "mintedAt": 1789305148269
     },
     {
       "id": "mint_genesis_3",
@@ -27,7 +27,7 @@
       "epochId": 1,
       "feeUsd": 5,
       "txHash": "0x03a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000003",
-      "mintedAt": 1789303242150
+      "mintedAt": 1789303947290
     },
     {
       "id": "mint_genesis_2",
@@ -38,7 +38,7 @@
       "epochId": 1,
       "feeUsd": 5,
       "txHash": "0x02a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000002",
-      "mintedAt": 1789302042150
+      "mintedAt": 1789302747290
     },
     {
       "id": "mint_genesis_1",
@@ -49,16 +49,16 @@
       "epochId": 1,
       "feeUsd": 5,
       "txHash": "0x01a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000001",
-      "mintedAt": 1789300842150
+      "mintedAt": 1789301547290
     }
   ],
   "workerEntitlements": {
-    "0xdb977783c1fb78b8345a29ba4798ac3c8afd0e19": {
+    "0xdb5e83050cf5748011d5bf297a528226ce5677b9": {
       "3": true
     }
   },
   "usedProofs": {
-    "0x000099a5137fd66b08aa654021d1733fb249ddcc883d5cffc77ee954099afee9": true
+    "0x000419eac63b39f289f310969e5b4d4cd9b19a2077bddbb50478fa9650071993": true
   },
   "activeMiners": {},
   "epochOverrides": {},
