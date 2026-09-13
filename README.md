@@ -13,6 +13,9 @@
 
 - **Cloudflare Edge Live URL**: [https://hashape-mining.dazed-region.workers.dev](https://hashape-mining.dazed-region.workers.dev)
 - **GitHub Repository**: [https://github.com/shuhaib90/hype-protocols](https://github.com/shuhaib90/hype-protocols)
+- **4EVERLAND IPFS Base Token URI**: `https://endpoint.4everland.co/hashape/metadata/`
+- **4EVERLAND IPFS Storefront URI**: `https://endpoint.4everland.co/hashape/storefront.json`
+- **4EVERLAND IPFS Artwork Images**: `https://endpoint.4everland.co/hashape/images/`
 - **Claim Cloudflare Worker into your permanent account**: [Claim Link](https://dash.cloudflare.com/claim-preview?claimToken=oePNq9Gv-tXVe2HNhxKa7nE0eA7J30V1x7EeEOpOvU8) *(Valid for 60 minutes)*
 
 ---
