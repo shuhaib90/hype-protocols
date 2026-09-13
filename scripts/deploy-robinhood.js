@@ -21,8 +21,9 @@ async function main() {
 
   const rpcUrl = process.env.ROBINHOOD_RPC_URL || process.env.RPC_URL;
   const privateKey = process.env.PRIVATE_KEY;
-  const baseUri = process.env.BASE_URI || 'http://localhost:3000/metadata/';
-  const hypeTokenAddress = process.env.HYPE_TOKEN_ADDRESS || '0x0000000000000000000000000000000000000000';
+  const baseUri = process.env.BASE_URI || 'https://endpoint.4everland.co/hashape/metadata/';
+  const contractUri = process.env.CONTRACT_URI || 'https://endpoint.4everland.co/hashape/storefront.json';
+  const rigTokenAddress = process.env.RIG_TOKEN_ADDRESS || process.env.HYPE_TOKEN_ADDRESS || '0x30E55c3cfB2BBe5d0B07051e0B15c8a532c45ecc';
 
   if (!rpcUrl) {
     console.error('❌ Error: ROBINHOOD_RPC_URL is required.');
@@ -71,9 +72,10 @@ async function main() {
 
   console.log('⏳ Submitting deployment transaction...');
   console.log(`   Initial Base URI: ${baseUri}`);
-  console.log(`   Worker Token Address: ${hypeTokenAddress}`);
+  console.log(`   Contract Storefront URI: ${contractUri}`);
+  console.log(`   Worker Rig Token Address: ${rigTokenAddress}`);
 
-  const contract = await factory.deploy(hypeTokenAddress, baseUri);
+  const contract = await factory.deploy(rigTokenAddress, baseUri, contractUri);
   console.log(`📝 Deployment Tx Hash: ${contract.deploymentTransaction().hash}`);
   console.log('⏳ Waiting for block confirmation on Robinhood L2...');
 
