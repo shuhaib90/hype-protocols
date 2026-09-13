@@ -1,0 +1,49 @@
+{
+  "name": "Hadorny the Corsair",
+  "description": "hashape #06045: Hadorny the Corsair. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/6045.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Olive"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Pixel Rain"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Midnight"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Cocoa"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Captain Coat"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Teal"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Smirk"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Headband"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Eye Patch"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Dog Tags"
+    }
+  ],
+  "edition": 6045,
+  "collection": "hashape"
+}

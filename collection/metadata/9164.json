@@ -1,0 +1,53 @@
+{
+  "name": "Iosenor the Rider",
+  "description": "hashape #09164: Iosenor the Rider. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/9164.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Midnight"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Pixel Rain"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Jade"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Silver"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Leather Rider"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Plum"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Pout"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Headband"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Sport Shades"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Mint"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Ear Ring"
+    }
+  ],
+  "edition": 9164,
+  "collection": "hashape"
+}

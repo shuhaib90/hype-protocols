@@ -1,0 +1,53 @@
+{
+  "name": "Arrisny the Broker",
+  "description": "hashape #08092: Arrisny the Broker. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/8092.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Slate"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Pixel Rain"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Midnight"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Silver"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Executive Suit"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Forest"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Gritted Teeth"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Snapback"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Monocle"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Mint"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "None"
+    }
+  ],
+  "edition": 8092,
+  "collection": "hashape"
+}

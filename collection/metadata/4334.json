@@ -1,0 +1,53 @@
+{
+  "name": "Lunixar the Ranger",
+  "description": "hashape #04334: Lunixar the Ranger. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/4334.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Lagoon"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Steps"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Plum"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Rosewood"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Tactical Vest"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Burgundy"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Laughing"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Snapback"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Classic Shades"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Ice"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "None"
+    }
+  ],
+  "edition": 4334,
+  "collection": "hashape"
+}

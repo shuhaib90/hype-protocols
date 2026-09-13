@@ -1,0 +1,53 @@
+{
+  "name": "Jumarmi the Corsair",
+  "description": "hashape #05643: Jumarmi the Corsair. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/5643.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Midnight"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Pixel Rain"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Ash"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Silver"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Captain Coat"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Plum"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Gritted Teeth"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Headband"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Clear Frames"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Ocean"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Studs"
+    }
+  ],
+  "edition": 5643,
+  "collection": "hashape"
+}

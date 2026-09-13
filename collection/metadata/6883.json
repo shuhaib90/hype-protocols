@@ -1,0 +1,49 @@
+{
+  "name": "Jusollo the Broker",
+  "description": "hashape #06883: Jusollo the Broker. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/6883.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Rose"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Steps"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Midnight"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Rosewood"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Executive Suit"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Burgundy"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Frown"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Spiked Hair"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Bare Eyes"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Gold Medallion"
+    }
+  ],
+  "edition": 6883,
+  "collection": "hashape"
+}

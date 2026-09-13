@@ -1,0 +1,49 @@
+{
+  "name": "Garonel the Aviator",
+  "description": "hashape #05126: Garonel the Aviator. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/5126.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Amethyst"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Steps"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Jade"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Silver"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Flight Bomber"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Navy"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Smirk"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Headband"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Eye Patch"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Ear Ring"
+    }
+  ],
+  "edition": 5126,
+  "collection": "hashape"
+}

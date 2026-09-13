@@ -1,0 +1,49 @@
+{
+  "name": "Haronmi the Aviator",
+  "description": "hashape #08805: Haronmi the Aviator. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/8805.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Rose"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Steps"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Copper"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Silver"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Flight Bomber"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Rust"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Pout"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Snapback"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Eye Patch"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "None"
+    }
+  ],
+  "edition": 8805,
+  "collection": "hashape"
+}

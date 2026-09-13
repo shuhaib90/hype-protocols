@@ -1,0 +1,53 @@
+{
+  "name": "Kavekfi the Ranger",
+  "description": "hashape #06058: Kavekfi the Ranger. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/6058.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Amethyst"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Solid"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Midnight"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Rosewood"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Tactical Vest"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Rust"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Smirk"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Crown"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Classic Shades"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Mint"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Gold Medallion"
+    }
+  ],
+  "edition": 6058,
+  "collection": "hashape"
+}

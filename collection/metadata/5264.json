@@ -1,0 +1,53 @@
+{
+  "name": "Iozorju the Ranger",
+  "description": "hashape #05264: Iozorju the Ranger. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/5264.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Amethyst"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Halo"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Copper"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Sand"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Tactical Vest"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Ivory"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Laughing"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Beanie"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Monocle"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Ice"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Pendant"
+    }
+  ],
+  "edition": 5264,
+  "collection": "hashape"
+}

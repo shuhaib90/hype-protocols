@@ -1,0 +1,53 @@
+{
+  "name": "Nutorlu the Drifter",
+  "description": "hashape #07799: Nutorlu the Drifter. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/7799.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Emerald"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Solid"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Plum"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Sand"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Denim Jacket"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Rust"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Stoic"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Spiked Hair"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Cyber Visor"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Ruby"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Silk Scarf"
+    }
+  ],
+  "edition": 7799,
+  "collection": "hashape"
+}

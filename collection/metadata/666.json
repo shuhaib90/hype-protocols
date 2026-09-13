@@ -1,0 +1,49 @@
+{
+  "name": "Garisga the Skater",
+  "description": "hashape #00666: Garisga the Skater. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/666.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Midnight"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Pixel Rain"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Obsidian"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Rosewood"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Street Hoodie"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Ivory"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Stoic"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Spiked Hair"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Bare Eyes"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Silver Medallion"
+    }
+  ],
+  "edition": 666,
+  "collection": "hashape"
+}

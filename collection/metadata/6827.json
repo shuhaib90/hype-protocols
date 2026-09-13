@@ -1,0 +1,53 @@
+{
+  "name": "Fikaiel the Rider",
+  "description": "hashape #06827: Fikaiel the Rider. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/6827.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Crimson"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Pixel Rain"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Plum"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Silver"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Leather Rider"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Rust"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Gritted Teeth"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Spiked Hair"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Clear Frames"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Violet"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Silver Medallion"
+    }
+  ],
+  "edition": 6827,
+  "collection": "hashape"
+}

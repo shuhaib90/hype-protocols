@@ -1,0 +1,49 @@
+{
+  "name": "Nuzorcy the Ranger",
+  "description": "hashape #07159: Nuzorcy the Ranger. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/7159.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Cobalt"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Halo"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Ash"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Rosewood"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Tactical Vest"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Ivory"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Pout"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Pilot Cap"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Bare Eyes"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Studs"
+    }
+  ],
+  "edition": 7159,
+  "collection": "hashape"
+}

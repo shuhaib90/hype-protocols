@@ -1,0 +1,53 @@
+{
+  "name": "Vadinny the Ronin",
+  "description": "hashape #04757: Vadinny the Ronin. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/4757.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Crimson"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Steps"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Jade"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Silver"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Ronin Robe"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Burgundy"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Stoic"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Snapback"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Clear Frames"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Ice"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Ear Ring"
+    }
+  ],
+  "edition": 4757,
+  "collection": "hashape"
+}

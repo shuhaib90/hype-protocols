@@ -1,0 +1,20 @@
+{
+  "status": "passed",
+  "count": 10000,
+  "unique_names": 10000,
+  "unique_decoded_pixel_images": 10000,
+  "metadata_image_pairs": 10000,
+  "dimensions": [
+    1024,
+    1024
+  ],
+  "native_dimensions": [
+    256,
+    256
+  ],
+  "all_exports_exact_nearest_neighbor": true,
+  "all_metadata_attributes_match_trait_index": true,
+  "all_images_decoded_successfully": true,
+  "checks_seconds": 226,
+  "visual_review": "24 systematic design combinations and sample sheet of 48 actual editions; not individual human review of all 10,000"
+}

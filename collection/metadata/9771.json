@@ -1,0 +1,53 @@
+{
+  "name": "Rorislo the Drifter",
+  "description": "hashape #09771: Rorislo the Drifter. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/9771.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Amethyst"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Pixel Rain"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Plum"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Cocoa"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Denim Jacket"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Navy"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Frown"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Beanie"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Clear Frames"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Amber"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Studs"
+    }
+  ],
+  "edition": 9771,
+  "collection": "hashape"
+}

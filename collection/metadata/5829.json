@@ -1,0 +1,53 @@
+{
+  "name": "Dadorlu the Ronin",
+  "description": "hashape #05829: Dadorlu the Ronin. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/5829.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Amethyst"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Halo"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Espresso"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Sand"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Ronin Robe"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Burgundy"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Smirk"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Headphones"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Clear Frames"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Ocean"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Ear Ring"
+    }
+  ],
+  "edition": 5829,
+  "collection": "hashape"
+}

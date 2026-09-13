@@ -1,0 +1,49 @@
+{
+  "name": "Firynio the Aviator",
+  "description": "hashape #03347: Firynio the Aviator. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/3347.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Cobalt"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Halo"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Blue Steel"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Rosewood"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Flight Bomber"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Navy"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Pout"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Pilot Cap"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Bare Eyes"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Silver Medallion"
+    }
+  ],
+  "edition": 3347,
+  "collection": "hashape"
+}

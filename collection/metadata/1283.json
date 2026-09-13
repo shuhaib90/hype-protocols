@@ -1,0 +1,53 @@
+{
+  "name": "Jutallu the Aviator",
+  "description": "hashape #01283: Jutallu the Aviator. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/1283.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Midnight"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Steps"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Ash"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Sand"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Flight Bomber"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Burgundy"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Pout"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Headphones"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Round Shades"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Ruby"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "None"
+    }
+  ],
+  "edition": 1283,
+  "collection": "hashape"
+}

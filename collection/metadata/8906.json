@@ -1,0 +1,53 @@
+{
+  "name": "Gazorlo the Ronin",
+  "description": "hashape #08906: Gazorlo the Ronin. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/8906.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Olive"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Halo"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Jade"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Cocoa"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Ronin Robe"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Burgundy"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Stoic"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Bucket Hat"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Monocle"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Violet"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Ear Ring"
+    }
+  ],
+  "edition": 8906,
+  "collection": "hashape"
+}

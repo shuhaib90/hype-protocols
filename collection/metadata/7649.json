@@ -1,0 +1,53 @@
+{
+  "name": "Datusda the Regent",
+  "description": "hashape #07649: Datusda the Regent. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/7649.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Lagoon"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Steps"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Jade"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Silver"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Royal Mantle"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Plum"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Frown"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Bucket Hat"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Sport Shades"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Mint"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "None"
+    }
+  ],
+  "edition": 7649,
+  "collection": "hashape"
+}

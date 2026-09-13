@@ -1,0 +1,53 @@
+{
+  "name": "Kamarju the Regent",
+  "description": "hashape #01958: Kamarju the Regent. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/1958.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Olive"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Pixel Rain"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Midnight"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Caramel"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Royal Mantle"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Ivory"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Surprised"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Snapback"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Classic Shades"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Amber"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Silver Medallion"
+    }
+  ],
+  "edition": 1958,
+  "collection": "hashape"
+}

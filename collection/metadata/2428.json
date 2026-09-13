@@ -1,0 +1,53 @@
+{
+  "name": "Elluxnu the Aviator",
+  "description": "hashape #02428: Elluxnu the Aviator. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/2428.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Lagoon"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Solid"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Blue Steel"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Rosewood"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Flight Bomber"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Navy"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Gritted Teeth"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Pilot Cap"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Cyber Visor"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Ice"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Silk Scarf"
+    }
+  ],
+  "edition": 2428,
+  "collection": "hashape"
+}

@@ -1,0 +1,49 @@
+{
+  "name": "Cyfenny the Rider",
+  "description": "hashape #07770: Cyfenny the Rider. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/7770.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Rose"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Halo"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Plum"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Caramel"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Leather Rider"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Navy"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Surprised"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Crown"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Bare Eyes"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Pendant"
+    }
+  ],
+  "edition": 7770,
+  "collection": "hashape"
+}

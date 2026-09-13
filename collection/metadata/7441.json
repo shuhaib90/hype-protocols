@@ -1,0 +1,53 @@
+{
+  "name": "Lotorio the Rider",
+  "description": "hashape #07441: Lotorio the Rider. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/7441.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Slate"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Solid"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Plum"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Sand"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Leather Rider"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Rust"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Gritted Teeth"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Pilot Cap"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Classic Shades"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Ruby"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Gold Medallion"
+    }
+  ],
+  "edition": 7441,
+  "collection": "hashape"
+}

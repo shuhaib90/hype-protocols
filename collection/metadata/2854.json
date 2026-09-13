@@ -1,0 +1,49 @@
+{
+  "name": "Luluxar the Maestro",
+  "description": "hashape #02854: Luluxar the Maestro. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/2854.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Midnight"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Steps"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Ash"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Caramel"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Velvet Tuxedo"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Plum"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Grin"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Crown"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Eye Patch"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Studs"
+    }
+  ],
+  "edition": 2854,
+  "collection": "hashape"
+}

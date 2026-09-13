@@ -1,0 +1,53 @@
+{
+  "name": "Nyzorke the Regent",
+  "description": "hashape #05653: Nyzorke the Regent. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/5653.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Slate"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Pixel Rain"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Copper"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Sand"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Royal Mantle"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Navy"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Laughing"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Crown"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Classic Shades"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Ocean"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Dog Tags"
+    }
+  ],
+  "edition": 5653,
+  "collection": "hashape"
+}

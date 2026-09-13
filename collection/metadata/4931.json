@@ -1,0 +1,53 @@
+{
+  "name": "Rowynva the Rider",
+  "description": "hashape #04931: Rowynva the Rider. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/4931.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Rose"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Steps"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Espresso"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Silver"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Leather Rider"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Plum"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Smirk"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Spiked Hair"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Sport Shades"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Amber"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Silver Medallion"
+    }
+  ],
+  "edition": 4931,
+  "collection": "hashape"
+}

@@ -1,0 +1,53 @@
+{
+  "name": "Rorynfi the Drifter",
+  "description": "hashape #04131: Rorynfi the Drifter. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/4131.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Emerald"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Solid"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Ash"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Caramel"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Denim Jacket"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Teal"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Gritted Teeth"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Snapback"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Classic Shades"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Ocean"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Silk Scarf"
+    }
+  ],
+  "edition": 4131,
+  "collection": "hashape"
+}

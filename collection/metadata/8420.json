@@ -1,0 +1,53 @@
+{
+  "name": "Misolka the Broker",
+  "description": "hashape #08420: Misolka the Broker. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/8420.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Cobalt"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Solid"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Copper"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Sand"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Executive Suit"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Rust"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Gritted Teeth"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Headband"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Clear Frames"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Ruby"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Pendant"
+    }
+  ],
+  "edition": 8420,
+  "collection": "hashape"
+}

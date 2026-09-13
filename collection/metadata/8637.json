@@ -1,0 +1,53 @@
+{
+  "name": "Vamarlo the Regent",
+  "description": "hashape #08637: Vamarlo the Regent. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/8637.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Cobalt"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Pixel Rain"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Ash"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Caramel"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Royal Mantle"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Teal"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Stoic"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Spiked Hair"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Clear Frames"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Violet"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Pendant"
+    }
+  ],
+  "edition": 8637,
+  "collection": "hashape"
+}

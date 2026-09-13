@@ -1,0 +1,45 @@
+{
+  "name": "hype-protocols",
+  "version": "1.0.0",
+  "description": "",
+  "main": "serve.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "node serve.js",
+    "test": "node test/test-mining-flow.js && node test/test-server-endpoints.js && node test/test-db-api.js && node test/verify-html.js && node test/test-cloudflare-headers.js",
+    "deploy:pages": "npx wrangler pages deploy dist",
+    "deploy:worker": "npx wrangler deploy"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.116.0",
+    "clsx": "^2.1.1",
+    "dotenv": "^17.4.2",
+    "ethers": "^6.17.0",
+    "lucide-react": "^1.45.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "three": "^0.186.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^22.20.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "autoprefixer": "^10.5.6",
+    "postcss": "^8.5.28",
+    "solc": "^0.8.37",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.0"
+  }
+}

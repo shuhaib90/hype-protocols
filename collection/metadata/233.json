@@ -1,0 +1,53 @@
+{
+  "name": "Nyfenio the Ranger",
+  "description": "hashape #00233: Nyfenio the Ranger. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/233.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Rose"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Halo"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Midnight"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Cocoa"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Tactical Vest"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Teal"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Grin"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Pilot Cap"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Monocle"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Mint"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Ear Ring"
+    }
+  ],
+  "edition": 233,
+  "collection": "hashape"
+}

@@ -1,0 +1,53 @@
+{
+  "name": "Kebelha the Broker",
+  "description": "hashape #08782: Kebelha the Broker. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/8782.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Crimson"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Solid"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Plum"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Rosewood"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Executive Suit"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Onyx"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Frown"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Headband"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Clear Frames"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Amber"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Dog Tags"
+    }
+  ],
+  "edition": 8782,
+  "collection": "hashape"
+}

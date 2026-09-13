@@ -1,0 +1,49 @@
+{
+  "name": "Gabelar the Aviator",
+  "description": "hashape #01566: Gabelar the Aviator. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/1566.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Crimson"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Halo"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Ash"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Caramel"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Flight Bomber"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Ivory"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Frown"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Crown"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Bare Eyes"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Silk Scarf"
+    }
+  ],
+  "edition": 1566,
+  "collection": "hashape"
+}

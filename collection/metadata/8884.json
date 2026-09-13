@@ -1,0 +1,53 @@
+{
+  "name": "Iorynda the Rider",
+  "description": "hashape #08884: Iorynda the Rider. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/8884.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Rose"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Halo"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Jade"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Sand"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Leather Rider"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Rust"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Laughing"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Headphones"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Round Shades"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Amber"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Studs"
+    }
+  ],
+  "edition": 8884,
+  "collection": "hashape"
+}

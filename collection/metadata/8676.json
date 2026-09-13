@@ -1,0 +1,53 @@
+{
+  "name": "Zelinio the Skater",
+  "description": "hashape #08676: Zelinio the Skater. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/8676.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Lagoon"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Pixel Rain"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Espresso"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Cocoa"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Street Hoodie"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Forest"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Grin"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Bucket Hat"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Monocle"
+    },
+    {
+      "trait_type": "Lens Color",
+      "value": "Amber"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Silk Scarf"
+    }
+  ],
+  "edition": 8676,
+  "collection": "hashape"
+}

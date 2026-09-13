@@ -1,0 +1,49 @@
+{
+  "name": "Daluxka the Maestro",
+  "description": "hashape #04249: Daluxka the Maestro. A detailed pixel-art ape from a 10,000-piece collection, assembled through deterministic pixel editing of licensed reference artwork. No AI image-generation model used.",
+  "image": "../images/4249.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Olive"
+    },
+    {
+      "trait_type": "Backdrop Style",
+      "value": "Halo"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Blue Steel"
+    },
+    {
+      "trait_type": "Skin",
+      "value": "Caramel"
+    },
+    {
+      "trait_type": "Outfit",
+      "value": "Velvet Tuxedo"
+    },
+    {
+      "trait_type": "Outfit Color",
+      "value": "Onyx"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Laughing"
+    },
+    {
+      "trait_type": "Headwear",
+      "value": "Pilot Cap"
+    },
+    {
+      "trait_type": "Eyewear",
+      "value": "Eye Patch"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "Silver Medallion"
+    }
+  ],
+  "edition": 4249,
+  "collection": "hashape"
+}

@@ -1,0 +1,418 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper-bg: #f5ebd7;
+  --color-paper-panel: #eee2ca;
+  --color-paper-card: #fdfbf7;
+  --color-paper-border: #24140a;
+  --color-paper-ink: #24140a;
+  --color-paper-muted: #6b5443;
+  --color-stamp-red: #d83a2a;
+  --color-stamp-green: #2e7d32;
+  --color-stamp-gold: #d48818;
+  --color-stamp-blue: #19638b;
+
+  --color-terminal-bg: #f5ebd7;
+  --color-terminal-panel: #eee2ca;
+  --color-terminal-card: #fdfbf7;
+  --color-terminal-lime: #2e7d32;
+  --color-terminal-limeDark: #1b4d1f;
+  --color-terminal-cyan: #19638b;
+  --color-terminal-slate: #eee2ca;
+  --color-terminal-border: #24140a;
+  --color-terminal-text: #24140a;
+  --color-terminal-muted: #6b5443;
+
+  --color-syndicate-bg: #f5ebd7;
+  --color-syndicate-panel: #eee2ca;
+  --color-syndicate-card: #fdfbf7;
+  --color-syndicate-lime: #d83a2a;
+  --color-syndicate-cyan: #19638b;
+  --color-syndicate-steel: #eee2ca;
+  --color-syndicate-border: #24140a;
+
+  --color-cyber-bg: #f5ebd7;
+  --color-cyber-surface: #eee2ca;
+  --color-cyber-panel: #fdfbf7;
+  --color-cyber-card: #fdfbf7;
+  --color-cyber-cardHover: #faf0d8;
+  --color-cyber-border: #24140a;
+  --color-cyber-borderSubtle: rgba(36, 20, 10, 0.2);
+  --color-cyber-blue: #19638b;
+  --color-cyber-blueGlow: rgba(25, 99, 139, 0.2);
+  --color-cyber-ocean: #19638b;
+  --color-cyber-purple: #7a3e7a;
+  --color-cyber-purpleDim: rgba(122, 62, 122, 0.15);
+  --color-cyber-mint: #2e7d32;
+  --color-cyber-mintGlow: rgba(46, 125, 50, 0.2);
+  --color-cyber-amber: #d48818;
+  --color-cyber-pink: #d83a2a;
+  --color-cyber-red: #d83a2a;
+  --color-cyber-text: #24140a;
+  --color-cyber-dim: #6b5443;
+  --color-cyber-muted: #6b5443;
+  --color-cyber-code: #d83a2a;
+
+  --font-jersey: 'Jersey 10', sans-serif;
+  --font-dot: 'DotGothic16', monospace;
+  --font-mono: 'DotGothic16', monospace;
+  --font-display: 'Jersey 10', monospace;
+  --font-sans: 'DotGothic16', monospace;
+  --font-pixel: 'DotGothic16', monospace;
+  --font-pixel-bold: 'Jersey 10', monospace;
+
+  --shadow-neon-blue: 0 0 10px rgba(25, 99, 139, 0.2);
+  --shadow-neon-mint: 0 0 10px rgba(46, 125, 50, 0.2);
+  --shadow-neon-purple: 0 0 10px rgba(122, 62, 122, 0.2);
+  --shadow-neon-amber: 0 0 10px rgba(212, 136, 24, 0.2);
+  --shadow-pixel: 4px 4px 0px 0px #24140a;
+}
+
+@layer base {
+  body {
+    background-color: #f5ebd7;
+    color: #24140a;
+    font-family: var(--font-dot);
+    letter-spacing: 0.02em;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-jersey);
+    letter-spacing: 0.03em;
+    color: #24140a;
+  }
+
+  code, pre {
+    font-family: var(--font-dot);
+  }
+}
+
+/* Custom Scrollbars - Vintage Paper Theme */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #eee2ca;
+  border-left: 2px solid #24140a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d9c5a3;
+  border: 2px solid #24140a;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #c8b18d;
+}
+
+/* Vintage Paper & Comic Halftone Backgrounds */
+.paper-dot-bg, .dot-matrix-bg {
+  background-color: #f5ebd7;
+  background-image: radial-gradient(circle, rgba(36, 20, 10, 0.12) 1.5px, transparent 1.5px);
+  background-size: 16px 16px;
+}
+
+.paper-grid-bg, .syndicate-grid-bg {
+  background-color: #f5ebd7;
+  background-image: 
+    linear-gradient(to right, rgba(36, 20, 10, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(36, 20, 10, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Cartoon Pixel Vintage Paper Chassis Containers */
+.paper-chassis, .syndicate-chassis, .terminal-frame, .pixel-card, .pixel-card-glow, .pixel-card-violet, .pixel-card-mint, .pixel-card-amber, .pixel-card-cyan {
+  background-color: #fdfbf7;
+  border: 3px solid #24140a;
+  box-shadow: 4px 4px 0px 0px #24140a;
+  position: relative;
+}
+
+.paper-chassis-dark {
+  background-color: #eee2ca;
+  border: 3px solid #24140a;
+  box-shadow: 4px 4px 0px 0px #24140a;
+  position: relative;
+}
+
+.paper-chassis-red, .syndicate-chassis-lime, .terminal-frame-lime {
+  background-color: #fdfbf7;
+  border: 3px solid #24140a;
+  box-shadow: 4px 4px 0px 0px #24140a;
+  position: relative;
+}
+
+/* Headers */
+.paper-header, .syndicate-header, .terminal-header-slate {
+  background-color: #24140a;
+  color: #f5ebd7;
+  border-bottom: 3px solid #24140a;
+  font-family: var(--font-jersey), sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.paper-header-red, .syndicate-header-lime, .terminal-header-lime {
+  background-color: #d83a2a;
+  color: #ffffff;
+  border-bottom: 3px solid #24140a;
+  font-family: var(--font-jersey), sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.paper-header-gold {
+  background-color: #d48818;
+  color: #24140a;
+  border-bottom: 3px solid #24140a;
+  font-family: var(--font-jersey), sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+/* Chunky Cartoon 3D Action Buttons */
+.paper-btn-red, .syndicate-btn-lime, .pixel-btn-lime, .pixel-btn-primary, .pixel-btn-mint {
+  font-family: var(--font-jersey), sans-serif;
+  background-color: #d83a2a;
+  color: #ffffff;
+  border: 3px solid #24140a;
+  box-shadow: 3px 3px 0 0 #24140a;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  cursor: pointer;
+  user-select: none;
+  font-size: 1.15rem;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.paper-btn-red:hover:not(:disabled), .syndicate-btn-lime:hover:not(:disabled), .pixel-btn-lime:hover:not(:disabled), .pixel-btn-primary:hover:not(:disabled), .pixel-btn-mint:hover:not(:disabled) {
+  background-color: #bf2d1e;
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 0 #24140a;
+}
+
+.paper-btn-red:active:not(:disabled), .syndicate-btn-lime:active:not(:disabled), .pixel-btn-lime:active:not(:disabled), .pixel-btn-primary:active:not(:disabled), .pixel-btn-mint:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 #24140a;
+}
+
+.paper-btn-red:disabled, .syndicate-btn-lime:disabled, .pixel-btn-lime:disabled, .pixel-btn-primary:disabled, .pixel-btn-mint:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background-color: #bfaea0;
+  border-color: #6b5443;
+  color: #4a3729;
+  box-shadow: 2px 2px 0 0 #24140a;
+}
+
+.paper-btn-gold, .syndicate-btn-navy, .pixel-btn-slate, .pixel-btn-secondary, .pixel-btn-cyan, .pixel-btn-purple, .pixel-btn-amber {
+  font-family: var(--font-jersey), sans-serif;
+  background-color: #d48818;
+  color: #24140a;
+  border: 3px solid #24140a;
+  box-shadow: 3px 3px 0 0 #24140a;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  cursor: pointer;
+  user-select: none;
+  font-size: 1.15rem;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.paper-btn-gold:hover:not(:disabled), .syndicate-btn-navy:hover:not(:disabled), .pixel-btn-slate:hover:not(:disabled), .pixel-btn-secondary:hover:not(:disabled), .pixel-btn-cyan:hover:not(:disabled), .pixel-btn-purple:hover:not(:disabled), .pixel-btn-amber:hover:not(:disabled) {
+  background-color: #bb7410;
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 0 #24140a;
+}
+
+.paper-btn-gold:active:not(:disabled), .syndicate-btn-navy:active:not(:disabled), .pixel-btn-slate:active:not(:disabled), .pixel-btn-secondary:active:not(:disabled), .pixel-btn-cyan:active:not(:disabled), .pixel-btn-purple:active:not(:disabled), .pixel-btn-amber:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 #24140a;
+}
+
+.paper-btn-kraft {
+  font-family: var(--font-dot), monospace;
+  background-color: #eee2ca;
+  color: #24140a;
+  border: 2px solid #24140a;
+  box-shadow: 2px 2px 0 0 #24140a;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.paper-btn-kraft:hover:not(:disabled) {
+  background-color: #e4d3b4;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 0 #24140a;
+}
+
+.paper-btn-kraft:active:not(:disabled) {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 0 #24140a;
+}
+
+.paper-btn-green {
+  font-family: var(--font-jersey), sans-serif;
+  background-color: #2e7d32;
+  color: #ffffff;
+  border: 3px solid #24140a;
+  box-shadow: 3px 3px 0 0 #24140a;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  cursor: pointer;
+  user-select: none;
+  font-size: 1.15rem;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.paper-btn-green:hover:not(:disabled) {
+  background-color: #256628;
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 0 #24140a;
+}
+
+.paper-btn-green:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 #24140a;
+}
+
+/* Vintage Rubber Stamps */
+.paper-stamp-red {
+  border: 2px dashed #d83a2a;
+  color: #d83a2a;
+  padding: 2px 8px;
+  font-family: var(--font-dot);
+  font-weight: 700;
+  text-transform: uppercase;
+  transform: rotate(-2deg);
+  display: inline-block;
+  user-select: none;
+}
+
+.paper-stamp-green {
+  border: 2px dashed #2e7d32;
+  color: #2e7d32;
+  padding: 2px 8px;
+  font-family: var(--font-dot);
+  font-weight: 700;
+  text-transform: uppercase;
+  transform: rotate(1.5deg);
+  display: inline-block;
+  user-select: none;
+}
+
+.paper-stamp-gold {
+  border: 2px dashed #9c6208;
+  color: #9c6208;
+  padding: 2px 8px;
+  font-family: var(--font-dot);
+  font-weight: 700;
+  text-transform: uppercase;
+  transform: rotate(-1deg);
+  display: inline-block;
+  user-select: none;
+}
+
+.paper-tape {
+  background: rgba(230, 218, 184, 0.85);
+  border-left: 2px dashed rgba(36, 20, 10, 0.25);
+  border-right: 2px dashed rgba(36, 20, 10, 0.25);
+  box-shadow: 0 1px 3px rgba(36, 20, 10, 0.08);
+}
+
+/* 32-Bit Difficulty Blocks - Vintage Paper Punch Style */
+.bit-block {
+  width: 100%;
+  height: 18px;
+  background: #eee2ca;
+  border: 2px solid #24140a;
+  transition: all 0.15s ease;
+}
+
+.bit-block-active {
+  background: #d83a2a;
+  border-color: #24140a;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(1000%); }
+}
+
+.animate-scanline {
+  animation: scanline 6s linear infinite;
+}
+
+/* Vintage Paper Documentation Styling */
+.paper-docs h1 {
+  color: #24140a !important;
+  font-family: 'Syne', sans-serif !important;
+  font-weight: 800 !important;
+}
+.paper-docs h2, .paper-docs h3, .paper-docs h4 {
+  color: #24140a !important;
+  font-family: 'Syne', sans-serif !important;
+  font-weight: 700 !important;
+}
+.paper-docs p, .paper-docs li {
+  color: #3b2a1a !important;
+}
+.paper-docs strong {
+  color: #24140a !important;
+  font-weight: 800 !important;
+}
+.paper-docs code {
+  background-color: #eee2ca !important;
+  color: #24140a !important;
+  border: 1px solid #24140a !important;
+  padding: 1px 4px !important;
+}
+.paper-docs pre {
+  background-color: #eee2ca !important;
+  color: #24140a !important;
+  border: 2px solid #24140a !important;
+  box-shadow: 2px 2px 0px #24140a !important;
+}
+.paper-docs table {
+  border: 2px solid #24140a !important;
+}
+.paper-docs th {
+  background-color: #eee2ca !important;
+  color: #24140a !important;
+  border: 1px solid #24140a !important;
+}
+.paper-docs td {
+  background-color: #fdfbf7 !important;
+  color: #3b2a1a !important;
+  border: 1px solid #24140a !important;
+}
+.paper-docs .text-cyber-mint, .paper-docs .text-cyber-blue, .paper-docs .text-cyber-cyan {
+  color: #d83a2a !important;
+}
+.paper-docs .text-cyber-dim {
+  color: #6b5443 !important;
+}
+.paper-docs .bg-cyber-surface {
+  background-color: #eee2ca !important;
+  border: 2px solid #24140a !important;
+  color: #24140a !important;
+  border-radius: 0px !important;
+  box-shadow: 2px 2px 0px #24140a !important;
+}
+

@@ -1,0 +1,30 @@
+{
+  "collection": "hashape",
+  "count": 10000,
+  "image_size": [
+    1024,
+    1024
+  ],
+  "native_size": [
+    256,
+    256
+  ],
+  "seed": 20260913,
+  "generation": "deterministic reference-pixel compositing; no AI image generator",
+  "source_permission": "User confirmed permission in this task",
+  "metadata_image_uri": "relative local paths; replace with hosted image base before publication",
+  "traits": {
+    "Background": 10,
+    "Backdrop Style": 4,
+    "Fur": 8,
+    "Skin": 5,
+    "Outfit": 12,
+    "Outfit Color": 8,
+    "Expression": 8,
+    "Headwear": 8,
+    "Eyewear": 8,
+    "Lens Color": 6,
+    "Accessory": 8
+  },
+  "render_seconds": 353
+}

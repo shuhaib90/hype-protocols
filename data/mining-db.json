@@ -1,0 +1,63 @@
+{
+  "totalMined": 5,
+  "maxSupply": 10000,
+  "records": [
+    {
+      "id": "solv_1789285447874_8mp00",
+      "wallet": "0xb8e3dfdd19b6bf35b9fd87f8373f7f82c53bc93c",
+      "tokenId": 4,
+      "nonce": "36486",
+      "solvedHash": "0x0003903598ae443beac10e9394324e53b003e0b28d4916afef6cdc4f5ea84701",
+      "difficulty": 4,
+      "gpuRenderer": "rdna-2 (amd)",
+      "status": "MINTED",
+      "solvedAt": 1789285447874,
+      "txHash": "0x0ae1f740d4c42bcd02f70aba452d35269e4f67615605633c37a1a0204b234295",
+      "epochId": 1,
+      "feeUsd": 5,
+      "feeEth": 0.002,
+      "mintedAt": 1789285452449
+    },
+    {
+      "id": "solv_1789284799851_ht8zu",
+      "wallet": "0xdb195274e29e4f33c2924700e52a91da1f087bfc",
+      "tokenId": 7850,
+      "nonce": "2767",
+      "solvedHash": "0x000c921c200ba26a147b83409ffd033a2e7bfcb1648c75a6b7094a5065ed6e2f",
+      "difficulty": 4,
+      "gpuRenderer": "NVIDIA RTX 4090 WebGPU",
+      "status": "MINTED",
+      "solvedAt": 1789284799851,
+      "txHash": "0x9999888877776666555544443333222211110000aabbccddeeff001122334455",
+      "epochId": 1,
+      "feeUsd": 5,
+      "feeEth": 0.002,
+      "mintedAt": 1789284799860
+    },
+    {
+      "id": "mint_genesis_3",
+      "wallet": "0x9999111122223333444455556666777788889999",
+      "tokenId": 3,
+      "nonce": "3126",
+      "status": "MINTED",
+      "epochId": 1,
+      "feeUsd": 5,
+      "txHash": "0x03a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000003",
+      "mintedAt": 1789283590086
+    },
+    {
+      "id": "mint_genesis_2",
+      "wallet": "0x7777111122223333444455556666777788889999",
+      "tokenId": 2,
+      "nonce": "2084",
+      "status": "MINTED",
+      "epochId": 1,
+      "feeUsd": 5,
+      "txHash": "0x02a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000002",
+      "mintedAt": 1789282390086
+    },
+    {
+      "id": "mint_genesis_1",
+      "wallet": "0x3333111122223333444455556666777788889999",
+      "tokenId": 1,
+      "nonce": "1042"

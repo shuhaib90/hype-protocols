@@ -1,0 +1,109 @@
+{
+  "Background": {
+    "Crimson": 1035,
+    "Slate": 985,
+    "Amber": 976,
+    "Midnight": 1032,
+    "Cobalt": 1030,
+    "Rose": 955,
+    "Amethyst": 963,
+    "Olive": 994,
+    "Lagoon": 963,
+    "Emerald": 1067
+  },
+  "Backdrop Style": {
+    "Halo": 2448,
+    "Solid": 2485,
+    "Steps": 2589,
+    "Pixel Rain": 2478
+  },
+  "Fur": {
+    "Plum": 1233,
+    "Blue Steel": 1198,
+    "Jade": 1281,
+    "Midnight": 1229,
+    "Obsidian": 1261,
+    "Espresso": 1302,
+    "Ash": 1251,
+    "Copper": 1245
+  },
+  "Skin": {
+    "Cocoa": 1991,
+    "Caramel": 2022,
+    "Silver": 1954,
+    "Rosewood": 2050,
+    "Sand": 1983
+  },
+  "Outfit": {
+    "Space Suit": 883,
+    "Tactical Vest": 814,
+    "Denim Jacket": 846,
+    "Ronin Robe": 832,
+    "Leather Rider": 829,
+    "Velvet Tuxedo": 852,
+    "Captain Coat": 810,
+    "Varsity Jacket": 819,
+    "Executive Suit": 810,
+    "Street Hoodie": 830,
+    "Flight Bomber": 836,
+    "Royal Mantle": 839
+  },
+  "Outfit Color": {
+    "Rust": 1239,
+    "Teal": 1273,
+    "Navy": 1238,
+    "Onyx": 1228,
+    "Ivory": 1286,
+    "Plum": 1177,
+    "Forest": 1322,
+    "Burgundy": 1237
+  },
+  "Expression": {
+    "Laughing": 1315,
+    "Grin": 1281,
+    "Pout": 1249,
+    "Smirk": 1259,
+    "Surprised": 1187,
+    "Stoic": 1260,
+    "Gritted Teeth": 1243,
+    "Frown": 1206
+  },
+  "Headwear": {
+    "Spiked Hair": 1252,
+    "Pilot Cap": 1258,
+    "Crown": 1212,
+    "Headband": 1181,
+    "Bucket Hat": 1230,
+    "Headphones": 1258,
+    "Beanie": 1343,
+    "Snapback": 1266
+  },
+  "Eyewear": {
+    "Bare Eyes": 1269,
+    "Eye Patch": 1275,
+    "Classic Shades": 1244,
+    "Cyber Visor": 1203,
+    "Clear Frames": 1229,
+    "Monocle": 1256,
+    "Round Shades": 1258,
+    "Sport Shades": 1266
+  },
+  "Lens Color": {
+    "Ocean": 3801,
+    "Ice": 1180,
+    "Violet": 1275,
+    "Ruby": 1206,
+    "Amber": 1240,
+    "Mint": 1298
+  },
+  "Accessory": {
+    "Silk Scarf": 1244,
+    "Silver Medallion": 1290,
+    "Pendant": 1321,
+    "None": 1219,
+    "Ear Ring": 1214,
+    "Gold Medallion": 1283,
+    "Studs": 1213,
+    "Dog Tags": 1216
+  }
+}
