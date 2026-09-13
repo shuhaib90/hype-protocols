@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { WorkerInfo } from '../types';
-import { useWallet } from '../web3/WalletContext';
-import { Users, CheckCircle2, Zap, AlertCircle, Loader2, Coins } from 'lucide-react';
+import { useWallet, HASHAPE_DEX_URL } from '../web3/WalletContext';
+import { Users, CheckCircle2, Zap, AlertCircle, Loader2, Coins, ShoppingCart, ExternalLink } from 'lucide-react';
 
 interface WorkerPanelProps {
   workers: WorkerInfo[];
@@ -65,6 +65,17 @@ export const WorkerPanel: React.FC<WorkerPanelProps> = ({
             <Coins className="w-3.5 h-3.5 text-[#d48818]" />
             <span>WALLET: {Number(tokenHypeBalance || 0).toFixed(2)} $HASHAPE</span>
           </div>
+          <a
+            href={HASHAPE_DEX_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="paper-btn-red text-[10px] px-2 py-0.5 flex items-center gap-1 font-bold uppercase no-underline shadow-[1px_1px_0px_#24140a]"
+            title="Buy $HASHAPE on LetsCash"
+          >
+            <ShoppingCart className="w-3 h-3" />
+            <span>BUY $HASHAPE</span>
+            <ExternalLink className="w-2.5 h-2.5" />
+          </a>
           <div className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 bg-[#2e7d32] border border-[#24140a] inline-block shadow-[1px_1px_0px_#24140a]" />
             <span>ONLINE: {workers.filter((w) => w.status === 'ACTIVE').length} / 5</span>
@@ -87,9 +98,21 @@ export const WorkerPanel: React.FC<WorkerPanelProps> = ({
               {rigActivationTokenAddress || '0x30E55c3cfB2BBe5d0B07051e0B15c8a532c45ecc'}
             </code>
           </div>
-          <span className="text-[10px] text-[#2e7d32] font-bold bg-[#fdfbf7] px-2 py-0.5 border border-[#24140a]">
-            ROBINHOOD MAINNET (4663)
-          </span>
+          <div className="flex items-center gap-2 flex-wrap">
+            <a
+              href={HASHAPE_DEX_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="paper-btn-red text-[10px] px-2.5 py-1 flex items-center gap-1 font-bold uppercase no-underline shadow-[1px_1px_0px_#24140a]"
+            >
+              <ShoppingCart className="w-3 h-3" />
+              <span>BUY ON LETSCASH</span>
+              <ExternalLink className="w-2.5 h-2.5" />
+            </a>
+            <span className="text-[10px] text-[#2e7d32] font-bold bg-[#fdfbf7] px-2 py-0.5 border border-[#24140a]">
+              ROBINHOOD MAINNET (4663)
+            </span>
+          </div>
         </div>
 
         {successMessage && (
@@ -100,9 +123,21 @@ export const WorkerPanel: React.FC<WorkerPanelProps> = ({
         )}
 
         {errorMessage && (
-          <div className="p-2.5 bg-[#eee2ca] border-2 border-[#d83a2a] text-xs text-[#d83a2a] flex items-center gap-2 font-bold shadow-[2px_2px_0px_#24140a]">
-            <AlertCircle className="w-4 h-4 flex-shrink-0 text-[#d83a2a]" />
-            <span>{errorMessage}</span>
+          <div className="p-2.5 bg-[#eee2ca] border-2 border-[#d83a2a] text-xs text-[#d83a2a] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 font-bold shadow-[2px_2px_0px_#24140a]">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 text-[#d83a2a]" />
+              <span>{errorMessage}</span>
+            </div>
+            <a
+              href={HASHAPE_DEX_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="paper-btn-red text-[10px] px-2.5 py-1 flex items-center gap-1 font-bold uppercase whitespace-nowrap self-end sm:self-auto no-underline shadow-[1px_1px_0px_#24140a]"
+            >
+              <ShoppingCart className="w-3 h-3" />
+              <span>BUY $HASHAPE NOW</span>
+              <ExternalLink className="w-2.5 h-2.5" />
+            </a>
           </div>
         )}
 
@@ -171,23 +206,38 @@ export const WorkerPanel: React.FC<WorkerPanelProps> = ({
                       <span>{isMining ? 'COMPUTING...' : 'BLADE ONLINE'}</span>
                     </div>
                   ) : (
-                    <button
-                      onClick={() => handleActivate(worker)}
-                      disabled={isProcessing || isMining}
-                      className="paper-btn-red w-full py-1.5 text-xs flex items-center justify-center gap-1 font-bold"
-                    >
-                      {isProcessing ? (
-                        <>
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          <span>ON-CHAIN TX...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Zap className="w-3.5 h-3.5 fill-current" />
-                          <span>ACTIVATE ON-CHAIN</span>
-                        </>
+                    <div className="space-y-1.5">
+                      <button
+                        onClick={() => handleActivate(worker)}
+                        disabled={isProcessing || isMining}
+                        className="paper-btn-red w-full py-1.5 text-xs flex items-center justify-center gap-1 font-bold"
+                      >
+                        {isProcessing ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <span>ON-CHAIN TX...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Zap className="w-3.5 h-3.5 fill-current" />
+                            <span>ACTIVATE ON-CHAIN</span>
+                          </>
+                        )}
+                      </button>
+                      {!worker.isFree && Number(tokenHypeBalance || 0) < worker.costHype && (
+                        <a
+                          href={HASHAPE_DEX_URL}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full py-1 bg-[#fdfbf7] hover:bg-[#eee2ca] text-[#d83a2a] border border-[#d83a2a] text-[10px] font-bold flex items-center justify-center gap-1 uppercase no-underline transition-colors shadow-[1px_1px_0px_#d83a2a]"
+                          title="Buy $HASHAPE on LetsCash"
+                        >
+                          <ShoppingCart className="w-3 h-3 text-[#d83a2a]" />
+                          <span>NO BALANCE? BUY NOW</span>
+                          <ExternalLink className="w-2.5 h-2.5 text-[#d83a2a]" />
+                        </a>
                       )}
-                    </button>
+                    </div>
                   )}
                 </div>
               </div>

@@ -14,8 +14,9 @@ import {
   HelpCircle,
   Zap,
   ExternalLink,
+  ShoppingCart,
 } from 'lucide-react';
-import { EXPLORER_URL, OPENSEA_COLLECTION_URL, CONTRACT_ADDRESS } from '../web3/WalletContext';
+import { EXPLORER_URL, OPENSEA_COLLECTION_URL, CONTRACT_ADDRESS, HASHAPE_DEX_URL } from '../web3/WalletContext';
 
 export const DocsContent: React.FC = () => {
   const [activeSection, setActiveSection] = useState('overview');
@@ -281,6 +282,27 @@ export const DocsContent: React.FC = () => {
                       ROBINHOOD EVM L2
                     </span>
                   </div>
+                </div>
+
+                <div className="p-3.5 bg-[#eee2ca] border-2 border-[#24140a] font-dot text-xs shadow-[2px_2px_0px_#24140a] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div>
+                    <div className="text-[10px] font-bold text-[#d83a2a] uppercase mb-1">
+                      [ ACQUIRE $HASHAPE ON LETSCASH DEX ]
+                    </div>
+                    <p className="text-[#5c4636] text-xs">
+                      Need $HASHAPE to power up extra mining rigs (Workers #2–#5)? Trade directly on LetsCash.
+                    </p>
+                  </div>
+                  <a
+                    href={HASHAPE_DEX_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="paper-btn-red text-xs px-3 py-1.5 flex items-center gap-1.5 font-bold uppercase whitespace-nowrap no-underline shadow-[2px_2px_0px_#24140a]"
+                  >
+                    <ShoppingCart className="w-3.5 h-3.5" />
+                    <span>BUY $HASHAPE NOW</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
                 </div>
 
                 <div className="space-y-3 text-xs">

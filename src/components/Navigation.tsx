@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useWallet } from '../web3/WalletContext';
-import { Cpu, FileText, Wallet, Shield, Volume2, VolumeX } from 'lucide-react';
+import { useWallet, HASHAPE_DEX_URL } from '../web3/WalletContext';
+import { Cpu, FileText, Wallet, Shield, Volume2, VolumeX, ShoppingCart, ExternalLink } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
 
 interface NavigationProps {
@@ -149,6 +149,19 @@ export const Navigation: React.FC<NavigationProps> = ({
             <span className="text-[#6b5443]">|</span>
             <span className="text-[#d83a2a] font-bold">STAGE #{currentEpochId}</span>
           </div>
+
+          {/* Buy $HASHAPE DEX button */}
+          <a
+            href={HASHAPE_DEX_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="paper-btn-red hidden sm:flex items-center space-x-1.5 px-2.5 py-1.5 text-xs font-dot font-bold uppercase no-underline shadow-[2px_2px_0px_#24140a]"
+            title="Buy $HASHAPE on LetsCash DEX"
+          >
+            <ShoppingCart className="w-3.5 h-3.5" />
+            <span>BUY $HASHAPE</span>
+            <ExternalLink className="w-2.5 h-2.5" />
+          </a>
 
           {/* 8-Bit SFX Toggle */}
           <button
