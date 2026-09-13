@@ -52,9 +52,10 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
     return `${m}:${sec}`;
   };
 
-  const formattedBalance = nativeHypeBalance < 0.001 
-    ? nativeHypeBalance.toFixed(6) 
-    : nativeHypeBalance.toFixed(4);
+  const bal = typeof nativeHypeBalance === 'number' ? nativeHypeBalance : 0;
+  const formattedBalance = bal < 0.001 
+    ? bal.toFixed(6) 
+    : bal.toFixed(4);
 
   return (
     <div className="fixed inset-0 z-50 bg-[#24140a]/75 backdrop-blur-sm flex items-center justify-center p-4">
@@ -97,7 +98,9 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
               </div>
               <div className="bg-[#fdfbf7] p-2 border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
                 <span className="text-[#6b5443] text-[10px] uppercase block font-bold">HASHRATE</span>
-                <span className="font-mono font-bold text-[#2e7d32]">{proof.hashrate.toFixed(2)} MH/s</span>
+                <span className="font-mono font-bold text-[#2e7d32]">
+                  {typeof proof.hashrate === 'number' ? proof.hashrate.toFixed(2) : '0.00'} MH/s
+                </span>
               </div>
               <div className="bg-[#fdfbf7] p-2 border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
                 <span className="text-[#6b5443] text-[10px] uppercase block font-bold">PROOF ID</span>
@@ -105,9 +108,11 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
               </div>
             </div>
 
-            <div className="mt-2.5 p-2 bg-[#fdfbf7] border border-[#24140a] text-[11px]">
-              <span className="text-[#6b5443] text-[10px] uppercase block mb-0.5 font-bold">SOLUTION NONCE</span>
-              <code className="text-[#19638b] break-all font-mono font-bold">{proof.nonce}</code>
+            <div className="p-2.5 bg-[#fdfbf7] border-2 border-[#24140a] mt-2.5">
+              <span className="text-[10px] text-[#6b5443] block uppercase font-bold">SOLVED NONCE:</span>
+              <div className="flex items-center space-x-1.5">
+                <code className="text-[#19638b] break-all font-mono font-bold">{proof.nonce}</code>
+              </div>
             </div>
           </div>
 
@@ -121,7 +126,9 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
               <div className="text-right">
                 <span className="text-[10px] text-[#6b5443] uppercase block font-bold">MINT FEE</span>
                 <span className="text-sm font-jersey font-bold text-[#d83a2a]">
-                  {currentEpoch ? `$${currentEpoch.mintFeeUsd} ETH (${currentEpoch.mintFeeEth.toFixed(4)} ETH)` : '$5 ETH (0.0020 ETH)'}
+                  {currentEpoch && typeof currentEpoch.mintFeeEth === 'number' 
+                    ? `$${currentEpoch.mintFeeUsd ?? 5} ETH (${currentEpoch.mintFeeEth.toFixed(4)} ETH)` 
+                    : `$${currentEpoch?.mintFeeUsd ?? 5} ETH (${((currentEpoch?.mintFeeUsd ?? 5) / 2500).toFixed(4)} ETH)`}
                 </span>
               </div>
             </div>

@@ -178,14 +178,14 @@ export const SupplyModule: React.FC<SupplyModuleProps> = ({ supply }) => {
               <div className="flex justify-between text-[11px] font-dot text-[#6b5443] mb-1.5 font-bold">
                 <span>0 (GENESIS)</span>
                 <span className="text-[#d83a2a] font-bold">
-                  {supply.totalMined.toLocaleString()} / 10,000 ({supply.percentMined.toFixed(1)}%) CLAIMED
+                  {(supply.totalMined ?? 0).toLocaleString()} / 10,000 ({Number(supply.percentMined || 0).toFixed(1)}%) CLAIMED
                 </span>
                 <span>10,000 MAX</span>
               </div>
               <div className="w-full bg-[#eee2ca] h-4 border-2 border-[#24140a] p-0.5 shadow-[inset_0_1px_2px_rgba(0,0,0,0.15)]">
                 <div
                   className="h-full bg-[#d83a2a] transition-all duration-500"
-                  style={{ width: `${Math.min(100, Math.max(1, supply.percentMined))}%` }}
+                  style={{ width: `${Math.min(100, Math.max(1, supply.percentMined || 0))}%` }}
                 />
               </div>
             </div>

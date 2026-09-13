@@ -288,9 +288,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
     try {
       const epochIds = displayedEpochs.map(e => e.id);
-      const newFeesUsd = displayedEpochs.map(e => Math.round(epochFees[e.id] || e.mintFeeUsd));
+      const newFeesUsd = displayedEpochs.map(e => Math.round(Number(epochFees[e.id] || e.mintFeeUsd || 5)));
       const newFeesWei = displayedEpochs.map(e => {
-        const usd = epochFees[e.id] || e.mintFeeUsd;
+        const usd = Number(epochFees[e.id] || e.mintFeeUsd || 5);
         const ethVal = (usd / 2500).toFixed(6);
         return ethers.parseEther(ethVal);
       });
@@ -303,9 +303,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       // Synchronize backend state with verified on-chain update
       const updates = displayedEpochs.map(e => ({
         id: e.id,
-        mintFeeUsd: Number(epochFees[e.id] || e.mintFeeUsd),
-        mintFeeEth: Number(((epochFees[e.id] || e.mintFeeUsd) / 2500).toFixed(4)),
-        mintFeeApe: Number(epochFees[e.id] || e.mintFeeUsd),
+        mintFeeUsd: Number(epochFees[e.id] || e.mintFeeUsd || 5),
+        mintFeeEth: Number((((epochFees[e.id] || e.mintFeeUsd || 5)) / 2500).toFixed(4)),
+        mintFeeApe: Number(epochFees[e.id] || e.mintFeeUsd || 5),
       }));
 
       await fetch('/api/admin/epoch-fees-batch', {
@@ -702,7 +702,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 {displayedEpochs.map((epoch) => {
                   const isCurrent = totalMined >= epoch.startToken - 1 && totalMined < epoch.endToken;
                   const isPast = totalMined >= epoch.endToken;
-                  const usdVal = epochFees[epoch.id] !== undefined ? epochFees[epoch.id] : epoch.mintFeeUsd;
+                  const usdVal = Number(epochFees[epoch.id] !== undefined ? epochFees[epoch.id] : (epoch.mintFeeUsd || 5));
                   const ethVal = (usdVal / 2500).toFixed(4);
                   const isSavingThis = savingSingleEpochId === epoch.id;
 

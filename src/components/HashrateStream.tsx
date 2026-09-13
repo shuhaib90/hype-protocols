@@ -25,7 +25,7 @@ export const HashrateStream: React.FC<HashrateStreamProps> = ({
         <div className="text-right">
           <span className="text-[10px] font-mono text-purple-300 uppercase block">TOTAL HASHRATE</span>
           <span className="font-display font-black text-xl text-cyan-300">
-            {isMining ? totalHashrate.toFixed(2) : '0.00'}{' '}
+            {isMining ? Number(totalHashrate || 0).toFixed(2) : '0.00'}{' '}
             <span className="text-xs font-mono text-purple-300 font-normal">MH/s</span>
           </span>
         </div>
@@ -58,7 +58,7 @@ export const HashrateStream: React.FC<HashrateStreamProps> = ({
                   </span>
                 </div>
                 <div className="font-mono font-bold text-cyan-300">
-                  {speed.toFixed(2)} MH/s {isMining && isWorkerActive && <span className="text-[10px] text-purple-300 font-normal">({pct}%)</span>}
+                  {Number(speed || 0).toFixed(2)} MH/s {isMining && isWorkerActive && <span className="text-[10px] text-purple-300 font-normal">({pct}%)</span>}
                 </div>
               </div>
 

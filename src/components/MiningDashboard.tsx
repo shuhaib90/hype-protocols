@@ -26,7 +26,7 @@ interface MiningDashboardProps {
 export const MiningDashboard: React.FC<MiningDashboardProps> = ({
   status,
   gpuInfo,
-  totalHashrate,
+  totalHashrate = 0,
   activeWorkerCount,
   difficultyBand,
   noncesScanned,
@@ -206,7 +206,7 @@ export const MiningDashboard: React.FC<MiningDashboardProps> = ({
               <div className="p-2 bg-[#eee2ca] border-2 border-[#24140a] shadow-[1px_1px_0px_#24140a]">
                 <span className="text-[9px] font-dot text-[#6b5443] block uppercase font-bold">COMPUTE SPEED</span>
                 <span className="text-base font-jersey font-bold text-[#24140a]">
-                  {totalHashrate.toFixed(1)} <span className="text-[10px] font-dot text-[#d83a2a]">MH/S</span>
+                  {Number(totalHashrate || 0).toFixed(1)} <span className="text-[10px] font-dot text-[#d83a2a]">MH/S</span>
                 </span>
               </div>
 

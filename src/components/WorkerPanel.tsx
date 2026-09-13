@@ -26,9 +26,10 @@ export const WorkerPanel: React.FC<WorkerPanelProps> = ({
       connectWallet();
       return;
     }
-    if (tokenHypeBalance < worker.costHype) {
+    const currentTokenBal = typeof tokenHypeBalance === 'number' ? tokenHypeBalance : 0;
+    if (currentTokenBal < worker.costHype) {
       setErrorMessage(
-        `Insufficient $HASHAPE token balance. You hold ${tokenHypeBalance.toFixed(2)} $HASHAPE, but Miner 0${worker.id} requires ${worker.costHype} $HASHAPE. Token Contract: ${rigActivationTokenAddress}`
+        `Insufficient $HASHAPE token balance. You hold ${currentTokenBal.toFixed(2)} $HASHAPE, but Miner 0${worker.id} requires ${worker.costHype} $HASHAPE. Token Contract: ${rigActivationTokenAddress}`
       );
       setTimeout(() => setErrorMessage(null), 8000);
       return;
@@ -62,7 +63,7 @@ export const WorkerPanel: React.FC<WorkerPanelProps> = ({
         <div className="flex items-center space-x-3 text-xs text-[#24140a] font-bold">
           <div className="flex items-center space-x-1 bg-[#fdfbf7] px-2 py-0.5 border border-[#24140a]">
             <Coins className="w-3.5 h-3.5 text-[#d48818]" />
-            <span>WALLET: {tokenHypeBalance.toFixed(2)} $HASHAPE</span>
+            <span>WALLET: {Number(tokenHypeBalance || 0).toFixed(2)} $HASHAPE</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 bg-[#2e7d32] border border-[#24140a] inline-block shadow-[1px_1px_0px_#24140a]" />
@@ -145,7 +146,7 @@ export const WorkerPanel: React.FC<WorkerPanelProps> = ({
                     <span>UNIT [{bladeNames[worker.id - 1]}]</span>
                     {isActive && isMining && (
                       <span className="text-[#2e7d32] font-bold">
-                        {speed.toFixed(1)} MH/s
+                        {Number(speed || 0).toFixed(1)} MH/s
                       </span>
                     )}
                   </div>
