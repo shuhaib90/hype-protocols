@@ -29,7 +29,7 @@ export const WorkerPanel: React.FC<WorkerPanelProps> = ({
     const currentTokenBal = typeof tokenHypeBalance === 'number' ? tokenHypeBalance : 0;
     if (currentTokenBal < worker.costHype) {
       setErrorMessage(
-        `Insufficient $HASHAPE token balance. You hold ${currentTokenBal.toFixed(2)} $HASHAPE, but Miner 0${worker.id} requires ${worker.costHype} $HASHAPE. Token Contract: ${rigActivationTokenAddress}`
+        `Insufficient $HASHAPE token balance. You hold ${currentTokenBal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $HASHAPE, but Miner 0${worker.id} requires ${worker.costHype.toLocaleString()} $HASHAPE. Token Contract: ${rigActivationTokenAddress}`
       );
       setTimeout(() => setErrorMessage(null), 8000);
       return;
@@ -170,7 +170,7 @@ export const WorkerPanel: React.FC<WorkerPanelProps> = ({
                         ? 'bg-[#2e7d32] text-white border-[#24140a]'
                         : 'bg-[#fdfbf7] text-[#6b5443] border-[#24140a]'
                     }`}>
-                      {worker.isFree ? 'FREE' : isActive ? 'UNLOCKED' : `${worker.costHype} $HASHAPE`}
+                      {worker.isFree ? 'FREE' : isActive ? 'UNLOCKED' : `${worker.costHype.toLocaleString()} $HASHAPE`}
                     </span>
                   </div>
 
@@ -218,11 +218,11 @@ export const WorkerPanel: React.FC<WorkerPanelProps> = ({
                         ) : (
                           <>
                             <Zap className="w-3.5 h-3.5 fill-current" />
-                            <span>ACTIVATE ON-CHAIN</span>
+                            <span>ACTIVATE ON-CHAIN ({worker.costHype.toLocaleString()} $HASHAPE)</span>
                           </>
                         )}
                       </button>
-                      {!worker.isFree && Number(tokenHypeBalance || 0) < worker.costHype && (
+                      {!worker.isFree && !isActive && Number(tokenHypeBalance || 0) < worker.costHype && (
                         <a
                           href={HASHAPE_DEX_URL}
                           target="_blank"

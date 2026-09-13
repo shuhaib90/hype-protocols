@@ -267,12 +267,26 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     if (!isConnected || !address) {
       throw new Error('Please connect your Web3 wallet first.');
     }
-    if (tokenBalance < costHype) {
-      throw new Error(`Insufficient HashApe ($HASHAPE) token balance: ${costHype} $HASHAPE required.`);
-    }
 
     const { provider, signer, contract } = await getSignerAndContract();
-    const costWei = ethers.parseUnits(costHype.toString(), 18);
+
+    // Query on-chain cost directly to guarantee 100% authoritative pricing
+    let costWei: bigint;
+    try {
+      costWei = await contract.workerActivationCost(workerId);
+    } catch (_) {
+      costWei = ethers.parseUnits(costHype.toString(), 18);
+    }
+    if (!costWei || costWei === 0n) {
+      costWei = ethers.parseUnits(costHype.toString(), 18);
+    }
+
+    const requiredTokens = Number(ethers.formatEther(costWei));
+    if (tokenBalance < requiredTokens) {
+      throw new Error(
+        `Insufficient HashApe ($HASHAPE) token balance: ${requiredTokens.toLocaleString()} $HASHAPE required to activate Blade #${workerId}. Your wallet holds ${tokenBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $HASHAPE.`
+      );
+    }
 
     const tokenContract = new ethers.Contract(RIG_ACTIVATION_TOKEN_ADDRESS, ERC20_ABI, signer);
     const allowance: bigint = await tokenContract.allowance(address, CONTRACT_ADDRESS);

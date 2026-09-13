@@ -108,12 +108,47 @@ try {
   const jsonRpcProvider = new ethers.JsonRpcProvider(RPC_URL);
   onChainMiningContract = new ethers.Contract(
     CONTRACT_ADDRESS,
-    ['function currentChallenge() view returns (bytes32)', 'function totalMined() view returns (uint256)'],
+    [
+      'function currentChallenge() view returns (bytes32)',
+      'function totalMined() view returns (uint256)',
+      'function workerActivationCost(uint256) view returns (uint256)'
+    ],
     jsonRpcProvider
   );
 } catch (e) {
   console.warn('Could not initialize ethers contract provider:', e.message);
 }
+
+let cachedWorkerCosts = { 1: 0, 2: 1986377, 3: 3964875, 4: 5279520, 5: 6590698 };
+if (db.workerCosts && Object.keys(db.workerCosts).length >= 4) {
+  cachedWorkerCosts = { ...cachedWorkerCosts, ...db.workerCosts };
+}
+
+async function getAuthoritativeWorkerCosts() {
+  if (db.workerCosts && Object.keys(db.workerCosts).length >= 4) {
+    cachedWorkerCosts = { ...cachedWorkerCosts, ...db.workerCosts };
+  }
+  if (onChainMiningContract) {
+    try {
+      const [w2, w3, w4, w5] = await Promise.all([
+        onChainMiningContract.workerActivationCost(2),
+        onChainMiningContract.workerActivationCost(3),
+        onChainMiningContract.workerActivationCost(4),
+        onChainMiningContract.workerActivationCost(5),
+      ]);
+      if (w2) cachedWorkerCosts[2] = Number(ethers.formatEther(w2));
+      if (w3) cachedWorkerCosts[3] = Number(ethers.formatEther(w3));
+      if (w4) cachedWorkerCosts[4] = Number(ethers.formatEther(w4));
+      if (w5) cachedWorkerCosts[5] = Number(ethers.formatEther(w5));
+      db.workerCosts = cachedWorkerCosts;
+      saveDb();
+    } catch (_) {}
+  }
+  return cachedWorkerCosts;
+}
+
+// Preload worker costs on server startup
+getAuthoritativeWorkerCosts().catch(() => {});
 
 let cachedOnChainChallenge = {
   challenge: '0xb46af2c33fa24c1c27670e585a72800097d9a812bd959955973687b70334a26a',
@@ -1015,6 +1050,7 @@ async function handleRequest(req, res) {
       success: true,
       wallet,
       workers,
+      workerCosts: cachedWorkerCosts,
       activationTokenContract: '0x30E55c3cfB2BBe5d0B07051e0B15c8a532c45ecc',
     }));
     return;
@@ -1023,6 +1059,7 @@ async function handleRequest(req, res) {
   // API 7: GET /api/config
   if (reqPath === '/api/config' && req.method === 'GET') {
     const currentEpoch = getCurrentEpoch(db.totalMined);
+    const workerCosts = await getAuthoritativeWorkerCosts();
     const config = {
       maxSupply: 10000,
       maxMintsPerWallet: WALLET_MAX_MINTS,
@@ -1031,7 +1068,7 @@ async function handleRequest(req, res) {
       mintFeeUsd: currentEpoch.mintFeeUsd,
       currentEpoch,
       epochs: getEffectiveEpochs(),
-      workerCosts: { 1: 0, 2: 100, 3: 200, 4: 300, 5: 500 },
+      workerCosts,
       sessionDurationSeconds: 600,
       adminWallet: '0xb8E3DfDd19b6Bf35b9Fd87F8373F7f82C53bc93C',
       contractAddress: '0x7D959C29aa1098d93b307Ca40bEEEc0bF7bbfF85',
@@ -1046,6 +1083,43 @@ async function handleRequest(req, res) {
     };
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ success: true, config }));
+    return;
+  }
+
+  // API 7.5: POST /api/admin/worker-costs (Update Worker Blade Activation Pricing)
+  if (reqPath === '/api/admin/worker-costs' && req.method === 'POST') {
+    try {
+      const data = await parseJsonBody(req);
+      const wallet = (data.wallet || '').toLowerCase();
+
+      if (!isAuthorizedAdmin(wallet)) {
+        res.writeHead(403, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Unauthorized: Admin wallet required' }));
+        return;
+      }
+
+      if (data.costs) {
+        db.workerCosts = {
+          1: 0,
+          2: Number(data.costs[2] || 1986377),
+          3: Number(data.costs[3] || 3964875),
+          4: Number(data.costs[4] || 5279520),
+          5: Number(data.costs[5] || 6590698),
+        };
+        cachedWorkerCosts = { ...db.workerCosts };
+        saveDb();
+      }
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: true,
+        workerCosts: db.workerCosts,
+        updatedAt: Date.now(),
+      }));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: err.message }));
+    }
     return;
   }
 

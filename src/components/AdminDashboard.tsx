@@ -86,16 +86,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // Epoch Fees State
   const DEFAULT_10_EPOCHS = [
-    { id: 1, name: 'EPOCH 1 (GENESIS)', startToken: 1, endToken: 10, count: 10, mintFeeUsd: 5, mintFeeEth: 0.0020, mintFeeApe: 5, difficulty: 'HARD' },
-    { id: 2, name: 'EPOCH 2 (ASCENSION)', startToken: 11, endToken: 30, count: 20, mintFeeUsd: 7, mintFeeEth: 0.0028, mintFeeApe: 7, difficulty: 'HARDER' },
-    { id: 3, name: 'EPOCH 3 (EXPANSION)', startToken: 31, endToken: 70, count: 40, mintFeeUsd: 10, mintFeeEth: 0.0040, mintFeeApe: 10, difficulty: 'VERY HARD' },
-    { id: 4, name: 'EPOCH 4 (SURGE)', startToken: 71, endToken: 150, count: 80, mintFeeUsd: 14, mintFeeEth: 0.0056, mintFeeApe: 14, difficulty: 'VERY HARD+' },
-    { id: 5, name: 'EPOCH 5 (NEXUS)', startToken: 151, endToken: 300, count: 150, mintFeeUsd: 18, mintFeeEth: 0.0072, mintFeeApe: 18, difficulty: 'EXTREME' },
-    { id: 6, name: 'EPOCH 6 (APEX)', startToken: 301, endToken: 600, count: 300, mintFeeUsd: 22, mintFeeEth: 0.0088, mintFeeApe: 22, difficulty: 'EXTREME+' },
-    { id: 7, name: 'EPOCH 7 (SOVEREIGN)', startToken: 601, endToken: 1200, count: 600, mintFeeUsd: 26, mintFeeEth: 0.0104, mintFeeApe: 26, difficulty: 'LEGENDARY' },
-    { id: 8, name: 'EPOCH 8 (TITAN)', startToken: 1201, endToken: 2500, count: 1300, mintFeeUsd: 30, mintFeeEth: 0.0120, mintFeeApe: 30, difficulty: 'LEGENDARY+' },
-    { id: 9, name: 'EPOCH 9 (MYTHIC)', startToken: 2501, endToken: 5000, count: 2500, mintFeeUsd: 35, mintFeeEth: 0.0140, mintFeeApe: 35, difficulty: 'MYTHIC' },
-    { id: 10, name: 'EPOCH 10 (OMEGA)', startToken: 5001, endToken: 10000, count: 5000, mintFeeUsd: 40, mintFeeEth: 0.0160, mintFeeApe: 40, difficulty: 'OMEGA' },
+    { id: 1, name: 'EPOCH 1 (GENESIS)', startToken: 1, endToken: 10, count: 10, mintFeeUsd: 1, mintFeeEth: 0.0004, mintFeeApe: 1, difficulty: 'HARD', target: '0x' + '0003'.padEnd(64, 'f') },
+    { id: 2, name: 'EPOCH 2 (ASCENSION)', startToken: 11, endToken: 30, count: 20, mintFeeUsd: 6, mintFeeEth: 0.0024, mintFeeApe: 6, difficulty: 'HARDER', target: '0x' + '0001'.padEnd(64, 'f') },
+    { id: 3, name: 'EPOCH 3 (EXPANSION)', startToken: 31, endToken: 70, count: 40, mintFeeUsd: 20, mintFeeEth: 0.0080, mintFeeApe: 20, difficulty: 'VERY HARD', target: '0x' + '0000ff'.padEnd(64, 'f') },
+    { id: 4, name: 'EPOCH 4 (SURGE)', startToken: 71, endToken: 150, count: 80, mintFeeUsd: 40, mintFeeEth: 0.0160, mintFeeApe: 40, difficulty: 'VERY HARD+', target: '0x' + '00007f'.padEnd(64, 'f') },
+    { id: 5, name: 'EPOCH 5 (NEXUS)', startToken: 151, endToken: 300, count: 150, mintFeeUsd: 60, mintFeeEth: 0.0240, mintFeeApe: 60, difficulty: 'EXTREME', target: '0x' + '00003f'.padEnd(64, 'f') },
+    { id: 6, name: 'EPOCH 6 (APEX)', startToken: 301, endToken: 600, count: 300, mintFeeUsd: 88, mintFeeEth: 0.0352, mintFeeApe: 88, difficulty: 'EXTREME+', target: '0x' + '00001f'.padEnd(64, 'f') },
+    { id: 7, name: 'EPOCH 7 (SOVEREIGN)', startToken: 601, endToken: 1200, count: 600, mintFeeUsd: 120, mintFeeEth: 0.0480, mintFeeApe: 120, difficulty: 'LEGENDARY', target: '0x' + '00000f'.padEnd(64, 'f') },
+    { id: 8, name: 'EPOCH 8 (TITAN)', startToken: 1201, endToken: 2500, count: 1300, mintFeeUsd: 160, mintFeeEth: 0.0640, mintFeeApe: 160, difficulty: 'LEGENDARY+', target: '0x' + '000007'.padEnd(64, 'f') },
+    { id: 9, name: 'EPOCH 9 (MYTHIC)', startToken: 2501, endToken: 5000, count: 2500, mintFeeUsd: 180, mintFeeEth: 0.0720, mintFeeApe: 180, difficulty: 'MYTHIC', target: '0x' + '000003'.padEnd(64, 'f') },
+    { id: 10, name: 'EPOCH 10 (OMEGA)', startToken: 5001, endToken: 10000, count: 5000, mintFeeUsd: 220, mintFeeEth: 0.0880, mintFeeApe: 220, difficulty: 'OMEGA', target: '0x' + '000001'.padEnd(64, 'f') },
   ];
 
   const displayedEpochs = (config.epochs && config.epochs.length > 0) ? config.epochs : DEFAULT_10_EPOCHS;
@@ -113,14 +113,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [epochSuccessMsg, setEpochSuccessMsg] = useState<string | null>(null);
   const [epochErrorMsg, setEpochErrorMsg] = useState<string | null>(null);
 
-  // Worker Cost Controls
-  const [worker2Cost, setWorker2Cost] = useState(config.workerCosts[2] || 100);
-  const [worker3Cost, setWorker3Cost] = useState(config.workerCosts[3] || 200);
-  const [worker4Cost, setWorker4Cost] = useState(config.workerCosts[4] || 300);
-  const [worker5Cost, setWorker5Cost] = useState(config.workerCosts[5] || 500);
+  // Worker Cost Controls (Initialized with live on-chain values)
+  const [worker2Cost, setWorker2Cost] = useState(config.workerCosts[2] || 1986377);
+  const [worker3Cost, setWorker3Cost] = useState(config.workerCosts[3] || 3964875);
+  const [worker4Cost, setWorker4Cost] = useState(config.workerCosts[4] || 5279520);
+  const [worker5Cost, setWorker5Cost] = useState(config.workerCosts[5] || 6590698);
   const [isSavingWorkerCosts, setIsSavingWorkerCosts] = useState(false);
   const [workerSavedMsg, setWorkerSavedMsg] = useState<string | null>(null);
   const [workerErrorMsg, setWorkerErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (config.workerCosts) {
+      if (config.workerCosts[2]) setWorker2Cost(config.workerCosts[2]);
+      if (config.workerCosts[3]) setWorker3Cost(config.workerCosts[3]);
+      if (config.workerCosts[4]) setWorker4Cost(config.workerCosts[4]);
+      if (config.workerCosts[5]) setWorker5Cost(config.workerCosts[5]);
+    }
+  }, [config.workerCosts]);
 
   // Fetch Live On-Chain Treasury & Contract State
   const fetchTreasury = useCallback(async () => {
@@ -304,7 +313,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       // Synchronize backend state with verified on-chain update
       const updates = displayedEpochs.map(e => ({
-        id: e.id,
+        ...e,
         mintFeeUsd: Number(epochFees[e.id] || e.mintFeeUsd || 5),
         mintFeeEth: Number((((epochFees[e.id] || e.mintFeeUsd || 5)) / 2500).toFixed(4)),
         mintFeeApe: Number(epochFees[e.id] || e.mintFeeUsd || 5),
@@ -406,6 +415,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       soundEffects.playProofFoundSound();
       setWorkerSavedMsg('Worker blade activation costs confirmed on-chain!');
+
+      // Synchronize with backend API and persistent database
+      await fetch('/api/admin/worker-costs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          wallet: address || adminAddress,
+          costs: {
+            1: 0,
+            2: worker2Cost,
+            3: worker3Cost,
+            4: worker4Cost,
+            5: worker5Cost,
+          },
+        }),
+      }).catch(() => {});
 
       onUpdateConfig({
         ...config,

@@ -17,6 +17,9 @@ export interface SolvedRecord {
   solvedAt: number;
   mintedAt?: number;
   txHash?: string;
+  epochId?: number;
+  feeUsd?: number;
+  feeEth?: number;
 }
 
 interface MiningLedgerProps {
@@ -149,8 +152,12 @@ export const MiningLedger: React.FC<MiningLedgerProps> = ({ onMintRecord, refres
                   status: 'MINTED',
                   txHash: '0x01a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000001',
                   epochId: 1,
-                  feeUsd: 5,
-                  mintedAt: 1789310320950
+                  feeUsd: 1,
+                  mintedAt: 1789310320950,
+                  nonce: '1042',
+                  solvedHash: '0x01a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000001',
+                  difficulty: 4,
+                  solvedAt: 1789310320950,
                 });
               }
             }

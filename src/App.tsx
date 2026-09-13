@@ -14,7 +14,7 @@ import { CollectionShowcase } from './components/CollectionShowcase';
 import { DocsContent } from './docs/DocsContent';
 import { WebGPUMiningEngine, GPUInfo } from './mining/WebGPUEngine';
 import { getAllWorkerRanges } from './mining/NoncePartition';
-import { MiningStatus, DifficultyBand, WorkerInfo, SupplyInfo, MiningProof, MintReceipt, ProtocolConfig } from './types';
+import { MiningStatus, DifficultyBand, WorkerInfo, SupplyInfo, MiningProof, MintReceipt, ProtocolConfig, EpochInfo } from './types';
 import { useWallet, ADMIN_WALLET, OWNER_WALLET, CONTRACT_ADDRESS, RPC_URL } from './web3/WalletContext';
 import { ethers } from 'ethers';
 
@@ -63,9 +63,9 @@ export const App: React.FC = () => {
       startToken: 1,
       endToken: 10,
       count: 10,
-      mintFeeUsd: 5,
-      mintFeeEth: 0.0020,
-      mintFeeApe: 5,
+      mintFeeUsd: 1,
+      mintFeeEth: 0.0004,
+      mintFeeApe: 1,
       difficulty: 'HARD',
       target: '0x00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
       nextToken: 1,
@@ -77,9 +77,9 @@ export const App: React.FC = () => {
         name: 'EPOCH 2 (ASCENSION)',
         startToken: 11,
         endToken: 30,
-        mintFeeUsd: 7,
-        mintFeeEth: 0.0028,
-        mintFeeApe: 7,
+        mintFeeUsd: 6,
+        mintFeeEth: 0.0024,
+        mintFeeApe: 6,
       }
     }
   });
@@ -88,24 +88,24 @@ export const App: React.FC = () => {
   const [config, setConfig] = useState<ProtocolConfig>({
     maxSupply: 10000,
     maxMintsPerWallet: 5,
-    mintFeeHype: 5,
-    mintFeeEth: 0.0020,
-    mintFeeUsd: 5,
-    workerCosts: { 1: 0, 2: 100, 3: 200, 4: 300, 5: 500 },
+    mintFeeHype: 1,
+    mintFeeEth: 0.0004,
+    mintFeeUsd: 1,
+    workerCosts: { 1: 0, 2: 1986377, 3: 3964875, 4: 5279520, 5: 6590698 },
     sessionDurationSeconds: 600,
     adminWallet: ADMIN_WALLET,
     royaltyBasisPoints: 500,
   });
 
-  // 5-Worker Setup
+  // 5-Worker Setup (Pre-configured with on-chain blade costs)
   const [workers, setWorkers] = useState<WorkerInfo[]>(() => {
     const ranges = getAllWorkerRanges();
     return [
       { id: 1, name: 'Miner 01', status: 'ACTIVE', hashrate: 0, costHype: 0, nonceRange: ranges[1], isFree: true },
-      { id: 2, name: 'Miner 02', status: 'LOCKED', hashrate: 0, costHype: 100, nonceRange: ranges[2], isFree: false },
-      { id: 3, name: 'Miner 03', status: 'LOCKED', hashrate: 0, costHype: 200, nonceRange: ranges[3], isFree: false },
-      { id: 4, name: 'Miner 04', status: 'LOCKED', hashrate: 0, costHype: 300, nonceRange: ranges[4], isFree: false },
-      { id: 5, name: 'Miner 05', status: 'LOCKED', hashrate: 0, costHype: 500, nonceRange: ranges[5], isFree: false },
+      { id: 2, name: 'Miner 02', status: 'LOCKED', hashrate: 0, costHype: 1986377, nonceRange: ranges[2], isFree: false },
+      { id: 3, name: 'Miner 03', status: 'LOCKED', hashrate: 0, costHype: 3964875, nonceRange: ranges[3], isFree: false },
+      { id: 4, name: 'Miner 04', status: 'LOCKED', hashrate: 0, costHype: 5279520, nonceRange: ranges[4], isFree: false },
+      { id: 5, name: 'Miner 05', status: 'LOCKED', hashrate: 0, costHype: 6590698, nonceRange: ranges[5], isFree: false },
     ];
   });
 
@@ -147,7 +147,7 @@ export const App: React.FC = () => {
       const targetHex = '0x' + BigInt(onChainEpoch.target).toString(16).padStart(64, '0');
 
       // Query on-chain worker activation costs (Workers 2 to 5)
-      let w2Cost = 100, w3Cost = 200, w4Cost = 300, w5Cost = 500;
+      let w2Cost = 1986377, w3Cost = 3964875, w4Cost = 5279520, w5Cost = 6590698;
       try {
         const [c2, c3, c4, c5] = await Promise.all([
           contract.workerActivationCost(2),
@@ -155,11 +155,13 @@ export const App: React.FC = () => {
           contract.workerActivationCost(4),
           contract.workerActivationCost(5),
         ]);
-        if (c2 !== undefined) w2Cost = Number(ethers.formatEther(c2));
-        if (c3 !== undefined) w3Cost = Number(ethers.formatEther(c3));
-        if (c4 !== undefined) w4Cost = Number(ethers.formatEther(c4));
-        if (c5 !== undefined) w5Cost = Number(ethers.formatEther(c5));
-      } catch (_) {}
+        if (c2 !== undefined && c2 > 0n) w2Cost = Number(ethers.formatEther(c2));
+        if (c3 !== undefined && c3 > 0n) w3Cost = Number(ethers.formatEther(c3));
+        if (c4 !== undefined && c4 > 0n) w4Cost = Number(ethers.formatEther(c4));
+        if (c5 !== undefined && c5 > 0n) w5Cost = Number(ethers.formatEther(c5));
+      } catch (we) {
+        console.warn('Could not query on-chain worker activation costs:', we);
+      }
 
       // Query on-chain epoch fees for all 10 stages
       const DEFAULT_EPOCH_STARTS = [1, 11, 31, 71, 151, 301, 601, 1201, 2501, 5001];
@@ -402,6 +404,12 @@ export const App: React.FC = () => {
       .then((data) => {
         if (data.success && data.config) {
           setConfig(data.config);
+          if (data.config.workerCosts) {
+            setWorkers(prev => prev.map(w => ({
+              ...w,
+              costHype: data.config.workerCosts[w.id] !== undefined ? data.config.workerCosts[w.id] : w.costHype,
+            })));
+          }
         }
       })
       .catch(() => {});
@@ -659,11 +667,16 @@ export const App: React.FC = () => {
   const handleMintRecord = (rec: SolvedRecord) => {
     if (rec.status === 'MINTED') return;
     setLatestProof({
+      proofId: rec.id || 'proof_' + Date.now(),
+      sessionId: 'sess_manual',
       nonce: rec.nonce,
       hash: rec.solvedHash,
       challenge: '0xb46af2c33fa24c1c27670e585a72800097d9a812bd959955973687b70334a26a',
       wallet: rec.wallet,
-      difficulty: rec.difficulty || 4,
+      difficulty: String(rec.difficulty || 4),
+      timeElapsedSeconds: rec.timeToSolve || 12,
+      workersUsed: 1,
+      averageHashrate: 12.5,
       timestamp: rec.solvedAt || Date.now(),
       workerId: 1,
     });

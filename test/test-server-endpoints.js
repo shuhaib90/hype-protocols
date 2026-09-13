@@ -61,8 +61,8 @@ async function testEndpoints() {
   assert(configRes.status === 200, '/api/config responds with HTTP 200');
   const configData = await configRes.json();
   assert(configData.config.maxSupply === 10000, 'Config reports 10,000 max supply');
-  assert(configData.config.workerCosts[2] === 100, 'Worker #2 cost is 100 HYPE');
-  assert(configData.config.workerCosts[5] === 500, 'Worker #5 cost is 500 HYPE');
+  assert(configData.config.workerCosts[2] > 0, 'Worker #2 cost is configured on-chain');
+  assert(configData.config.workerCosts[5] > 0, 'Worker #5 cost is configured on-chain');
   assert(configData.config.adminWallet.toLowerCase() === testWallet.toLowerCase(), 'Admin wallet is configured');
   assert(configData.config.currentEpoch && configData.config.currentEpoch.id >= 1, 'Config reports active epoch');
   assert(Array.isArray(configData.config.epochs) && configData.config.epochs.length === 10, 'Config reports 10-epoch schedule');
@@ -289,6 +289,31 @@ async function testEndpoints() {
   assert(claimRigData.success === true, 'Claim rig fees reports success');
   assert(claimRigData.claim.tokenContract === '0x30E55c3cfB2BBe5d0B07051e0B15c8a532c45ecc', 'Rig fee claim specifies token contract');
   assert(claimRigData.claim.recipient === testWallet, 'Rig fee claim receipt recipient is admin wallet');
+
+  // 21. Test Worker Costs Update (POST /api/admin/worker-costs)
+  const workerCostsUpdateRes = await fetch('http://localhost:3000/api/admin/worker-costs', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      wallet: testWallet,
+      costs: { 1: 0, 2: 1986377, 3: 3964875, 4: 5279520, 5: 6590698 }
+    })
+  });
+  assert(workerCostsUpdateRes.status === 200, 'Admin successfully updates worker blade costs');
+  const workerCostsData = await workerCostsUpdateRes.json();
+  assert(workerCostsData.success === true, 'Worker costs update reports success');
+  assert(workerCostsData.workerCosts[2] === 1986377, 'Blade #2 cost matches 1986377');
+  assert(workerCostsData.workerCosts[5] === 6590698, 'Blade #5 cost matches 6590698');
+
+  const unauthWorkerCostRes = await fetch('http://localhost:3000/api/admin/worker-costs', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      wallet: nonAdminWallet,
+      costs: { 1: 0, 2: 100 }
+    })
+  });
+  assert(unauthWorkerCostRes.status === 403, 'Non-admin rejected from editing worker costs with HTTP 403');
 
   // Final cleanup reset to default genesis
   await fetch('http://localhost:3000/api/mining/reset', { method: 'POST' });
