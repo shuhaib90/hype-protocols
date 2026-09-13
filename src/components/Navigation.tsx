@@ -120,17 +120,19 @@ export const Navigation: React.FC<NavigationProps> = ({
             >
               Docs
             </button>
-            <button
-              onClick={() => handleTabClick('admin')}
-              className={`px-3 py-1.5 uppercase tracking-wider font-bold transition-all flex items-center gap-1.5 ${
-                activeTab === 'admin'
-                  ? 'bg-[#d83a2a] text-white shadow-[2px_2px_0px_#24140a]'
-                  : 'text-[#d48818] hover:text-[#24140a] hover:bg-[#eee2ca]'
-              }`}
-            >
-              <Shield className="w-3.5 h-3.5 fill-current" />
-              <span>Admin</span>
-            </button>
+            {isAdmin && (
+              <button
+                onClick={() => handleTabClick('admin')}
+                className={`px-3 py-1.5 uppercase tracking-wider font-bold transition-all flex items-center gap-1.5 ${
+                  activeTab === 'admin'
+                    ? 'bg-[#d83a2a] text-white shadow-[2px_2px_0px_#24140a]'
+                    : 'text-[#d48818] hover:text-[#24140a] hover:bg-[#eee2ca]'
+                }`}
+              >
+                <Shield className="w-3.5 h-3.5 fill-current" />
+                <span>Admin</span>
+              </button>
+            )}
           </nav>
         </div>
 
@@ -254,20 +256,22 @@ export const Navigation: React.FC<NavigationProps> = ({
           >
             Docs
           </button>
-          <button
-            onClick={() => {
-              setMobileMenuOpen(false);
-              handleTabClick('admin');
-            }}
-            className={`w-full text-left px-3 py-2 uppercase font-bold transition-all flex items-center gap-2 ${
-              activeTab === 'admin'
-                ? 'bg-[#d83a2a] text-white'
-                : 'text-[#d48818] hover:bg-[#eee2ca]'
-            }`}
-          >
-            <Shield className="w-3.5 h-3.5 fill-current" />
-            <span>Admin Dashboard</span>
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                handleTabClick('admin');
+              }}
+              className={`w-full text-left px-3 py-2 uppercase font-bold transition-all flex items-center gap-2 ${
+                activeTab === 'admin'
+                  ? 'bg-[#d83a2a] text-white'
+                  : 'text-[#d48818] hover:bg-[#eee2ca]'
+              }`}
+            >
+              <Shield className="w-3.5 h-3.5 fill-current" />
+              <span>Admin Dashboard</span>
+            </button>
+          )}
         </div>
       )}
     </header>

@@ -20,11 +20,18 @@ import { ethers } from 'ethers';
 import { soundEffects } from './utils/soundEffects';
 
 export const App: React.FC = () => {
-  const { isConnected, address, activateWorkerOnChain } = useWallet();
+  const { isConnected, address, isAdmin, activateWorkerOnChain } = useWallet();
 
   // Navigation tab
   const [activeTab, setActiveTab] = useState<'mining' | 'docs' | 'admin'>('mining');
   const [isAdminOpen, setIsAdminOpen] = useState(false);
+
+  // Non-admin redirect: prevent non-admins from accessing or viewing admin tab
+  useEffect(() => {
+    if (activeTab === 'admin' && !isAdmin) {
+      setActiveTab('mining');
+    }
+  }, [activeTab, isAdmin]);
 
   // Hardware detection
   const [gpuInfo, setGpuInfo] = useState<GPUInfo | null>(null);
@@ -633,22 +640,26 @@ export const App: React.FC = () => {
         console.warn('On-chain challenge query warning:', rpcErr);
       }
 
+      const currentEpochId = supply.currentEpoch?.id || 1;
       setIsMining(true);
       setMiningStatus('MINING');
       miningEngineRef.current?.start(
         activeChallenge,
         address,
         targetHex,
-        workers
+        workers,
+        currentEpochId
       );
     } catch (err) {
+      const currentEpochId = supply.currentEpoch?.id || 1;
       setIsMining(true);
       setMiningStatus('MINING');
       miningEngineRef.current?.start(
         '0xff57ddb3f5e14ac967d4378c56c43491cb2d1639b53d4a9aae417da4be94c685',
         address,
         walletTargetHex,
-        workers
+        workers,
+        currentEpochId
       );
     }
   };
@@ -822,7 +833,7 @@ export const App: React.FC = () => {
 
       {/* Main Content Area */}
       <main className="flex-grow">
-        {activeTab === 'admin' ? (
+        {activeTab === 'admin' && isAdmin ? (
           <AdminDashboard
             config={config}
             onUpdateConfig={handleUpdateConfig}
@@ -914,17 +925,21 @@ export const App: React.FC = () => {
             <span className="text-[#24140a] bg-[#f5ebd7] px-2 py-0.5 border border-[#24140a]">Robinhood EVM L2 (Native ETH)</span>
             <span className="text-[#24140a]">▪</span>
             <span className="text-[#9c6208] bg-[#f5ebd7] px-2 py-0.5 border border-[#24140a]">5.0% CREATOR ROYALTY</span>
-            <span className="text-[#24140a]">▪</span>
-            <button
-              onClick={() => {
-                soundEffects.playClickSound();
-                setActiveTab('admin');
-                window.scrollTo({ top: 0, behavior: 'instant' });
-              }}
-              className="text-[#d83a2a] hover:text-[#24140a] hover:underline cursor-pointer bg-[#fdfbf7] px-2 py-0.5 border border-[#24140a] font-bold"
-            >
-              ADMIN PORTAL
-            </button>
+            {isAdmin && (
+              <>
+                <span className="text-[#24140a]">▪</span>
+                <button
+                  onClick={() => {
+                    soundEffects.playClickSound();
+                    setActiveTab('admin');
+                    window.scrollTo({ top: 0, behavior: 'instant' });
+                  }}
+                  className="text-[#d83a2a] hover:text-[#24140a] hover:underline cursor-pointer bg-[#fdfbf7] px-2 py-0.5 border border-[#24140a] font-bold"
+                >
+                  ADMIN PORTAL
+                </button>
+              </>
+            )}
           </div>
         </div>
       </footer>

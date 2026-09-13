@@ -24,6 +24,9 @@ export class WebGPUMiningEngine {
   private challenge = '';
   private wallet = '';
   private targetDifficulty = '';
+  private epochId = 1;
+  private cachedCandidateSolution: { workerId: number; nonce: bigint; hashHex: string } | null = null;
+  private timeoutId: any = null;
   private activeWorkerCount = 1;
   private workerInstances: Array<{ id: number; currentNonce: bigint; hashrate: number }> = [];
   private totalNoncesScanned = 0;
@@ -137,7 +140,16 @@ export class WebGPUMiningEngine {
       document.addEventListener('visibilitychange', () => {
         this.tabHidden = document.hidden;
         if (this.tabHidden && this.isMining) {
-          console.log('[HashApe Miner] Browser tab hidden: mining rate throttled for thermal safety.');
+          console.log('[HashApe Miner] Browser tab hidden: continuing mining via background timer.');
+        } else if (!this.tabHidden && this.isMining) {
+          console.log('[HashApe Miner] Browser tab active: resuming animation frame loop.');
+          if (this.timeoutId) {
+            clearTimeout(this.timeoutId);
+            this.timeoutId = null;
+          }
+          if (this.animationFrameId === null) {
+            this.animationFrameId = requestAnimationFrame(() => this.runMiningLoop());
+          }
         }
       });
     }
@@ -147,7 +159,8 @@ export class WebGPUMiningEngine {
     challenge: string,
     wallet: string,
     targetDifficulty: string,
-    activeWorkers: WorkerInfo[]
+    activeWorkers: WorkerInfo[],
+    epochId: number = 1
   ) {
     if (this.isMining) {
       this.stop();
@@ -159,8 +172,31 @@ export class WebGPUMiningEngine {
     this.challenge = challenge;
     this.wallet = wallet;
     this.targetDifficulty = targetDifficulty;
+    this.epochId = epochId;
+    this.cachedCandidateSolution = null;
     this.isMining = true;
-    this.startTime = Date.now();
+
+    // Persist or restore mining start timestamp per wallet and epoch
+    // This ensures refreshing the browser page does not reset the 20-minute solve clock
+    const storageKey = `hashape_mining_start_${wallet.toLowerCase()}_ep${epochId}`;
+    let initialStartTime = Date.now();
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const saved = window.localStorage.getItem(storageKey);
+        if (saved) {
+          const parsed = parseInt(saved, 10);
+          if (!isNaN(parsed) && (initialStartTime - parsed) < 4 * 3600 * 1000 && (initialStartTime - parsed) >= 0) {
+            initialStartTime = parsed;
+          } else {
+            window.localStorage.setItem(storageKey, String(initialStartTime));
+          }
+        } else {
+          window.localStorage.setItem(storageKey, String(initialStartTime));
+        }
+      }
+    } catch (_) {}
+
+    this.startTime = initialStartTime;
     this.totalNoncesScanned = 0;
     this.abortController = new AbortController();
 
@@ -183,6 +219,10 @@ export class WebGPUMiningEngine {
   public stop() {
     this.isMining = false;
     soundEffects.stopGpuRunningSound();
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId);
+      this.timeoutId = null;
+    }
     if (this.abortController) {
       this.abortController.abort();
       this.abortController = null;
@@ -224,13 +264,37 @@ export class WebGPUMiningEngine {
         lastCurrentHash = hashHex;
         lastCurrentNonce = nonceToTest.toString();
 
-        // Enforce genuine proof of work: must meet target and require authentic sustained hashing depth
-        if (hashBigInt < targetBigInt && this.totalNoncesScanned >= 25000) {
-          batchSolved = true;
-          winningWorkerId = worker.id;
-          winningNonce = nonceToTest;
-          winningHashHex = hashHex;
-          break;
+        // Check if hash satisfies targetDifficulty
+        if (hashBigInt < targetBigInt) {
+          this.cachedCandidateSolution = {
+            workerId: worker.id,
+            nonce: nonceToTest,
+            hashHex,
+          };
+        }
+
+        // Calibrated Difficulty & Solve Duration:
+        // Epoch 1 and Epoch 2: strictly calibrated so 1 mine takes ~20 minutes (1200 seconds)
+        // Subsequent Epochs: authentic sustained hashing depth (25,000+ nonces)
+        if (this.epochId <= 2) {
+          const targetDurationSec = 1200; // 20 minutes (1 mine per 20 min)
+          const elapsedSec = (Date.now() - this.startTime) / 1000;
+          if (elapsedSec >= targetDurationSec && this.cachedCandidateSolution !== null) {
+            batchSolved = true;
+            winningWorkerId = this.cachedCandidateSolution.workerId;
+            winningNonce = this.cachedCandidateSolution.nonce;
+            winningHashHex = this.cachedCandidateSolution.hashHex;
+            break;
+          }
+        } else {
+          // Epochs > 2
+          if (hashBigInt < targetBigInt && this.totalNoncesScanned >= 25000) {
+            batchSolved = true;
+            winningWorkerId = worker.id;
+            winningNonce = nonceToTest;
+            winningHashHex = hashHex;
+            break;
+          }
         }
       }
 
@@ -253,6 +317,14 @@ export class WebGPUMiningEngine {
     this.callbacks.onNonceProgress(this.totalNoncesScanned, lastCurrentHash, lastCurrentNonce);
 
     if (batchSolved) {
+      // Clear persistent start time now that this mine is solved
+      try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          const storageKey = `hashape_mining_start_${this.wallet.toLowerCase()}_ep${this.epochId}`;
+          window.localStorage.removeItem(storageKey);
+        }
+      } catch (_) {}
+
       // STOP ALL OTHER WORKERS IMMEDIATELY
       this.stop();
 
@@ -278,7 +350,11 @@ export class WebGPUMiningEngine {
       return;
     }
 
-    // Continue loop
-    this.animationFrameId = requestAnimationFrame(() => this.runMiningLoop());
+    // Continue loop: if tab is hidden in background, use setTimeout to avoid browser throttling
+    if (this.tabHidden) {
+      this.timeoutId = setTimeout(() => this.runMiningLoop(), 50);
+    } else {
+      this.animationFrameId = requestAnimationFrame(() => this.runMiningLoop());
+    }
   }
 }

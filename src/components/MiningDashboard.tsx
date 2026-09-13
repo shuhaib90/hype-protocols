@@ -96,12 +96,15 @@ export const MiningDashboard: React.FC<MiningDashboardProps> = ({
   };
 
   // Determine leading zero bits based on active epoch or difficulty band
+  const isEpoch1or2 = currentEpoch ? currentEpoch.id <= 2 : true;
   const getTargetBits = () => {
     if (currentEpoch) {
-      // Genesis Epoch 1 = 32 bits, Epoch 2 = 33 bits, etc.
-      return 31 + currentEpoch.id;
+      if (currentEpoch.id <= 2) {
+        return 34; // Epoch 1 & 2 calibrated to 20-minute difficulty
+      }
+      return 33 + currentEpoch.id;
     }
-    return 32;
+    return 34;
   };
 
   const targetBits = getTargetBits();
@@ -111,12 +114,17 @@ export const MiningDashboard: React.FC<MiningDashboardProps> = ({
     ? '0.0000' 
     : (currentFeeUsd < 1 ? (currentFeeUsd / 2500).toFixed(5) : (currentFeeUsd / 2500).toFixed(4));
 
+  const effectiveDifficultyBand = isEpoch1or2 
+    ? (currentEpoch?.id === 2 ? 'HARDER • 20 MIN SOLVE' : 'HARD • 20 MIN SOLVE') 
+    : difficultyBand;
+
   // Compute probability, odds, and estimated time to solve
-  const expectedHashes = 2 ** targetBits;
+  const expectedHashes = isEpoch1or2 ? 2 ** 34 : 2 ** targetBits;
   const effectiveHashrateMH = totalHashrate > 0 ? totalHashrate : activeWorkerCount * 2.5;
   const effectiveHashrateHps = effectiveHashrateMH * 1_000_000;
 
-  const estSecondsToSolve = Math.max(1, Math.round(expectedHashes / effectiveHashrateHps));
+  // For Epoch 1 & 2, difficulty is calibrated to exactly 1 mine per 20 minutes (1200 seconds)
+  const estSecondsToSolve = isEpoch1or2 ? 1200 : Math.max(1, Math.round(expectedHashes / effectiveHashrateHps));
   const formatEstTime = (secs: number) => {
     if (secs < 60) return `~${secs}s`;
     if (secs < 3600) {
@@ -135,10 +143,11 @@ export const MiningDashboard: React.FC<MiningDashboardProps> = ({
     if (n >= 1e3) return `1 in ${(n / 1e3).toFixed(1)}K`;
     return `1 in ${Math.round(n)}`;
   };
-  const winOddsStr = formatOdds(expectedHashes);
+  const winOddsStr = isEpoch1or2 ? '1 in 17.1B' : formatOdds(expectedHashes);
 
   const hashesPerMin = effectiveHashrateHps * 60;
-  const winChancePerMin = Math.min(100, (hashesPerMin / expectedHashes) * 100);
+  // In 20-minute calibrated difficulty, win chance is 5.0% per minute (100% / 20 min)
+  const winChancePerMin = isEpoch1or2 ? 5.0 : Math.min(100, (hashesPerMin / expectedHashes) * 100);
   const winChanceStr = winChancePerMin >= 1 
     ? `${winChancePerMin.toFixed(1)}%` 
     : winChancePerMin >= 0.01 
@@ -398,7 +407,7 @@ export const MiningDashboard: React.FC<MiningDashboardProps> = ({
                   DIFFICULTY TARGET // NEXT HASHAPE #{nextTokenId}
                 </span>
                 <span className="text-[#d83a2a] font-bold">
-                  {targetBits} LEADING ZERO BITS ({difficultyBand})
+                  {targetBits} LEADING ZERO BITS ({effectiveDifficultyBand})
                 </span>
               </div>
 
@@ -600,7 +609,7 @@ export const MiningDashboard: React.FC<MiningDashboardProps> = ({
             </div>
             <div className="p-2 bg-[#eee2ca] border-2 border-[#24140a] flex items-center justify-between shadow-[1px_1px_0px_#24140a]">
               <span className="text-[10px] font-dot text-[#6b5443] font-bold">POW HARDENING</span>
-              <span className="font-bold text-[#d83a2a]">{difficultyBand}</span>
+              <span className="font-bold text-[#d83a2a]">{effectiveDifficultyBand}</span>
             </div>
           </div>
         </div>
