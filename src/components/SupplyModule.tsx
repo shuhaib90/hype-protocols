@@ -83,7 +83,10 @@ export const SupplyModule: React.FC<SupplyModuleProps> = ({ supply }) => {
           <div>
             <span className="text-[#6b5443] block text-[10px] uppercase font-bold">STAGE ENTRY FEE</span>
             <span className="text-[#24140a] font-bold text-sm">
-              {currencyMode === 'USD' ? `$${activeEpoch.mintFeeUsd} ETH` : `${activeEpoch.mintFeeEth} ETH`}
+              {currencyMode === 'USD' ? `$${activeEpoch.mintFeeUsd} USD` : `${activeEpoch.mintFeeEth} ETH`}
+              <span className="text-[10px] text-[#6b5443] font-normal ml-1">
+                ({currencyMode === 'USD' ? `${activeEpoch.mintFeeEth} ETH` : `$${activeEpoch.mintFeeUsd} USD`})
+              </span>
             </span>
           </div>
           <div>
@@ -195,6 +198,9 @@ export const SupplyModule: React.FC<SupplyModuleProps> = ({ supply }) => {
               {defaultEpochs.map((ep) => {
                 const isActive = ep.id === activeEpoch.id;
                 const isPast = ep.id < activeEpoch.id;
+                const effectiveUsd = isActive ? activeEpoch.mintFeeUsd : (ep.mintFeeUsd || 5);
+                const effectiveEth = isActive ? activeEpoch.mintFeeEth : (ep.mintFeeEth || Number((effectiveUsd / 2500).toFixed(4)));
+
                 return (
                   <div
                     key={ep.id}
@@ -211,7 +217,7 @@ export const SupplyModule: React.FC<SupplyModuleProps> = ({ supply }) => {
                         STAGE #{ep.id}
                       </span>
                       {isActive && (
-                        <span className="paper-stamp-red text-[8px]">
+                        <span className="paper-stamp-red text-[8px] animate-pulse">
                           ACTIVE
                         </span>
                       )}
@@ -227,7 +233,7 @@ export const SupplyModule: React.FC<SupplyModuleProps> = ({ supply }) => {
                     <div className="font-bold text-xs mb-0.5">
                       {isActive ? (
                         <span className="text-[#d83a2a]">
-                          {currencyMode === 'USD' ? `$${ep.mintFeeUsd} ETH` : `${ep.mintFeeEth} ETH`}
+                          {currencyMode === 'USD' ? `$${effectiveUsd} USD` : `${effectiveEth} ETH`}
                         </span>
                       ) : isPast ? (
                         <span className="text-[#6b5443]/60 text-[10px] font-mono">CONCLUDED</span>
@@ -236,7 +242,7 @@ export const SupplyModule: React.FC<SupplyModuleProps> = ({ supply }) => {
                       )}
                     </div>
                     <div className="text-[9px] text-[#6b5443] font-medium">
-                      {ep.difficulty}
+                      {isActive ? activeEpoch.difficulty : ep.difficulty}
                     </div>
                   </div>
                 );

@@ -166,13 +166,11 @@ export const WorkerPanel: React.FC<WorkerPanelProps> = ({
                       {worker.name}
                     </span>
                     <span className={`text-[10px] px-1.5 py-0.5 border font-bold ${
-                      worker.isFree
+                      worker.isFree || isActive
                         ? 'bg-[#2e7d32] text-white border-[#24140a]'
-                        : isActive
-                        ? 'bg-[#fdfbf7] text-[#2e7d32] border-[#2e7d32]'
                         : 'bg-[#fdfbf7] text-[#6b5443] border-[#24140a]'
                     }`}>
-                      {worker.isFree ? 'FREE' : `${worker.costHype} $HASHAPE`}
+                      {worker.isFree ? 'FREE' : isActive ? 'UNLOCKED' : `${worker.costHype} $HASHAPE`}
                     </span>
                   </div>
 

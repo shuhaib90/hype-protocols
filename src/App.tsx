@@ -146,11 +146,51 @@ export const App: React.FC = () => {
       const percentInEpoch = Number(((minedInEpoch / epochCount) * 100).toFixed(1));
       const targetHex = '0x' + BigInt(onChainEpoch.target).toString(16).padStart(64, '0');
 
+      // Query on-chain worker activation costs (Workers 2 to 5)
+      let w2Cost = 100, w3Cost = 200, w4Cost = 300, w5Cost = 500;
+      try {
+        const [c2, c3, c4, c5] = await Promise.all([
+          contract.workerActivationCost(2),
+          contract.workerActivationCost(3),
+          contract.workerActivationCost(4),
+          contract.workerActivationCost(5),
+        ]);
+        if (c2 !== undefined) w2Cost = Number(ethers.formatEther(c2));
+        if (c3 !== undefined) w3Cost = Number(ethers.formatEther(c3));
+        if (c4 !== undefined) w4Cost = Number(ethers.formatEther(c4));
+        if (c5 !== undefined) w5Cost = Number(ethers.formatEther(c5));
+      } catch (_) {}
+
+      // Query on-chain epoch fees for all 10 stages
+      const DEFAULT_EPOCH_STARTS = [1, 11, 31, 71, 151, 301, 601, 1201, 2501, 5001];
+      const onChainEpochs: EpochInfo[] = [];
+      for (const start of DEFAULT_EPOCH_STARTS) {
+        try {
+          const epData = await contract.getEpoch(start);
+          const epId = Number(epData.id);
+          const epFeeUsd = Number(epData.feeUsd);
+          const epFeeEth = Number(parseFloat(ethers.formatEther(epData.mintFeeWei)).toFixed(4));
+          onChainEpochs.push({
+            id: epId,
+            name: epData.name,
+            startToken: Number(epData.startToken),
+            endToken: Number(epData.endToken),
+            count: Number(epData.endToken) - Number(epData.startToken) + 1,
+            mintFeeUsd: epFeeUsd,
+            mintFeeEth: epFeeEth,
+            mintFeeApe: epFeeUsd,
+            difficulty: epId === 1 ? 'HARD' : epId === 2 ? 'HARDER' : epId <= 4 ? 'VERY HARD' : 'EXTREME',
+            target: '0x' + BigInt(epData.target).toString(16).padStart(64, '0'),
+          });
+        } catch (_) {}
+      }
+
       setSupply((prev) => ({
         ...prev,
         totalMined: onChainMined,
         remaining: Math.max(0, 10000 - onChainMined),
         percentMined: Number(((onChainMined / 10000) * 100).toFixed(2)),
+        epochs: onChainEpochs.length === 10 ? onChainEpochs : prev.epochs,
         currentEpoch: {
           id: epochId,
           name: onChainEpoch.name,
@@ -168,6 +208,23 @@ export const App: React.FC = () => {
           percentInEpoch,
         }
       }));
+
+      setConfig((prev) => ({
+        ...prev,
+        mintFeeUsd: feeUsd,
+        mintFeeEth: feeEth,
+        mintFeeHype: feeUsd,
+        workerCosts: { 1: 0, 2: w2Cost, 3: w3Cost, 4: w4Cost, 5: w5Cost },
+        currentEpoch: {
+          ...prev.currentEpoch,
+          id: epochId,
+          mintFeeUsd: feeUsd,
+          mintFeeEth: feeEth,
+        },
+        epochs: onChainEpochs.length === 10 ? onChainEpochs : prev.epochs,
+      }));
+
+      const costMap: Record<number, number> = { 1: 0, 2: w2Cost, 3: w3Cost, 4: w4Cost, 5: w5Cost };
 
       // If user address is provided, sync on-chain wallet mint count & worker entitlements
       if (userAddr) {
@@ -230,7 +287,15 @@ export const App: React.FC = () => {
         setWorkers((prev) =>
           prev.map((w, idx) => ({
             ...w,
+            costHype: costMap[w.id] !== undefined ? costMap[w.id] : w.costHype,
             status: workerChecks[idx] ? 'ACTIVE' : 'LOCKED'
+          }))
+        );
+      } else {
+        setWorkers((prev) =>
+          prev.map((w) => ({
+            ...w,
+            costHype: costMap[w.id] !== undefined ? costMap[w.id] : w.costHype,
           }))
         );
       }
@@ -574,6 +639,23 @@ export const App: React.FC = () => {
       .catch(() => {});
   };
 
+  const handleUpdateConfig = (newConfig: ProtocolConfig) => {
+    setConfig(newConfig);
+    if (newConfig.workerCosts) {
+      setWorkers(prev => prev.map(w => ({
+        ...w,
+        costHype: newConfig.workerCosts[w.id] !== undefined ? newConfig.workerCosts[w.id] : w.costHype
+      })));
+    }
+    if (newConfig.epochs && newConfig.epochs.length > 0) {
+      setSupply(prev => ({
+        ...prev,
+        epochs: newConfig.epochs,
+        currentEpoch: newConfig.currentEpoch || prev.currentEpoch
+      }));
+    }
+  };
+
   const handleMintRecord = (rec: SolvedRecord) => {
     if (rec.status === 'MINTED') return;
     setLatestProof({
@@ -604,10 +686,14 @@ export const App: React.FC = () => {
         {activeTab === 'admin' ? (
           <AdminDashboard
             config={config}
-            onUpdateConfig={setConfig}
+            onUpdateConfig={handleUpdateConfig}
             totalMined={supply.totalMined}
             maxSupply={supply.maxSupply}
-            onBack={() => setActiveTab('mining')}
+            onBack={() => {
+              setActiveTab('mining');
+              syncOnChainState(address);
+            }}
+            onRefreshState={() => syncOnChainState(address)}
           />
         ) : activeTab === 'mining' ? (
           <div>

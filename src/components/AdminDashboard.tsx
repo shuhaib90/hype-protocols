@@ -52,6 +52,7 @@ interface AdminDashboardProps {
   totalMined?: number;
   maxSupply?: number;
   onBack: () => void;
+  onRefreshState?: () => void;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
@@ -60,6 +61,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   totalMined = 0,
   maxSupply = 10000,
   onBack,
+  onRefreshState,
 }) => {
   const {
     address,
@@ -324,6 +326,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       });
 
       await fetchTreasury();
+      onRefreshState?.();
     } catch (err: any) {
       setEpochErrorMsg(err.message || 'On-chain batch epoch fee update failed');
     } finally {
@@ -360,7 +363,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         }),
       }).catch(() => {});
 
+      const updatedEpochs = displayedEpochs.map(e => e.id === epochId ? {
+        ...e,
+        mintFeeUsd: usdVal,
+        mintFeeEth: Number(ethVal),
+        mintFeeApe: usdVal,
+      } : e);
+
+      onUpdateConfig({
+        ...config,
+        epochs: updatedEpochs,
+      });
+
       await fetchTreasury();
+      onRefreshState?.();
     } catch (err: any) {
       setEpochErrorMsg(err.message || `On-chain fee update failed for Epoch #${epochId}`);
     } finally {
@@ -403,6 +419,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       });
 
       await fetchTreasury();
+      onRefreshState?.();
     } catch (err: any) {
       setWorkerErrorMsg(err.message || 'Failed to update worker blade pricing on-chain');
     } finally {

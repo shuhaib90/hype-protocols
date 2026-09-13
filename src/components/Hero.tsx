@@ -103,7 +103,7 @@ export const Hero: React.FC<HeroProps> = ({
               <div className="p-3 bg-[#fdfbf7] border-2 border-[#24140a] shadow-[2px_2px_0px_#24140a]">
                 <span className="text-[10px] font-dot text-[#6b5443] block uppercase font-bold">MINT PRICE</span>
                 <span className="text-sm sm:text-base font-jersey font-bold text-[#24140a]">
-                  ${currentEpochFeeUsd} ETH <span className="text-xs font-dot text-[#6b5443]">({ethEquiv})</span>
+                  {ethEquiv} ETH <span className="text-xs font-dot text-[#6b5443]">(${currentEpochFeeUsd} USD)</span>
                 </span>
               </div>
               <div className="p-3 bg-[#fdfbf7] border-2 border-[#24140a] shadow-[2px_2px_0px_#24140a]">
