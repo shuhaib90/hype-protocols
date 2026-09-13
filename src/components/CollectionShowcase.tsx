@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { soundEffects } from '../utils/soundEffects';
 import { Sparkles, ChevronRight, Layers, ExternalLink } from 'lucide-react';
+import { OPENSEA_COLLECTION_URL } from '../web3/WalletContext';
 
 export const CollectionShowcase: React.FC = () => {
   const [selectedTokenId, setSelectedTokenId] = useState<number>(1);
@@ -43,16 +44,28 @@ export const CollectionShowcase: React.FC = () => {
             </h2>
           </div>
 
-          <a
-            href="/storefront.json"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => soundEffects.playClickSound()}
-            className="paper-btn-gold px-4 py-2 text-xs uppercase flex items-center space-x-2 self-start sm:self-auto font-bold"
-          >
-            <span>ACCESS 10,000 ON-CHAIN METADATA</span>
-            <ChevronRight className="w-4 h-4 text-[#24140a]" />
-          </a>
+          <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+            <a
+              href={OPENSEA_COLLECTION_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => soundEffects.playClickSound()}
+              className="paper-btn-red px-4 py-2 text-xs uppercase flex items-center space-x-2 font-bold"
+            >
+              <span>VIEW ON OPENSEA</span>
+              <ExternalLink className="w-3.5 h-3.5 text-white" />
+            </a>
+            <a
+              href="/storefront.json"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => soundEffects.playClickSound()}
+              className="paper-btn-gold px-4 py-2 text-xs uppercase flex items-center space-x-2 font-bold"
+            >
+              <span>ACCESS 10,000 METADATA</span>
+              <ChevronRight className="w-4 h-4 text-[#24140a]" />
+            </a>
+          </div>
         </div>
 
         {/* Interactive Dossier Workstation */}

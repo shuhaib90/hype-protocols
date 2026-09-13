@@ -9,6 +9,7 @@ export const RIG_ACTIVATION_TOKEN_ADDRESS = '0x30E55c3cfB2BBe5d0B07051e0B15c8a53
 export const CHAIN_ID = 4663;
 export const RPC_URL = 'https://robinhood-mainnet.g.alchemy.com/v2/VADj_sajpbD_KAWbnZk5x';
 export const EXPLORER_URL = 'https://explorer.robinhood.com';
+export const OPENSEA_COLLECTION_URL = 'https://opensea.io/collection/hashape';
 export const BASE_URI = 'https://endpoint.4everland.co/hashape/metadata/';
 export const CONTRACT_URI = 'https://endpoint.4everland.co/hashape/storefront.json';
 

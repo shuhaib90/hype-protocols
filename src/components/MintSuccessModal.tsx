@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { MintReceipt } from '../types';
 import { CheckCircle2, ExternalLink, Sparkles, X, ShieldCheck } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
+import { EXPLORER_URL, OPENSEA_COLLECTION_URL } from '../web3/WalletContext';
 
 interface MintSuccessModalProps {
   receipt: MintReceipt | null;
@@ -17,7 +18,8 @@ export const MintSuccessModal: React.FC<MintSuccessModalProps> = ({ receipt, onC
 
   if (!receipt) return null;
 
-  const explorerUrl = `https://hyperscan.xyz/tx/${receipt.txHash}`;
+  const openseaUrl = OPENSEA_COLLECTION_URL;
+  const explorerUrl = `${EXPLORER_URL}/tx/${receipt.txHash}`;
 
   return (
     <div className="fixed inset-0 z-50 bg-[#07070a]/90 backdrop-blur-md flex items-center justify-center p-4">
@@ -47,15 +49,26 @@ export const MintSuccessModal: React.FC<MintSuccessModalProps> = ({ receipt, onC
             <div className="text-[10px] text-[#8b9bb4] uppercase tracking-widest mb-2">
               HASHAPE NFT MINTED
             </div>
-            <div className="relative mx-auto w-36 h-36 mb-3 border-2 border-[#a3e635] bg-[#07070a] shadow-[0_0_20px_rgba(163,230,53,0.3)]">
+            <div
+              onClick={() => {
+                soundEffects.playClickSound();
+                window.open(openseaUrl, '_blank', 'noopener,noreferrer');
+              }}
+              title="Click to view on OpenSea"
+              className="relative mx-auto w-36 h-36 mb-3 border-2 border-[#a3e635] bg-[#07070a] shadow-[0_0_20px_rgba(163,230,53,0.3)] cursor-pointer hover:border-[#2081e2] transition-colors group overflow-hidden"
+            >
               <img
                 src={`/images/${receipt.tokenId}.png`}
                 alt={`HashApe #${receipt.tokenId}`}
-                className="w-full h-full object-cover pixelated"
+                className="w-full h-full object-cover pixelated group-hover:scale-105 transition-transform"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = '/preview.png';
                 }}
               />
+              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-[10px] text-white font-mono gap-1">
+                <span>VIEW OPENSEA</span>
+                <ExternalLink className="w-3 h-3 text-[#2081e2]" />
+              </div>
             </div>
             <div className="font-jersey text-3xl text-white tracking-tight">
               #{receipt.tokenId.toString().padStart(4, '0')}
@@ -91,18 +104,31 @@ export const MintSuccessModal: React.FC<MintSuccessModalProps> = ({ receipt, onC
               <span>VALID & SETTLED</span>
             </span>
           </div>
+          <div className="p-2.5 bg-[#10121b] border border-[#232738] flex justify-between items-center text-xs">
+            <span className="text-[#64748b]">OPENSEA:</span>
+            <a
+              href={openseaUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => soundEffects.playClickSound()}
+              className="text-[#2081e2] hover:text-[#5aa2ee] hover:underline flex items-center gap-1 font-mono text-[11px] font-bold"
+            >
+              <span>opensea.io/collection/hashape</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
         </div>
 
         {/* Footer */}
         <div className="p-4 bg-[#10121b] border-t border-[#232738] flex items-center justify-end space-x-3 font-dot">
           <a
-            href={`/images/${receipt.tokenId}.png`}
+            href={openseaUrl}
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => soundEffects.playClickSound()}
-            className="pixel-btn-slate px-4 py-1.5 text-xs flex items-center space-x-1.5 uppercase"
+            className="pixel-btn-slate px-4 py-1.5 text-xs flex items-center space-x-1.5 uppercase border-[#2081e2] text-[#2081e2] hover:bg-[#2081e2]/10 font-bold"
           >
-            <span>VIEW NFT</span>
+            <span>VIEW NFT (OPENSEA)</span>
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
           <a

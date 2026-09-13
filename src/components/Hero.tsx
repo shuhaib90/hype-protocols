@@ -1,5 +1,5 @@
 import React from 'react';
-import { useWallet } from '../web3/WalletContext';
+import { useWallet, CONTRACT_ADDRESS, EXPLORER_URL, OPENSEA_COLLECTION_URL } from '../web3/WalletContext';
 import { Pickaxe, Eye, ShieldCheck, Sparkles, Zap, ArrowDown } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
 
@@ -45,12 +45,28 @@ export const Hero: React.FC<HeroProps> = ({
             <span className="inline-block w-2.5 h-2.5 bg-[#2e7d32] border border-[#24140a] shadow-[1px_1px_0px_#24140a]" />
             <span className="font-bold uppercase tracking-wider">ROBINHOOD EVM L2</span>
             <span className="text-[#6b5443]">::</span>
-            <span className="text-[#19638b] font-bold">CONTRACT: 0xb8E3...c93C</span>
+            <a
+              href={`${EXPLORER_URL}/address/${CONTRACT_ADDRESS}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#19638b] font-bold hover:underline"
+              title="View Contract on Robinhood Explorer"
+            >
+              CONTRACT: {CONTRACT_ADDRESS.slice(0, 6)}...{CONTRACT_ADDRESS.slice(-4)}
+            </a>
           </div>
           <div className="flex items-center space-x-4 flex-wrap">
             <span className="font-bold">Native ETH Mint Fees</span>
             <span className="text-[#6b5443]">•</span>
-            <span className="text-[#d83a2a] font-bold">5.0% OpenSea Royalty</span>
+            <a
+              href={OPENSEA_COLLECTION_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#d83a2a] font-bold hover:underline"
+              title="View HashApe Collection on OpenSea"
+            >
+              5.0% OpenSea Royalty
+            </a>
             <span className="text-[#6b5443]">•</span>
             <span className="text-[#2e7d32] font-bold">10,000 Hard Cap</span>
           </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useWallet } from '../web3/WalletContext';
+import { useWallet, EXPLORER_URL, OPENSEA_COLLECTION_URL } from '../web3/WalletContext';
 import { ShieldCheck, Hash, CheckCircle2, ExternalLink, Sparkles, Clock, ArrowRight } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
 
@@ -178,20 +178,33 @@ export const MiningLedger: React.FC<MiningLedgerProps> = ({ onMintRecord, refres
 
                   <div className="flex items-center gap-3 self-start md:self-auto flex-shrink-0">
                     {isMinted ? (
-                      rec.txHash ? (
+                      <div className="flex items-center gap-2">
+                        {rec.txHash ? (
+                          <a
+                            href={`${EXPLORER_URL}/tx/${rec.txHash}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={() => soundEffects.playClickSound()}
+                            className="paper-btn-kraft px-3 py-1.5 text-xs flex items-center gap-1 font-bold"
+                          >
+                            <span>TX: {rec.txHash.slice(0, 6)}...{rec.txHash.slice(-4)}</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        ) : (
+                          <span className="text-xs font-dot text-[#2e7d32] font-bold">Mint Confirmed ✓</span>
+                        )}
                         <a
-                          href={`https://explorer.hyperliquid.xyz/tx/${rec.txHash}`}
+                          href={OPENSEA_COLLECTION_URL}
                           target="_blank"
                           rel="noreferrer"
                           onClick={() => soundEffects.playClickSound()}
-                          className="paper-btn-kraft px-3 py-1.5 text-xs flex items-center gap-1 font-bold"
+                          className="paper-btn-gold px-3 py-1.5 text-xs flex items-center gap-1 font-bold text-[#19638b]"
+                          title="View on OpenSea"
                         >
-                          <span>TX: {rec.txHash.slice(0, 6)}...{rec.txHash.slice(-4)}</span>
+                          <span>OPENSEA</span>
                           <ExternalLink className="w-3 h-3" />
                         </a>
-                      ) : (
-                        <span className="text-xs font-dot text-[#2e7d32] font-bold">Mint Confirmed ✓</span>
-                      )
+                      </div>
                     ) : (
                       <button
                         onClick={() => {
