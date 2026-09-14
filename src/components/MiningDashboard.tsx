@@ -95,18 +95,13 @@ export const MiningDashboard: React.FC<MiningDashboardProps> = ({
     connectWallet();
   };
 
-  // Determine leading zero bits based on active epoch's internal hard target
-  const isEpoch1or2 = currentEpoch ? currentEpoch.id <= 2 : false;
-  // Epoch 1-2 use internal harder targets in the engine:
-  // Epoch 1: 0x00000001ff... ≈ 2^225 → 31 leading zero bits → ~2^31 expected hashes
-  // Epoch 2: 0x00000000ff... ≈ 2^224 → 32 leading zero bits → ~2^32 expected hashes
+  // Internal hard target for ALL epochs: (30 + epochId) leading zero bits
+  // This matches the engine's hardTarget formula exactly
+  // Epoch 1: 31 bits (~3 min @12 MH/s), Epoch 2: 32 bits (~6 min),
+  // Epoch 3: 33 bits (~12 min), Epoch 4+: progressively harder, 20-min cap
   const getTargetBits = () => {
-    if (currentEpoch) {
-      if (currentEpoch.id === 1) return 31; // Internal hard target for Epoch 1
-      if (currentEpoch.id === 2) return 32; // Internal hard target for Epoch 2
-      return 31 + currentEpoch.id;
-    }
-    return 32;
+    if (currentEpoch) return 30 + currentEpoch.id;
+    return 31;
   };
 
   const targetBits = getTargetBits();
@@ -116,18 +111,16 @@ export const MiningDashboard: React.FC<MiningDashboardProps> = ({
     ? '0.0000' 
     : (currentFeeUsd < 1 ? (currentFeeUsd / 2500).toFixed(5) : (currentFeeUsd / 2500).toFixed(4));
 
-  const effectiveDifficultyBand = isEpoch1or2 
-    ? (currentEpoch?.id === 2 ? 'HARDER • 20 MIN CAP' : 'HARD • 20 MIN CAP') 
-    : difficultyBand;
+  const effectiveDifficultyBand = difficultyBand + ' • 20 MIN CAP';
 
   // Compute probability, odds, and estimated time to solve
   const expectedHashes = 2 ** targetBits;
   const effectiveHashrateMH = totalHashrate > 0 ? totalHashrate : activeWorkerCount * 2.5;
   const effectiveHashrateHps = effectiveHashrateMH * 1_000_000;
 
-  // GPU-dependent ETA: faster GPUs show shorter ETA, capped at 20 min (1200s) for Epoch 1-2
+  // GPU-dependent ETA: faster GPUs show shorter ETA, capped at 20 min (1200s) for ALL epochs
   const rawEstSeconds = Math.max(1, Math.round(expectedHashes / effectiveHashrateHps));
-  const estSecondsToSolve = isEpoch1or2 ? Math.min(rawEstSeconds, 1200) : rawEstSeconds;
+  const estSecondsToSolve = Math.min(rawEstSeconds, 1200);
   const formatEstTime = (secs: number) => {
     if (secs < 60) return `~${secs}s`;
     if (secs < 3600) {

@@ -36,6 +36,7 @@ export class WebGPUMiningEngine {
   private abortController: AbortController | null = null;
   private tabHidden = false;
   private pipelineCtx: WebGPUPipelineContext | null = null;
+  private hardTarget: bigint = BigInt(0);
 
   constructor(callbacks: MiningCallbacks) {
     this.callbacks = callbacks;
@@ -200,6 +201,13 @@ export class WebGPUMiningEngine {
     this.totalNoncesScanned = 0;
     this.abortController = new AbortController();
 
+    // Compute internal hard target for this epoch: (30 + epochId) leading zero bits
+    // This ensures ALL epochs require real GPU work — no instant solves possible
+    // Epoch 1: ~2^31 hashes (~3 min @12 MH/s), Epoch 2: ~2^32 (~6 min),
+    // Epoch 3: ~2^33 (~12 min), Epoch 4+: progressively harder, capped at 20 min
+    const hardTargetBits = 30 + this.epochId;
+    this.hardTarget = (BigInt(1) << BigInt(256 - hardTargetBits)) - BigInt(1);
+
     const activeList = activeWorkers.filter((w) => w.status === 'ACTIVE');
     this.activeWorkerCount = Math.max(1, activeList.length);
 
@@ -274,43 +282,28 @@ export class WebGPUMiningEngine {
           };
         }
 
-        // GPU-Dependent Difficulty:
-        // Epoch 1 & 2 use an internal HARDER target requiring ~2^31 / ~2^32 hashes.
-        // Faster GPUs find valid hashes sooner, slower GPUs take longer — real PoW.
-        // For Epoch 3+, use the server target directly.
-        if (this.epochId <= 2) {
-          // Internal hard targets: Epoch 1 ≈ 2^225 (~3 min at 12 MH/s), Epoch 2 ≈ 2^224 (~6 min at 12 MH/s)
-          const hardTarget = this.epochId === 1
-            ? BigInt('0x00000001ffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
-            : BigInt('0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
+        // GPU-Dependent Difficulty for ALL epochs:
+        // Internal hard target = (30 + epochId) leading zero bits
+        // Epoch 1: 2^31 hashes (~3 min @12 MH/s), Epoch 2: 2^32 (~6 min),
+        // Epoch 3: 2^33 (~12 min), Epoch 4+: ~20 min cap for most GPUs
+        // Faster GPUs solve sooner, slower GPUs hit the 20-min cap fallback.
+        if (hashBigInt < this.hardTarget && this.totalNoncesScanned >= 25000) {
+          batchSolved = true;
+          winningWorkerId = worker.id;
+          winningNonce = nonceToTest;
+          winningHashHex = hashHex;
+          break;
+        }
 
-          if (hashBigInt < hardTarget && this.totalNoncesScanned >= 25000) {
-            batchSolved = true;
-            winningWorkerId = worker.id;
-            winningNonce = nonceToTest;
-            winningHashHex = hashHex;
-            break;
-          }
-
-          // 20-minute MAXIMUM cap: if GPU is too slow to beat the hard target,
-          // use the cached easier solution (which still passes on-chain verification)
-          const elapsedSec = (Date.now() - this.startTime) / 1000;
-          if (elapsedSec >= 1200 && this.cachedCandidateSolution !== null) {
-            batchSolved = true;
-            winningWorkerId = this.cachedCandidateSolution.workerId;
-            winningNonce = this.cachedCandidateSolution.nonce;
-            winningHashHex = this.cachedCandidateSolution.hashHex;
-            break;
-          }
-        } else {
-          // Epochs > 2: original difficulty logic
-          if (hashBigInt < targetBigInt && this.totalNoncesScanned >= 25000) {
-            batchSolved = true;
-            winningWorkerId = worker.id;
-            winningNonce = nonceToTest;
-            winningHashHex = hashHex;
-            break;
-          }
+        // 20-minute MAXIMUM cap: if GPU can't beat the hard target in time,
+        // use the cached easier solution (which still passes on-chain verification)
+        const elapsedSec = (Date.now() - this.startTime) / 1000;
+        if (elapsedSec >= 1200 && this.cachedCandidateSolution !== null) {
+          batchSolved = true;
+          winningWorkerId = this.cachedCandidateSolution.workerId;
+          winningNonce = this.cachedCandidateSolution.nonce;
+          winningHashHex = this.cachedCandidateSolution.hashHex;
+          break;
         }
       }
 
