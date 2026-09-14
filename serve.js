@@ -221,9 +221,9 @@ const WALLET_DIFFICULTY_TIERS = [
 // Epoch 2: Tokens 11 to 30 (20 NFTs) - Mine Harder, Mint Fee: $7 ETH (0.0028 ETH)
 // Subsequent Epochs: Progressively escalating difficulty and fees up to 10,000 Hard Cap
 const BASE_EPOCHS = [
-  { id: 1, name: 'EPOCH 1 (GENESIS)', startToken: 1, endToken: 10, count: 10, mintFeeUsd: 5, mintFeeEth: 0.0020, mintFeeApe: 5, difficulty: 'HARD (20M SOLVE)', target: '0x' + '000003'.padEnd(64, 'f') },
-  { id: 2, name: 'EPOCH 2 (ASCENSION)', startToken: 11, endToken: 30, count: 20, mintFeeUsd: 7, mintFeeEth: 0.0028, mintFeeApe: 7, difficulty: 'HARDER (20M SOLVE)', target: '0x' + '000001'.padEnd(64, 'f') },
-  { id: 3, name: 'EPOCH 3 (EXPANSION)', startToken: 31, endToken: 70, count: 40, mintFeeUsd: 10, mintFeeEth: 0.0040, mintFeeApe: 10, difficulty: 'VERY HARD', target: '0x' + '0000ff'.padEnd(64, 'f') },
+  { id: 1, name: 'EPOCH 1 (GENESIS)', startToken: 1, endToken: 10, count: 10, mintFeeUsd: 5, mintFeeEth: 0.0020, mintFeeApe: 5, difficulty: 'HARD (20M CAP)', target: '0x' + '000003'.padEnd(64, 'f') },
+  { id: 2, name: 'EPOCH 2 (ASCENSION)', startToken: 11, endToken: 30, count: 20, mintFeeUsd: 7, mintFeeEth: 0.0028, mintFeeApe: 7, difficulty: 'HARDER (20M CAP)', target: '0x' + '000001'.padEnd(64, 'f') },
+  { id: 3, name: 'EPOCH 3 (EXPANSION)', startToken: 31, endToken: 70, count: 40, mintFeeUsd: 10, mintFeeEth: 0.0040, mintFeeApe: 10, difficulty: 'VERY HARD', target: '0x' + '000003'.padEnd(64, 'f') },
   { id: 4, name: 'EPOCH 4 (SURGE)', startToken: 71, endToken: 150, count: 80, mintFeeUsd: 14, mintFeeEth: 0.0056, mintFeeApe: 14, difficulty: 'VERY HARD+', target: '0x' + '000001'.padEnd(64, 'f') },
   { id: 5, name: 'EPOCH 5 (NEXUS)', startToken: 151, endToken: 300, count: 150, mintFeeUsd: 18, mintFeeEth: 0.0072, mintFeeApe: 18, difficulty: 'EXTREME', target: '0x' + '000000f'.padEnd(64, 'f') },
   { id: 6, name: 'EPOCH 6 (APEX)', startToken: 301, endToken: 600, count: 300, mintFeeUsd: 22, mintFeeEth: 0.0088, mintFeeApe: 22, difficulty: 'EXTREME+', target: '0x' + '0000007'.padEnd(64, 'f') },

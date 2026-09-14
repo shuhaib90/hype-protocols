@@ -42,8 +42,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [difficultyTier] = useState('VERY HARD');
 
   const DEFAULT_10_EPOCHS = [
-    { id: 1, name: 'EPOCH 1 (GENESIS)', startToken: 1, endToken: 10, count: 10, mintFeeUsd: 1, mintFeeEth: 0.0004, mintFeeApe: 1, difficulty: 'HARD (20M SOLVE)' },
-    { id: 2, name: 'EPOCH 2 (ASCENSION)', startToken: 11, endToken: 30, count: 20, mintFeeUsd: 6, mintFeeEth: 0.0024, mintFeeApe: 6, difficulty: 'HARDER (20M SOLVE)' },
+    { id: 1, name: 'EPOCH 1 (GENESIS)', startToken: 1, endToken: 10, count: 10, mintFeeUsd: 1, mintFeeEth: 0.0004, mintFeeApe: 1, difficulty: 'HARD (20M CAP)' },
+    { id: 2, name: 'EPOCH 2 (ASCENSION)', startToken: 11, endToken: 30, count: 20, mintFeeUsd: 6, mintFeeEth: 0.0024, mintFeeApe: 6, difficulty: 'HARDER (20M CAP)' },
     { id: 3, name: 'EPOCH 3 (EXPANSION)', startToken: 31, endToken: 70, count: 40, mintFeeUsd: 20, mintFeeEth: 0.0080, mintFeeApe: 20, difficulty: 'VERY HARD' },
     { id: 4, name: 'EPOCH 4 (SURGE)', startToken: 71, endToken: 150, count: 80, mintFeeUsd: 40, mintFeeEth: 0.0160, mintFeeApe: 40, difficulty: 'VERY HARD+' },
     { id: 5, name: 'EPOCH 5 (NEXUS)', startToken: 151, endToken: 300, count: 150, mintFeeUsd: 60, mintFeeEth: 0.0240, mintFeeApe: 60, difficulty: 'EXTREME' },

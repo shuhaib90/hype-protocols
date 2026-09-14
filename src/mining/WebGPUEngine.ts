@@ -264,8 +264,9 @@ export class WebGPUMiningEngine {
         lastCurrentHash = hashHex;
         lastCurrentNonce = nonceToTest.toString();
 
-        // Check if hash satisfies targetDifficulty
-        if (hashBigInt < targetBigInt) {
+        // Cache solutions that beat the SERVER target (used for 20-min maximum cap fallback)
+        // This target matches on-chain, so the cached solution is always valid for minting
+        if (hashBigInt < targetBigInt && !this.cachedCandidateSolution) {
           this.cachedCandidateSolution = {
             workerId: worker.id,
             nonce: nonceToTest,
@@ -273,13 +274,28 @@ export class WebGPUMiningEngine {
           };
         }
 
-        // Calibrated Difficulty & Solve Duration:
-        // Epoch 1 and Epoch 2: strictly calibrated so 1 mine takes ~20 minutes (1200 seconds)
-        // Subsequent Epochs: authentic sustained hashing depth (25,000+ nonces)
+        // GPU-Dependent Difficulty:
+        // Epoch 1 & 2 use an internal HARDER target requiring ~2^31 / ~2^32 hashes.
+        // Faster GPUs find valid hashes sooner, slower GPUs take longer — real PoW.
+        // For Epoch 3+, use the server target directly.
         if (this.epochId <= 2) {
-          const targetDurationSec = 1200; // 20 minutes (1 mine per 20 min)
+          // Internal hard targets: Epoch 1 ≈ 2^225 (~3 min at 12 MH/s), Epoch 2 ≈ 2^224 (~6 min at 12 MH/s)
+          const hardTarget = this.epochId === 1
+            ? BigInt('0x00000001ffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
+            : BigInt('0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
+
+          if (hashBigInt < hardTarget && this.totalNoncesScanned >= 25000) {
+            batchSolved = true;
+            winningWorkerId = worker.id;
+            winningNonce = nonceToTest;
+            winningHashHex = hashHex;
+            break;
+          }
+
+          // 20-minute MAXIMUM cap: if GPU is too slow to beat the hard target,
+          // use the cached easier solution (which still passes on-chain verification)
           const elapsedSec = (Date.now() - this.startTime) / 1000;
-          if (elapsedSec >= targetDurationSec && this.cachedCandidateSolution !== null) {
+          if (elapsedSec >= 1200 && this.cachedCandidateSolution !== null) {
             batchSolved = true;
             winningWorkerId = this.cachedCandidateSolution.workerId;
             winningNonce = this.cachedCandidateSolution.nonce;
@@ -287,7 +303,7 @@ export class WebGPUMiningEngine {
             break;
           }
         } else {
-          // Epochs > 2
+          // Epochs > 2: original difficulty logic
           if (hashBigInt < targetBigInt && this.totalNoncesScanned >= 25000) {
             batchSolved = true;
             winningWorkerId = worker.id;

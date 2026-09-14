@@ -95,16 +95,18 @@ export const MiningDashboard: React.FC<MiningDashboardProps> = ({
     connectWallet();
   };
 
-  // Determine leading zero bits based on active epoch or difficulty band
-  const isEpoch1or2 = currentEpoch ? currentEpoch.id <= 2 : true;
+  // Determine leading zero bits based on active epoch's internal hard target
+  const isEpoch1or2 = currentEpoch ? currentEpoch.id <= 2 : false;
+  // Epoch 1-2 use internal harder targets in the engine:
+  // Epoch 1: 0x00000001ff... ≈ 2^225 → 31 leading zero bits → ~2^31 expected hashes
+  // Epoch 2: 0x00000000ff... ≈ 2^224 → 32 leading zero bits → ~2^32 expected hashes
   const getTargetBits = () => {
     if (currentEpoch) {
-      if (currentEpoch.id <= 2) {
-        return 34; // Epoch 1 & 2 calibrated to 20-minute difficulty
-      }
-      return 33 + currentEpoch.id;
+      if (currentEpoch.id === 1) return 31; // Internal hard target for Epoch 1
+      if (currentEpoch.id === 2) return 32; // Internal hard target for Epoch 2
+      return 31 + currentEpoch.id;
     }
-    return 34;
+    return 32;
   };
 
   const targetBits = getTargetBits();
@@ -115,16 +117,17 @@ export const MiningDashboard: React.FC<MiningDashboardProps> = ({
     : (currentFeeUsd < 1 ? (currentFeeUsd / 2500).toFixed(5) : (currentFeeUsd / 2500).toFixed(4));
 
   const effectiveDifficultyBand = isEpoch1or2 
-    ? (currentEpoch?.id === 2 ? 'HARDER • 20 MIN SOLVE' : 'HARD • 20 MIN SOLVE') 
+    ? (currentEpoch?.id === 2 ? 'HARDER • 20 MIN CAP' : 'HARD • 20 MIN CAP') 
     : difficultyBand;
 
   // Compute probability, odds, and estimated time to solve
-  const expectedHashes = isEpoch1or2 ? 2 ** 34 : 2 ** targetBits;
+  const expectedHashes = 2 ** targetBits;
   const effectiveHashrateMH = totalHashrate > 0 ? totalHashrate : activeWorkerCount * 2.5;
   const effectiveHashrateHps = effectiveHashrateMH * 1_000_000;
 
-  // For Epoch 1 & 2, difficulty is calibrated to exactly 1 mine per 20 minutes (1200 seconds)
-  const estSecondsToSolve = isEpoch1or2 ? 1200 : Math.max(1, Math.round(expectedHashes / effectiveHashrateHps));
+  // GPU-dependent ETA: faster GPUs show shorter ETA, capped at 20 min (1200s) for Epoch 1-2
+  const rawEstSeconds = Math.max(1, Math.round(expectedHashes / effectiveHashrateHps));
+  const estSecondsToSolve = isEpoch1or2 ? Math.min(rawEstSeconds, 1200) : rawEstSeconds;
   const formatEstTime = (secs: number) => {
     if (secs < 60) return `~${secs}s`;
     if (secs < 3600) {
@@ -143,11 +146,11 @@ export const MiningDashboard: React.FC<MiningDashboardProps> = ({
     if (n >= 1e3) return `1 in ${(n / 1e3).toFixed(1)}K`;
     return `1 in ${Math.round(n)}`;
   };
-  const winOddsStr = isEpoch1or2 ? '1 in 17.1B' : formatOdds(expectedHashes);
+  const winOddsStr = formatOdds(expectedHashes);
 
   const hashesPerMin = effectiveHashrateHps * 60;
-  // In 20-minute calibrated difficulty, win chance is 5.0% per minute (100% / 20 min)
-  const winChancePerMin = isEpoch1or2 ? 5.0 : Math.min(100, (hashesPerMin / expectedHashes) * 100);
+  // GPU-dependent win chance: faster hashrate = higher chance per minute
+  const winChancePerMin = Math.min(100, (hashesPerMin / expectedHashes) * 100);
   const winChanceStr = winChancePerMin >= 1 
     ? `${winChancePerMin.toFixed(1)}%` 
     : winChancePerMin >= 0.01 
