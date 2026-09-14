@@ -3,109 +3,66 @@
   "maxSupply": 10000,
   "records": [
     {
-      "id": "solv_1789321732137_co0iw",
-      "wallet": "0x6f086ebd5f70abb829daad1710410f2f3737653b",
-      "tokenId": 5,
-      "nonce": "271523",
-      "solvedHash": "0x00000529ebe5493b5758b05b743953b11f8102ae24f98b0cd0d47cc73a0dee6d",
-      "difficulty": 4,
-      "gpuRenderer": "Adreno (TM) 840",
-      "status": "SOLVED",
-      "epochId": 1,
-      "feeUsd": 5,
-      "feeEth": 0.002,
-      "txHash": null,
-      "solvedAt": 1789321732137,
-      "mintedAt": null
-    },
-    {
-      "id": "solv_1789321725447_xzei9",
-      "wallet": "0xdb4efbf67e3c285037296d0492c2a019339fc393",
+      "id": "solv_1789366005774_edagj",
+      "wallet": "0xdb96da01770ba1b7575130fafb9ed3af2caf0147",
       "tokenId": 7850,
-      "nonce": "329",
-      "solvedHash": "0x0004b159f26adf42df55cdb0557228f02e60a992dcb50abec81b141af605d7f9",
+      "nonce": "1513",
+      "solvedHash": "0x00070bf7befe58b915cba3668e920dea8205eb4a0fead27e9156cfbea6514c30",
+      "challenge": "0x2ce7f6144ec658afc3ad7f856d4f6fb488bd8821bd0a7db792ad126c80d36d7e",
       "difficulty": 4,
       "gpuRenderer": "NVIDIA RTX 4090 WebGPU",
+      "timeToSolve": 0,
       "status": "MINTED",
-      "epochId": 1,
-      "feeUsd": 5,
-      "feeEth": 0.002,
+      "solvedAt": 1789366005774,
+      "expiresAt": 1789373205774,
+      "deadlineHours": 2,
       "txHash": "0x9999888877776666555544443333222211110000aabbccddeeff001122334455",
-      "solvedAt": 1789321725447,
-      "mintedAt": 1789321725453
-    },
-    {
-      "id": "solv_1789321725114_a4nh0",
-      "wallet": "0xdce4ab4e002274aa03a3a2ea4afb7aef67e776ff",
-      "tokenId": 5,
-      "nonce": "379663",
-      "solvedHash": "0x00000d52637c96bd7cf82c69d329bf083e7c978a0db2e99eed7958eea80605bf",
-      "difficulty": 4,
-      "gpuRenderer": "Apple GPU",
-      "status": "SOLVED",
       "epochId": 1,
       "feeUsd": 5,
       "feeEth": 0.002,
-      "txHash": null,
-      "solvedAt": 1789321725114,
-      "mintedAt": null
-    },
-    {
-      "id": "mint_genesis_1",
-      "wallet": "0x3333111122223333444455556666777788889999",
-      "tokenId": 1,
-      "nonce": "1042",
-      "solvedHash": "0x01a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000001",
-      "difficulty": 4,
-      "gpuRenderer": "WebGPU Compute Core",
-      "status": "MINTED",
-      "epochId": 1,
-      "feeUsd": 5,
-      "feeEth": 0.002,
-      "txHash": "0x01a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000001",
-      "solvedAt": 1789284047508,
-      "mintedAt": 1789280447508
-    },
-    {
-      "id": "mint_genesis_2",
-      "wallet": "0x7777111122223333444455556666777788889999",
-      "tokenId": 2,
-      "nonce": "2084",
-      "solvedHash": "0x02a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000002",
-      "difficulty": 4,
-      "gpuRenderer": "WebGPU Compute Core",
-      "status": "MINTED",
-      "epochId": 1,
-      "feeUsd": 5,
-      "feeEth": 0.002,
-      "txHash": "0x02a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000002",
-      "solvedAt": 1789284047508,
-      "mintedAt": 1789281647508
+      "mintedAt": 1789366005784
     },
     {
       "id": "mint_genesis_3",
       "wallet": "0x9999111122223333444455556666777788889999",
       "tokenId": 3,
       "nonce": "3126",
-      "solvedHash": "0x03a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000003",
-      "difficulty": 4,
-      "gpuRenderer": "WebGPU Compute Core",
       "status": "MINTED",
       "epochId": 1,
       "feeUsd": 5,
-      "feeEth": 0.002,
       "txHash": "0x03a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000003",
-      "solvedAt": 1789284047508,
-      "mintedAt": 1789282847508
+      "mintedAt": 1789364804853
+    },
+    {
+      "id": "mint_genesis_2",
+      "wallet": "0x7777111122223333444455556666777788889999",
+      "tokenId": 2,
+      "nonce": "2084",
+      "status": "MINTED",
+      "epochId": 1,
+      "feeUsd": 5,
+      "txHash": "0x02a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000002",
+      "mintedAt": 1789363604853
+    },
+    {
+      "id": "mint_genesis_1",
+      "wallet": "0x3333111122223333444455556666777788889999",
+      "tokenId": 1,
+      "nonce": "1042",
+      "status": "MINTED",
+      "epochId": 1,
+      "feeUsd": 5,
+      "txHash": "0x01a88b8e91f1c7d24a0d9e4c19b6bf35b9fd87f8373f7f82c53bc93c00000001",
+      "mintedAt": 1789362404853
     }
   ],
   "workerEntitlements": {
-    "0xdb4efbf67e3c285037296d0492c2a019339fc393": {
+    "0xdb96da01770ba1b7575130fafb9ed3af2caf0147": {
       "3": true
     }
   },
   "usedProofs": {
-    "0x0004b159f26adf42df55cdb0557228f02e60a992dcb50abec81b141af605d7f9": true
+    "0x00070bf7befe58b915cba3668e920dea8205eb4a0fead27e9156cfbea6514c30": true
   },
   "activeMiners": {
     "0xd8287aef4d931d4cf3bfb36d99d577f6b4c36178": {
@@ -132,7 +89,7 @@
       "hashrate": 12.5,
       "noncesScanned": 0,
       "isMining": true,
-      "lastSeen": 1789321726895,
+      "lastSeen": 1789366007431,
       "status": "HASHING_UNSOLVED"
     },
     "0xbd320f04e429c139c570fa9b4ffdc92164e9b395": {
@@ -150,7 +107,7 @@
       "hashrate": 18.5,
       "noncesScanned": 500000,
       "isMining": true,
-      "lastSeen": 1789321724888,
+      "lastSeen": 1789366004851,
       "status": "HASHING_UNSOLVED"
     },
     "0xdb2d47e68f92fe5021b1a1994a612c4cefc9c80c": {
@@ -251,6 +208,24 @@
       "isMining": true,
       "lastSeen": 1789321754085,
       "status": "HASHING_UNSOLVED"
+    },
+    "0x7ab7654d51195185d4d0b3a3f59179ea82174cae": {
+      "wallet": "0x7ab7654d51195185d4d0b3a3f59179ea82174cae",
+      "gpuName": "WebGPU Compute Core",
+      "hashrate": 12.5,
+      "noncesScanned": 0,
+      "isMining": true,
+      "lastSeen": 1789366004226,
+      "status": "HASHING_UNSOLVED"
+    },
+    "0xdb96da01770ba1b7575130fafb9ed3af2caf0147": {
+      "wallet": "0xdb96da01770ba1b7575130fafb9ed3af2caf0147",
+      "gpuName": "WebGPU Compute Core",
+      "hashrate": 12.5,
+      "noncesScanned": 0,
+      "isMining": true,
+      "lastSeen": 1789366005422,
+      "status": "HASHING_UNSOLVED"
     }
   },
   "epochOverrides": {
@@ -258,7 +233,7 @@
       "mintFeeUsd": 5,
       "mintFeeEth": 0.002,
       "mintFeeApe": 5,
-      "updatedAt": 1789321726933
+      "updatedAt": 1789366007463
     }
   },
   "treasury": {

@@ -1059,6 +1059,8 @@ async function handleRequest(req, res) {
           timeToSolve: Number(data.timeToSolve || 0),
           status: 'SOLVED',
           solvedAt: Date.now(),
+          expiresAt: Date.now() + 2 * 3600 * 1000, // 2-hour deadline
+          deadlineHours: 2,
           txHash: null
         };
         db.records.unshift(newRecord);
@@ -1152,11 +1154,27 @@ async function handleRequest(req, res) {
   // API 5: GET /api/mining/records
   if (reqPath === '/api/mining/records' && req.method === 'GET') {
     const wallet = (parsedUrl.searchParams.get('wallet') || '').toLowerCase();
-    const userRecords = wallet
+    const rawRecords = wallet
       ? db.records.filter(r => r.wallet === wallet)
       : db.records.slice(0, 50);
+    const now = Date.now();
+    const userRecords = rawRecords.map(r => {
+      if (r.status === 'SOLVED') {
+        const solvedTime = r.solvedAt || now;
+        const expiresAt = r.expiresAt || (solvedTime + 2 * 3600 * 1000);
+        const isExpired = now > expiresAt;
+        return {
+          ...r,
+          expiresAt,
+          isExpired,
+          deadlineHours: 2,
+          remainingSeconds: Math.max(0, Math.floor((expiresAt - now) / 1000))
+        };
+      }
+      return r;
+    });
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ success: true, records: userRecords }));
+    res.end(JSON.stringify({ success: true, records: userRecords, deadlineHours: 2 }));
     return;
   }
 

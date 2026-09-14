@@ -21,6 +21,8 @@ export interface SolvedRecord {
   epochId?: number;
   feeUsd?: number;
   feeEth?: number;
+  expiresAt?: number;
+  deadlineHours?: number;
 }
 
 interface MiningLedgerProps {
@@ -33,6 +35,12 @@ export const MiningLedger: React.FC<MiningLedgerProps> = ({ onMintRecord, refres
   const { isConnected, address, connectWallet } = useWallet();
   const [records, setRecords] = useState<SolvedRecord[]>([]);
   const [loading, setLoading] = useState(false);
+  const [currentTime, setCurrentTime] = useState(Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleDismiss = (idOrNonce: string) => {
     soundEffects.playClickSound();
@@ -263,8 +271,18 @@ export const MiningLedger: React.FC<MiningLedgerProps> = ({ onMintRecord, refres
           <div className="space-y-3">
             {records.map((rec) => {
               const isMinted = rec.status === 'MINTED';
-              const isSuperseded = !isMinted && typeof totalMined === 'number' && rec.tokenId <= totalMined;
-              const dateStr = new Date(rec.solvedAt || Date.now()).toLocaleTimeString();
+              const solvedAt = rec.solvedAt || currentTime;
+              const expiresAt = rec.expiresAt || (solvedAt + 2 * 3600 * 1000);
+              const remainingMs = Math.max(0, expiresAt - currentTime);
+              const isExpired = !isMinted && remainingMs <= 0;
+              const isClaimable = !isMinted && remainingMs > 0;
+
+              const totalSecs = Math.floor(remainingMs / 1000);
+              const hrs = Math.floor(totalSecs / 3600);
+              const mins = Math.floor((totalSecs % 3600) / 60);
+              const secs = totalSecs % 60;
+              const remainingStr = hrs > 0 ? `${hrs}h ${mins}m left` : `${mins}m ${secs}s left`;
+              const dateStr = new Date(rec.solvedAt || currentTime).toLocaleTimeString();
 
               return (
                 <div
@@ -272,7 +290,7 @@ export const MiningLedger: React.FC<MiningLedgerProps> = ({ onMintRecord, refres
                   className={`p-3.5 border-2 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all ${
                     isMinted
                       ? 'bg-[#fdfbf7] border-[#24140a] shadow-[1px_1px_0px_#24140a]'
-                      : isSuperseded
+                      : isExpired
                       ? 'bg-[#f5ebd7] border-[#6b5443] opacity-85 shadow-[1px_1px_0px_#24140a]'
                       : 'bg-[#eee2ca] border-[#d83a2a] shadow-[2px_2px_0px_#24140a]'
                   }`}
@@ -297,13 +315,14 @@ export const MiningLedger: React.FC<MiningLedgerProps> = ({ onMintRecord, refres
                           <span className="paper-stamp-gold text-[10px]">
                             MINTED
                           </span>
-                        ) : isSuperseded ? (
+                        ) : isExpired ? (
                           <span className="bg-[#fdfbf7] text-[#d83a2a] border border-[#d83a2a] px-1.5 py-0.5 text-[10px] font-bold">
-                            EXPIRED // ROUND ROTATED
+                            2H DEADLINE EXPIRED
                           </span>
                         ) : (
-                          <span className="paper-stamp-green text-[10px]">
-                            READY TO MINT
+                          <span className="paper-stamp-green text-[10px] flex items-center gap-1 font-bold">
+                            <Clock className="w-3 h-3 text-[#2e7d32]" />
+                            <span>READY TO MINT ({remainingStr})</span>
                           </span>
                         )}
                         <span className="text-[10px] text-[#6b5443] font-medium">
@@ -360,17 +379,17 @@ export const MiningLedger: React.FC<MiningLedgerProps> = ({ onMintRecord, refres
                           <ExternalLink className="w-3 h-3" />
                         </a>
                       </div>
-                    ) : isSuperseded ? (
+                    ) : isExpired ? (
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleDismiss(rec.id || rec.nonce)}
                           className="paper-btn-kraft px-3 py-1.5 text-xs font-bold text-[#d83a2a] hover:bg-[#d83a2a] hover:text-white"
-                          title="Dismiss stale proof from local ledger"
+                          title="Dismiss expired proof from local ledger"
                         >
                           DISMISS
                         </button>
                         <span className="text-[11px] text-[#6b5443] font-bold">
-                          Block #{rec.tokenId} already minted
+                          2-Hour Window Expired
                         </span>
                       </div>
                     ) : (
@@ -379,9 +398,10 @@ export const MiningLedger: React.FC<MiningLedgerProps> = ({ onMintRecord, refres
                           soundEffects.playClickSound();
                           if (onMintRecord) onMintRecord(rec);
                         }}
-                        className="paper-btn-red px-4 py-2 text-xs flex items-center gap-1.5 font-bold"
+                        className="paper-btn-red px-4 py-2 text-xs flex items-center gap-1.5 font-bold animate-pulse shadow-[1px_1px_0px_#24140a]"
                       >
-                        <span>MINT NFT (NATIVE ETH)</span>
+                        <Sparkles className="w-3.5 h-3.5 fill-current" />
+                        <span>MINT NFT NOW</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </button>
                     )}

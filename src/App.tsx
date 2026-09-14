@@ -11,6 +11,7 @@ import { MiningLedger, SolvedRecord } from './components/MiningLedger';
 import { AdminModal } from './components/AdminModal';
 import { AdminDashboard } from './components/AdminDashboard';
 import { CollectionShowcase } from './components/CollectionShowcase';
+import { PendingMintBanner } from './components/PendingMintBanner';
 import { DocsContent } from './docs/DocsContent';
 import { WebGPUMiningEngine, GPUInfo } from './mining/WebGPUEngine';
 import { getAllWorkerRanges } from './mining/NoncePartition';
@@ -47,6 +48,7 @@ export const App: React.FC = () => {
 
   // Modals & Receipts
   const [latestProof, setLatestProof] = useState<MiningProof | null>(null);
+  const [pendingSolution, setPendingSolution] = useState<MiningProof | null>(null);
   const [latestReceipt, setLatestReceipt] = useState<MintReceipt | null>(null);
   const [ledgerRefresh, setLedgerRefresh] = useState(0);
 
@@ -402,6 +404,58 @@ export const App: React.FC = () => {
     }
   }, [isConnected, address, ledgerRefresh, syncOnChainState]);
 
+  // Sync / restore active pending 2-hour solution from localStorage or records
+  useEffect(() => {
+    const targetAddr = address || (typeof window !== 'undefined' ? localStorage.getItem('hashape_last_wallet') : null);
+    if (!targetAddr) {
+      setPendingSolution(null);
+      return;
+    }
+    try {
+      const pendingKey = `hashape_pending_solution_${targetAddr.toLowerCase()}`;
+      const saved = localStorage.getItem(pendingKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const solvedTime = parsed.solvedAt || parsed.timestamp || 0;
+        const expiresAt = parsed.expiresAt || (solvedTime + 2 * 3600 * 1000);
+        if (Date.now() < expiresAt) {
+          setPendingSolution(parsed);
+          return;
+        } else {
+          localStorage.removeItem(pendingKey);
+        }
+      }
+
+      // Check records if an unminted SOLVED record within 2 hours exists
+      const storageKey = `hashape_records_${targetAddr.toLowerCase()}`;
+      const localRecs = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      const activeSolve = localRecs.find((r: any) => r.status === 'SOLVED' && (Date.now() < (r.solvedAt || 0) + 2 * 3600 * 1000));
+      if (activeSolve) {
+        const restoredProof: MiningProof = {
+          proofId: activeSolve.id,
+          sessionId: 'sess_restored',
+          wallet: activeSolve.wallet,
+          challenge: activeSolve.challenge || '0xff57ddb3f5e14ac967d4378c56c43491cb2d1639b53d4a9aae417da4be94c685',
+          nonce: activeSolve.nonce,
+          hash: activeSolve.solvedHash,
+          difficulty: String(activeSolve.difficulty || 4),
+          timeElapsedSeconds: activeSolve.timeToSolve || 12,
+          workersUsed: 1,
+          averageHashrate: 12.5,
+          timestamp: activeSolve.solvedAt,
+          workerId: 1,
+          solvedAt: activeSolve.solvedAt,
+          expiresAt: activeSolve.solvedAt + 2 * 3600 * 1000,
+          tokenId: activeSolve.tokenId,
+        } as any;
+        setPendingSolution(restoredProof);
+        localStorage.setItem(pendingKey, JSON.stringify(restoredProof));
+      } else {
+        setPendingSolution(null);
+      }
+    } catch (_) {}
+  }, [address, ledgerRefresh]);
+
   // Initialize WebGPU detection & backend fetch on mount
   useEffect(() => {
     WebGPUMiningEngine.detectGPU().then(setGpuInfo);
@@ -452,15 +506,29 @@ export const App: React.FC = () => {
       onSolutionFound: (proof) => {
         setIsMining(false);
         setMiningStatus('SUCCESS');
-        setLatestProof(proof);
+
+        const now = Date.now();
+        const pendingWithDeadline: MiningProof = {
+          ...proof,
+          timestamp: now,
+          solvedAt: now,
+          expiresAt: now + 2 * 3600 * 1000,
+          tokenId: supply.totalMined + 1,
+        } as any;
+
+        setLatestProof(pendingWithDeadline);
+        setPendingSolution(pendingWithDeadline);
 
         // Save immediately to client localStorage so data is NEVER lost on page refresh
         if (proof.wallet) {
           try {
+            const pendingKey = `hashape_pending_solution_${proof.wallet.toLowerCase()}`;
+            localStorage.setItem(pendingKey, JSON.stringify(pendingWithDeadline));
+
             const storageKey = `hashape_records_${proof.wallet.toLowerCase()}`;
             const local = JSON.parse(localStorage.getItem(storageKey) || '[]');
             const newRecord = {
-              id: 'solv_' + Date.now(),
+              id: 'solv_' + now,
               wallet: proof.wallet.toLowerCase(),
               tokenId: supply.totalMined + 1,
               nonce: String(proof.nonce),
@@ -470,7 +538,8 @@ export const App: React.FC = () => {
               gpuRenderer: gpuInfo?.name || 'WebGPU Compute Core',
               timeToSolve: proof.timeElapsedSeconds || 0,
               status: 'SOLVED',
-              solvedAt: Date.now(),
+              solvedAt: now,
+              expiresAt: now + 2 * 3600 * 1000,
               txHash: null,
             };
             if (!local.some((r: any) => String(r.nonce) === String(proof.nonce))) {
@@ -697,8 +766,14 @@ export const App: React.FC = () => {
   };
 
   const handleMintSuccess = async (tokenId: number, txHash: string) => {
-    const solvedProof = latestProof;
+    const solvedProof = latestProof || pendingSolution;
     setLatestProof(null);
+    setPendingSolution(null);
+    if (address) {
+      try {
+        localStorage.removeItem(`hashape_pending_solution_${address.toLowerCase()}`);
+      } catch (_) {}
+    }
     setLatestReceipt({
       tokenId,
       txHash,
@@ -803,8 +878,9 @@ export const App: React.FC = () => {
         ch = '0xff57ddb3f5e14ac967d4378c56c43491cb2d1639b53d4a9aae417da4be94c685';
       }
     }
-
-    setLatestProof({
+    const solvedAt = rec.solvedAt || Date.now();
+    const expiresAt = rec.expiresAt || (solvedAt + 2 * 3600 * 1000);
+    const proofObj: MiningProof = {
       proofId: rec.id || 'proof_' + Date.now(),
       sessionId: 'sess_manual',
       nonce: rec.nonce,
@@ -815,9 +891,15 @@ export const App: React.FC = () => {
       timeElapsedSeconds: rec.timeToSolve || 12,
       workersUsed: 1,
       averageHashrate: 12.5,
-      timestamp: rec.solvedAt || Date.now(),
+      timestamp: solvedAt,
       workerId: 1,
-    });
+      solvedAt,
+      expiresAt,
+      tokenId: rec.tokenId,
+    } as any;
+
+    setPendingSolution(proofObj);
+    setLatestProof(proofObj);
   };
 
   return (
@@ -864,6 +946,26 @@ export const App: React.FC = () => {
               {/* WebGPU Hardware Status Banner */}
               <WebGPUNotice gpuInfo={gpuInfo} />
 
+              {/* Reserved Solved Mint 2-Hour Deadline Banner */}
+              {pendingSolution && (
+                <PendingMintBanner
+                  proof={pendingSolution}
+                  currentEpoch={supply.currentEpoch}
+                  targetTokenId={(pendingSolution as any).tokenId || (supply.totalMined + 1)}
+                  onMintNow={() => {
+                    setLatestProof(pendingSolution);
+                  }}
+                  onDismiss={() => {
+                    setPendingSolution(null);
+                    if (address) {
+                      try {
+                        localStorage.removeItem(`hashape_pending_solution_${address.toLowerCase()}`);
+                      } catch (_) {}
+                    }
+                  }}
+                />
+              )}
+
               {/* Main Full-Width Cyber Mining Terminal */}
               <MiningDashboard
                 status={walletQuotaCapped ? 'QUOTA FULL' : miningStatus}
@@ -882,6 +984,10 @@ export const App: React.FC = () => {
                 activeMinersCount={supply.activeMinersCount}
                 unsolvedCount={supply.unsolvedCount}
                 networkStats={supply.networkStats}
+                pendingProof={pendingSolution}
+                onOpenPendingMint={() => {
+                  setLatestProof(pendingSolution);
+                }}
                 onStart={handleStartMining}
                 onStop={handleStopMining}
               />

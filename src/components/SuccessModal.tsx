@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { MiningProof, EpochInfo } from '../types';
 import { useWallet } from '../web3/WalletContext';
-import { CheckCircle2, ShieldCheck, Sparkles, X, Loader2, AlertCircle } from 'lucide-react';
+import { CheckCircle2, ShieldCheck, Sparkles, X, Loader2, AlertCircle, Clock } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
 
 interface SuccessModalProps {
@@ -26,8 +26,23 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
   const { mintNFTOnChain, nativeHypeBalance } = useWallet();
   const [isMinting, setIsMinting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [now, setNow] = useState(Date.now());
+
+  React.useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   if (!proof) return null;
+
+  const solvedAt = proof.timestamp || (proof as any).solvedAt || now;
+  const expiresAt = (proof as any).expiresAt || (solvedAt + 2 * 3600 * 1000);
+  const remainingMs = Math.max(0, expiresAt - now);
+  const totalSecs = Math.floor(remainingMs / 1000);
+  const hours = Math.floor(totalSecs / 3600).toString().padStart(2, '0');
+  const minutes = Math.floor((totalSecs % 3600) / 60).toString().padStart(2, '0');
+  const seconds = (totalSecs % 60).toString().padStart(2, '0');
+  const countdownStr = `${hours}h ${minutes}m ${seconds}s`;
 
   const feeToPay = currentEpoch ? currentEpoch.mintFeeEth : 0.0020;
   const expectedToken = targetTokenId || (currentEpoch ? currentEpoch.startToken + (currentEpoch.minedInEpoch || 0) : 1);
@@ -83,6 +98,19 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
           >
             <X className="w-5 h-5" />
           </button>
+        </div>
+
+        {/* 2-Hour Deadline Ribbon */}
+        <div className="bg-[#24140a] text-white px-4 py-2 flex items-center justify-between text-xs font-dot border-b-2 border-[#24140a]">
+          <div className="flex items-center space-x-2">
+            <Clock className="w-4 h-4 text-[#e5a93c] animate-pulse" />
+            <span className="font-bold uppercase tracking-wider text-[#eee2ca]">
+              2-HOUR MINT DEADLINE:
+            </span>
+          </div>
+          <div className="font-mono font-bold text-sm text-[#e5a93c] tracking-wider">
+            {remainingMs > 0 ? countdownStr : 'EXPIRED'}
+          </div>
         </div>
 
         {/* Body */}
@@ -190,8 +218,9 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
               }}
               disabled={isMinting}
               className="paper-btn-kraft px-4 py-1.5 text-xs uppercase font-bold"
+              title="Save this proof and mint anytime within the 2-hour deadline window"
             >
-              LATER
+              MINT LATER (2H WINDOW)
             </button>
             <button
               onClick={handleMint}

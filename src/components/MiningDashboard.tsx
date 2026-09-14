@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MiningStatus, DifficultyBand, EpochInfo, NetworkMiningStats } from '../types';
+import { MiningStatus, DifficultyBand, EpochInfo, NetworkMiningStats, MiningProof } from '../types';
 import { useWallet } from '../web3/WalletContext';
 import { GPUInfo } from '../mining/WebGPUEngine';
 import { Pickaxe, Square, Cpu, Zap, Hash, Clock, CheckCircle2, ShieldAlert, Sparkles, Layers, Users, Activity, Radio, Gauge, Terminal } from 'lucide-react';
@@ -22,6 +22,8 @@ interface MiningDashboardProps {
   activeMinersCount?: number;
   unsolvedCount?: number;
   networkStats?: NetworkMiningStats;
+  pendingProof?: MiningProof | null;
+  onOpenPendingMint?: () => void;
   onStart: () => void;
   onStop: () => void;
 }
@@ -43,6 +45,8 @@ export const MiningDashboard: React.FC<MiningDashboardProps> = ({
   activeMinersCount,
   unsolvedCount,
   networkStats,
+  pendingProof,
+  onOpenPendingMint,
   onStart,
   onStop,
 }) => {
@@ -537,7 +541,17 @@ export const MiningDashboard: React.FC<MiningDashboardProps> = ({
               </div>
 
               {/* Action Button */}
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 flex-wrap gap-y-2">
+                {pendingProof && !isMining && onOpenPendingMint && (
+                  <button
+                    onClick={onOpenPendingMint}
+                    className="paper-btn-gold px-5 py-2.5 text-xs sm:text-sm flex items-center space-x-2 font-bold animate-pulse text-[#19638b] border-2 border-[#19638b] shadow-[2px_2px_0px_#24140a]"
+                    title="You have 1 solved block waiting to be minted within the 2-hour deadline"
+                  >
+                    <Sparkles className="w-4 h-4 fill-current text-[#d83a2a]" />
+                    <span>MINT RESERVED NFT (2H DEADLINE)</span>
+                  </button>
+                )}
                 {isCapped ? (
                   <button
                     disabled
