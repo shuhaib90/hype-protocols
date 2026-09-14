@@ -266,7 +266,8 @@ export const App: React.FC = () => {
           onChainWalletMints = 1;
         }
 
-        const effectiveMints = Math.max(onChainWalletMints, onChainBal, localMintCount);
+        // Only count actual mints, NOT secondary market purchases (balanceOf includes transfers)
+        const effectiveMints = Math.max(onChainWalletMints, localMintCount);
         if (effectiveMints > 0) {
           setWalletMints(effectiveMints);
           setWalletQuotaCapped(effectiveMints >= 5);
