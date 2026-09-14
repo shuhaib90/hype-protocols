@@ -241,12 +241,14 @@ export const SupplyModule: React.FC<SupplyModuleProps> = ({ supply }) => {
                         </span>
                       ) : isPast ? (
                         <span className="text-[#6b5443]/60 text-[10px] font-mono">CONCLUDED</span>
-                      ) : (
+                      ) : ep.id === activeEpoch.id + 1 ? (
                         <span className="text-[#19638b] font-bold">
                           {ep.mintFeeUsd <= 0
                             ? (currencyMode === 'USD' ? '$0 (FREE)' : '0.0000 ETH')
                             : (currencyMode === 'USD' ? `$${ep.mintFeeUsd} USD` : `${ep.mintFeeEth} ETH`)}
                         </span>
+                      ) : (
+                        <span className="text-[#6b5443]/50 text-[10px] font-mono uppercase tracking-wider">LOCKED FEE</span>
                       )}
                     </div>
                     <div className="text-[9px] text-[#6b5443] font-medium">
